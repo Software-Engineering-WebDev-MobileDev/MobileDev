@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Nothing for now
 
+## [0.0.3] - 2024-08-30
+
+### Added
+
+- Added Intitial Project Src 
+- Added Static Home Page 
+
 ## [0.0.2] - 2024-08-28
 
 ### Added
