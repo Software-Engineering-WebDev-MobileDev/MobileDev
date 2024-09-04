@@ -1,4 +1,3 @@
-//import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,7 +6,7 @@ import 'package:provider/provider.dart';
   * Currently only works in Debug mode
 */ 
 void main() {
-  runApp(MyApp()); 
+  runApp(const MyApp()); 
 } 
 
 class MyApp extends StatelessWidget {
@@ -25,7 +24,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(
               seedColor: const Color.fromARGB(0, 255, 0, 1)),
         ),
-        home: MyHomePage(),
+        home: const MyHomePage(),
       ),
     );
   }
@@ -45,9 +44,11 @@ class MyAppState extends ChangeNotifier {
  *  OptionsBar() - Option Buttons
 */
 class MyHomePage extends StatelessWidget {
+  const MyHomePage({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       // SafeArea prevents overlap for device function bars
       body: SafeArea(
         child: Column(
@@ -80,27 +81,27 @@ class OptionsBar extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: () {}, // Do nothing for now - Should route to the Recipies page
-              child: Text('All Recipes'),
+              child: const Text('All Recipes'),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {}, // Do nothing for now - Should route to the Ingredient Inventory page
-              child: Text('Ingredient Inventory'),
+              child: const Text('Ingredient Inventory'),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {}, // Do nothing for now - Should route to the Product Inventory page
-              child: Text('Product Inventory'),
+              child: const Text('Product Inventory'),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {}, // Do nothing for now - Should route to the Tasks page
-              child: Text('Daily Tasks'),
+              child: const Text('Daily Tasks'),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {}, // Do nothing for now - Should route to Sales History page - May be removed
-              child: Text('Sales History'),
+              child: const Text('Sales History'),
             ),
           ],
         )
