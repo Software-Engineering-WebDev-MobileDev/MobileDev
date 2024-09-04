@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'pages/home_page.dart';
 
 /* 
   * Runs the app 
@@ -36,94 +37,3 @@ class MyAppState extends ChangeNotifier {
 }
 
 // ...
-
-/*
- * Home page for the app
- * Children: 
- *  Title() - Title Text for home page
- *  OptionsBar() - Option Buttons
-*/
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      // SafeArea prevents overlap for device function bars
-      body: SafeArea(
-        child: Column(
-          children: [
-            Title(),
-            SizedBox(height: 10), // Used to create a gap
-            OptionsBar(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/* 
- * OptionsBar widget:
- * Contains five buttons on the home page that should route to a different page
-*/
-class OptionsBar extends StatelessWidget {
-  const OptionsBar({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Align(
-        alignment: Alignment.topLeft,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            ElevatedButton(
-              onPressed: () {}, // Do nothing for now - Should route to the Recipies page
-              child: const Text('All Recipes'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {}, // Do nothing for now - Should route to the Ingredient Inventory page
-              child: const Text('Ingredient Inventory'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {}, // Do nothing for now - Should route to the Product Inventory page
-              child: const Text('Product Inventory'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {}, // Do nothing for now - Should route to the Tasks page
-              child: const Text('Daily Tasks'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {}, // Do nothing for now - Should route to Sales History page - May be removed
-              child: const Text('Sales History'),
-            ),
-          ],
-        )
-        );
-  }
-}
-
-/*  
- * Title widget:
- * Contains text of the homepage title 
-*/
-class Title extends StatelessWidget {
-  const Title({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final style = theme.textTheme.displaySmall!.copyWith(
-      fontWeight: FontWeight.bold,
-    );
-    return Center(child: Text('Home', style: style));
-  }
-}
