@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Nothing for now
 
+## [0.0.4] - 2024-09-05
+
+### Added
+
+- Added Page Routing Between Pages. 
+- Added Const File to Hold Constants Used in Multiple Files.
+
+### Changed
+
+- Moved Most Code Outside main.dart Into Individual Files Based off Page.
+
 ## [0.0.3] - 2024-08-30
 
 ### Added
