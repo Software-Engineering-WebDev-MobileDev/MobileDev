@@ -1,5 +1,5 @@
+import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:flutter/material.dart';
-import 'all.dart';
 
 /*
  * Home page for the app
@@ -12,10 +12,9 @@ class MyHomePage extends StatefulWidget {
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
-} 
+}
 
 class _MyHomePageState extends State<MyHomePage> {
-
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
@@ -23,13 +22,13 @@ class _MyHomePageState extends State<MyHomePage> {
       body: SafeArea(
         child: Column(
           children: [
-            Title(), 
+            Title(),
             SizedBox(height: 10), // Used to create a gap
             OptionsBar(),
           ],
-        ), 
+        ),
       ),
-    ); 
+    );
   }
 }
 
@@ -50,57 +49,41 @@ class OptionsBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             ElevatedButton(
-               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AllRecipesPage())
-                );
-               }, // On press navigate to the Recipe page
+              onPressed: () {
+                Navigator.pushNamed(context, recipePageRoute);
+              }, // On press navigate to the Recipe page
               child: const Text('All Recipes'),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const IngredientPage())
-                );
+                Navigator.pushNamed(context, ingredientPageRoute);
               }, // On press navigate to the Ingredient page
               child: const Text('Ingredient Inventory'),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ProductPage())
-                );
+                Navigator.pushNamed(context, productPageRoute);
               }, // Do nothing for now - Should route to the Product Inventory page
               child: const Text('Product Inventory'),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const TaskPage())
-                );
+                Navigator.pushNamed(context, taskPageRoute);
               }, // Do nothing for now - Should route to the Tasks page
               child: const Text('Daily Tasks'),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SalesPage())
-                );
+                Navigator.pushNamed(context, salesPageRoute);
               }, // Do nothing for now - Should route to Sales History page - May be removed
               child: const Text('Sales History'),
             ),
           ],
-        )
-        );
+        ));
   }
 }
 
