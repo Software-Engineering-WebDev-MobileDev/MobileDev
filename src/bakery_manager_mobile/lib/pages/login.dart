@@ -18,7 +18,7 @@ class _LoginPageState extends State<LoginPage> {
       String username = _usernameController.text;
       String password = _passwordController.text;
 
-      if (username == 'Hello123' && password == 'Software1') {
+      if (username == 'username' && password == 'password') {
         Navigator.pushReplacementNamed(context, homePageRoute);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login successful')),
