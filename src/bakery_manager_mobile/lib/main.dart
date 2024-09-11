@@ -2,7 +2,6 @@ import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'pages/routes.dart';
-
 /* 
   * Runs the app 
   * Currently only works in Debug mode
@@ -26,7 +25,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(
               seedColor: const Color.fromARGB(0, 255, 0, 1)),
         ),
-        initialRoute: homePageRoute,
+        initialRoute: loginPageRoute,
         routes: appRoutes,
       ),
     );

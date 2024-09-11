@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Const File to Hold Constants Used in Multiple Files.
 - Added Intitial Project Src 
 - Added Static Home Page 
+- Created a login page.
+- Added custom fonts.
 
 ### Changed
 

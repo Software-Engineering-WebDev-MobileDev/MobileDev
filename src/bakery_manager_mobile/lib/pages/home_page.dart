@@ -49,6 +49,9 @@ class OptionsBar extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange, // Set the button color to orange
+              ),
               onPressed: () {
                 Navigator.pushNamed(context, recipePageRoute);
               }, // On press navigate to the Recipe page
