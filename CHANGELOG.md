@@ -7,25 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Nothing for now
-
-## [0.0.4] - 2024-09-05
-
 ### Added
 
 - Added Page Routing Between Pages. 
 - Added Const File to Hold Constants Used in Multiple Files.
+- Added Intitial Project Src 
+- Added Static Home Page 
 
 ### Changed
 
 - Moved Most Code Outside main.dart Into Individual Files Based off Page.
-
-## [0.0.3] - 2024-08-30
-
-### Added
-
-- Added Intitial Project Src 
-- Added Static Home Page 
+- Updated Changelog with resources for ease of access
 
 ## [0.0.2] - 2024-08-28
 
@@ -39,5 +31,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial Commit
 
+[Unreleased]: https://github.com/Swolford0408/MobileDev/compare/v0.0.2...HEAD
 [0.0.2]: https://github.com/Swolford0408/MobileDev/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/Swolford0408/MobileDev/releases/tag/v0.0.1
