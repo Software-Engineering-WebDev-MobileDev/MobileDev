@@ -17,13 +17,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
-      // Sets the theme of the app - currently using material
       child: MaterialApp(
         title: 'Bakery Manager Mobile',
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color.fromARGB(0, 255, 0, 1)),
+              seedColor: const Color.fromARGB(0, 255, 187, 0)),
         ),
         initialRoute: loginPageRoute,
         routes: appRoutes,
@@ -32,9 +31,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// Used to update the state of the app - current app is static so no state updates
 class MyAppState extends ChangeNotifier {
 
 }
-
-// ...
