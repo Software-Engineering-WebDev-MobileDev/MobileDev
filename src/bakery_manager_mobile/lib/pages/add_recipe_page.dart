@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
 
 
-class AddRecipePage extends StatelessWidget {
+class AddRecipePage extends StatefulWidget {
   const AddRecipePage({super.key});
 
+  @override
+  State<AddRecipePage> createState() => _AddRecipePageState();
+}
+
+class _AddRecipePageState extends State<AddRecipePage> {
+  final TextEditingController recipeNameController = TextEditingController();
+  final TextEditingController ingredientsController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,14 +37,27 @@ class AddRecipePage extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              controller: recipeNameController,
+              decoration: const InputDecoration(
                 hintText: 'Recipe Name',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(10)),
                 ),
               ),
             ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: ingredientsController,
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+              decoration: InputDecoration(
+             hintText: 'Recipe Ingredients',
+              border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+          ),
+        ),
             const SizedBox(height: 16),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -46,8 +67,22 @@ class AddRecipePage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              onPressed: () {
+              onPressed: () async {
+                String recipeName = recipeNameController.text;
+                String ingredients = ingredientsController.text;
+
                 //Save recipe
+                bool response = await ApiService.addRecipe(recipeName: recipeName, ingredients: ingredients);
+                if (response) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Recipe added successfully')));
+                    Navigator.pop(context);
+                  }
+                } else {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to add recipe')));
+                  }
+                }
               },
               child: const Text('Save Recipe'),
             ),

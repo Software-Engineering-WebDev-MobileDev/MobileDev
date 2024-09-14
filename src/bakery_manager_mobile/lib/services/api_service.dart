@@ -16,4 +16,21 @@ class ApiService {
       throw Exception('Failed to load recipes');
     }
   }
+
+  static Future<bool> addRecipe({String recipeName = "", String ingredients = "", double scalingFactor = 1.0}) async {
+    final baseApiUrl = dotenv.env['BASE_URL'];
+    final response = await http.post(Uri.parse('$baseApiUrl/add_recipe'),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'RecipeName': recipeName,
+      'Instructions': ingredients,
+      'ScalingFactor': scalingFactor.toString(),
+    }),
+    );
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }

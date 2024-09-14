@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../assets/constants.dart';
 import '../models/recipe.dart';
+import '../services/navigator_observer.dart';
 
 class AllRecipesPage extends StatefulWidget {
   const AllRecipesPage({super.key});
@@ -9,6 +10,7 @@ class AllRecipesPage extends StatefulWidget {
   @override
   AllRecipesPageState createState() => AllRecipesPageState();
 }
+
 
 class AllRecipesPageState extends State<AllRecipesPage> {
   late Future<List<Recipe>> _futureRecipes;
@@ -18,6 +20,15 @@ class AllRecipesPageState extends State<AllRecipesPage> {
   void initState() {
     super.initState();
     _fetchRecipes(); // Lists all recipes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final NavigatorState navigator = Navigator.of(context);
+      final MyNavigatorObserver? observer = navigator.widget.observers.firstWhere(
+        (observer) => observer is MyNavigatorObserver,
+      ) as MyNavigatorObserver?;  
+      if (observer != null) {
+        observer.onReturned = _fetchRecipes;
+      }
+    });
   }
 
   void _fetchRecipes() {

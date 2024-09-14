@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'pages/routes.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'services/navigator_observer.dart';
+
 /* 
   * Runs the app 
   * Currently only works in Debug mode
@@ -29,6 +31,7 @@ class MyApp extends StatelessWidget {
         ),
         initialRoute: loginPageRoute,
         routes: appRoutes,
+        navigatorObservers: [MyNavigatorObserver()],
       ),
     );
   }
