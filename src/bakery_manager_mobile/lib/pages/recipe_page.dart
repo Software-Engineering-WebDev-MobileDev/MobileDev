@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
+import '../assets/constants.dart';
+import '../models/recipe.dart';
 
 class AllRecipesPage extends StatefulWidget {
   const AllRecipesPage({super.key});
@@ -8,22 +11,31 @@ class AllRecipesPage extends StatefulWidget {
 }
 
 class AllRecipesPageState extends State<AllRecipesPage> {
-  final List<String> _recipes = ['Sourdough', 'Baguette', 'Croissant', 'Ciabatta'];
-  List<String> _filteredRecipes = [];
+  late Future<List<Recipe>> _futureRecipes;
+  List<Recipe> _filteredRecipes = [];
 
   @override
   void initState() {
     super.initState();
-    _filteredRecipes = _recipes; // Lists all recipes
+    _fetchRecipes(); // Lists all recipes
+  }
+
+  void _fetchRecipes() {
+    _futureRecipes = ApiService.getRecipes();
+    _futureRecipes.then((recipes) {
+      setState(() {
+        _filteredRecipes = recipes;
+      });
+    });
   }
 
   void _filterRecipes(String query) {
     setState(() {
       if (query.isEmpty) {
-        _filteredRecipes = _recipes;
+        _fetchRecipes();
       } else {
-        _filteredRecipes = _recipes
-            .where((recipe) => recipe.toLowerCase().contains(query.toLowerCase()))
+        _filteredRecipes = _filteredRecipes
+            .where((recipe) => recipe.recipeName.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
     });
@@ -64,6 +76,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
                   icon: const Icon(Icons.clear),
                   onPressed: () {
                     // Clear search field
+                    _filterRecipes('');
                   },
                 ),
                 border: const OutlineInputBorder(
@@ -75,10 +88,23 @@ class AllRecipesPageState extends State<AllRecipesPage> {
 
             // List of recipes
             Expanded(
-              child: ListView.builder(
-                itemCount: _filteredRecipes.length,
-                itemBuilder: (context, index) {
-                  return _RecipeItem(name: _filteredRecipes[index]);
+              child: FutureBuilder<List<Recipe>>(
+                future: _futureRecipes,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Text('No recipes found');
+                  } else {
+                    return ListView.builder(
+                      itemCount: _filteredRecipes.length,
+                      itemBuilder: (context, index) {
+                        return _RecipeItem(name: _filteredRecipes[index].recipeName);
+                      },
+                    );
+                  }
                 },
               ),
             ),
@@ -95,10 +121,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
               ),
               onPressed: () {
                 // Navigate to AddRecipePage
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AddRecipePage()),
-                );
+                Navigator.pushNamed(context, addRecipePageRoute);
               },
               icon: const Icon(Icons.add),
               label: const Text('Add recipe'),
@@ -144,63 +167,6 @@ class _RecipeItem extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class AddRecipePage extends StatelessWidget {
-  const AddRecipePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Add Recipe',
-            style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.orange,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'Add a New Recipe',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            const TextField(
-              decoration: InputDecoration(
-                hintText: 'Recipe Name',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              onPressed: () {
-                //Save recipe
-              },
-              child: const Text('Save Recipe'),
-            ),
-          ],
         ),
       ),
     );
