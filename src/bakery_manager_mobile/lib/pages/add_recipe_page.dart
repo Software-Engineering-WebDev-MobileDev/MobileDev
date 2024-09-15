@@ -71,16 +71,16 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 String recipeName = recipeNameController.text;
                 String ingredients = ingredientsController.text;
 
-                //Save recipe
-                bool response = await ApiService.addRecipe(recipeName: recipeName, ingredients: ingredients);
-                if (response) {
+                // Save recipe
+                Map<String, dynamic> response = await ApiService.addRecipe(recipeName: recipeName, ingredients: ingredients);
+                if (response['status'] == 'success') {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Recipe added successfully')));
                     Navigator.pop(context);
                   }
                 } else {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to add recipe')));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to add recipe: ${response['reason']}')));
                   }
                 }
               },
@@ -90,5 +90,11 @@ class _AddRecipePageState extends State<AddRecipePage> {
         ),
       ),
     );
+  }
+  @override
+  void dispose() {
+    recipeNameController.dispose();
+    ingredientsController.dispose();
+    super.dispose();
   }
 }

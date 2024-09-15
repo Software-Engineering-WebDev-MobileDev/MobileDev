@@ -31,12 +31,19 @@ class AllRecipesPageState extends State<AllRecipesPage> {
     });
   }
 
-  void _fetchRecipes() {
-    _futureRecipes = ApiService.getRecipes();
-    _futureRecipes.then((recipes) {
+void _fetchRecipes() {
+  _futureRecipes = ApiService.getRecipes().then((response) {
+    if (response['status'] == 'success') {
+      List<Recipe> recipes = response['recipes'];
       setState(() {
         _filteredRecipes = recipes;
       });
+      return recipes;
+    } else {
+      throw Exception('Failed to fetch recipes: ${response['message'] ?? 'Unknown error'}');
+    }
+  }).catchError((error) {
+      return <Recipe>[];  // Return an empty list on error
     });
   }
 
