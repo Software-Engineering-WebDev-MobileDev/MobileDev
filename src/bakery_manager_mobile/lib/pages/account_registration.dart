@@ -99,6 +99,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                   return null;
                 },
               ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _lastNameController,
                 decoration: const InputDecoration(labelText: 'Last Name'),
@@ -109,6 +110,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                   return null;
                 },
               ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: _usernameController,
                 decoration: const InputDecoration(labelText: 'Username'),

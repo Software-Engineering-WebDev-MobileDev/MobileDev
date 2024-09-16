@@ -1,7 +1,7 @@
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../assets/constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -20,19 +20,19 @@ class LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _usernameController.addListener(_updateButtonState);
-    _passwordController.addListener(_updateButtonState);
-    _loadSavedCredentials();
+    _usernameController.addListener(_updateButton);
+    _passwordController.addListener(_updateButton);
+    _savedCredentials();
   }
 
-  void _updateButtonState() {
+  void _updateButton() {
     setState(() {
       _isButtonDisabled =
           _usernameController.text.isEmpty || _passwordController.text.isEmpty;
     });
   }
 
-  Future<void> _loadSavedCredentials() async {
+  Future<void> _savedCredentials() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool rememberMe = prefs.getBool('remember_me') ?? false;
     if (rememberMe) {
@@ -101,29 +101,27 @@ class LoginPageState extends State<LoginPage> {
         title: const Text('Login'),
         automaticallyImplyLeading: false,
       ),
-      body: Center(
-        child: Padding(
+      body: SafeArea(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              const Text(
-                'Sign In',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.orange,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Text(
+                  'Sign In',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Center(
-                      child: SizedBox(
+                const SizedBox(height: 24),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(
                         width: 300,
                         child: TextFormField(
                           controller: _usernameController,
@@ -138,10 +136,8 @@ class LoginPageState extends State<LoginPage> {
                           textInputAction: TextInputAction.next,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Center(
-                      child: SizedBox(
+                      const SizedBox(height: 16),
+                      SizedBox(
                         width: 300,
                         child: TextFormField(
                           controller: _passwordController,
@@ -158,44 +154,42 @@ class LoginPageState extends State<LoginPage> {
                           onFieldSubmitted: (_) => _login(),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Checkbox(
-                          value: _rememberMe,
-                          onChanged: (value) {
-                            setState(() {
-                              _rememberMe = value!;
-                            });
-                          },
-                        ),
-                        const Text('Remember Me'),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    Center(
-                      child: SizedBox(
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Checkbox(
+                            value: _rememberMe,
+                            onChanged: (value) {
+                              setState(() {
+                                _rememberMe = value!;
+                              });
+                            },
+                          ),
+                          const Text('Remember Me'),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
                         width: 150,
                         child: ElevatedButton(
                           onPressed: _isButtonDisabled ? null : _login,
                           child: const Text('Login'),
                         ),
                       ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        if (mounted) {
-                          Navigator.pushNamed(context, registrationPageRoute);
-                        }
-                      },
-                      child: const Text('Create an account'),
-                    ),
-                  ],
+                      TextButton(
+                        onPressed: () {
+                          if (mounted) {
+                            Navigator.pushNamed(context, registrationPageRoute);
+                          }
+                        },
+                        child: const Text('Create an account'),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
