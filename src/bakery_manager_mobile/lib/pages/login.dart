@@ -19,18 +19,18 @@ class LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _usernameController.addListener(_updateButtonState);
-    _passwordController.addListener(_updateButtonState);
-    _loadSavedCredentials();
+    _usernameController.addListener(_updateButton);
+    _passwordController.addListener(_updateButton);
+    _savedCredentials();
   }
 
-  void _updateButtonState() {
+  void _updateButton() {
     setState(() {
       _isButtonDisabled = _usernameController.text.isEmpty || _passwordController.text.isEmpty;
     });
   }
 
-  Future<void> _loadSavedCredentials() async {
+  Future<void> _savedCredentials() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool rememberMe = prefs.getBool('remember_me') ?? false;
     if (rememberMe) {
@@ -94,9 +94,9 @@ class LoginPageState extends State<LoginPage> {
         title: const Text('Login'),
         automaticallyImplyLeading: false,
       ),
-      body: SafeArea( // Added SafeArea to avoid overlapping system UI
-        child: SingleChildScrollView( // Wrapped content in SingleChildScrollView to make it scrollable
-          padding: const EdgeInsets.all(16.0), // Added padding here
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
