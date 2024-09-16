@@ -173,7 +173,21 @@ class LoginPageState extends State<LoginPage> {
                         width: 300,
                         child: TextFormField(
                           controller: _usernameController,
-                          decoration: const InputDecoration(labelText: 'Username'),
+                          decoration: const InputDecoration(
+                            labelText: 'Username',
+                            labelStyle: TextStyle(
+                              color: Color.fromARGB(255, 209,126,51)
+                            ),
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Color.fromARGB(255, 209,126,51),
+                                width: 1,
+                              ),
+                            ),
+                          ),
+                          style: const TextStyle(
+                            color: Color.fromARGB(255, 92,40,10)
+                          ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please enter your username';
