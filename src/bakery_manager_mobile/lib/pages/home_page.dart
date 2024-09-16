@@ -1,5 +1,6 @@
-import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:bakery_manager_mobile/assets/constants.dart';
 
 /*
  * Home page for the app
@@ -15,17 +16,80 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String _firstName = '';
+  String _lastName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _firstName = prefs.getString('first_name') ?? 'First Name';
+      _lastName = prefs.getString('last_name') ?? 'Last Name';
+    });
+  }
+
+  void _logout() {
+    Navigator.pushReplacementNamed(context, loginPageRoute);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      // SafeArea prevents overlap for device function bars
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Home'),
+        leading: IconButton(
+          icon: const Icon(Icons.logout), 
+          onPressed: _logout,
+        ),
+      ),
       body: SafeArea(
-        child: Column(
-          children: [
-            Title(),
-            SizedBox(height: 10), // Used to create a gap
-            OptionsBar(),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Container(
+                height: 80,
+                alignment: Alignment.center,
+                child: const Text(
+                  'The Rolling Scones',
+                  style: TextStyle(
+                    fontFamily: 'Pacifico',
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Dynamically displaying the first and last name
+              Text(
+                'Hi $_firstName $_lastName!',
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange,
+                ),
+              ),
+              const Text(
+                'Owner',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black54,
+                ),
+              ),
+              const SizedBox(height: 30),
+
+              const Expanded(
+                child: OptionsBar(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -35,6 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
 /* 
  * OptionsBar widget:
  * Contains five buttons on the home page that should route to a different page
+ * Using GridView with smaller buttons
 */
 class OptionsBar extends StatelessWidget {
   const OptionsBar({
@@ -43,68 +108,60 @@ class OptionsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-        alignment: Alignment.topLeft,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange, // Set the button color to orange
-              ),
-              onPressed: () {
-                Navigator.pushNamed(context, recipePageRoute);
-              }, // On press navigate to the Recipe page
-              child: const Text('All Recipes'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, ingredientPageRoute);
-              }, // On press navigate to the Ingredient page
-              child: const Text('Ingredient Inventory'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, productPageRoute);
-              }, // Do nothing for now - Should route to the Product Inventory page
-              child: const Text('Product Inventory'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, taskPageRoute);
-              }, // Do nothing for now - Should route to the Tasks page
-              child: const Text('Daily Tasks'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, salesPageRoute);
-              }, // Do nothing for now - Should route to Sales History page - May be removed
-              child: const Text('Sales History'),
-            ),
-          ],
-        ));
-  }
-}
-
-/*  
- * Title widget:
- * Contains text of the homepage title 
-*/
-class Title extends StatelessWidget {
-  const Title({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final style = theme.textTheme.displaySmall!.copyWith(
-      fontWeight: FontWeight.bold,
+    return GridView.count(
+      crossAxisCount: 3,
+      crossAxisSpacing: 10,
+      mainAxisSpacing: 10,
+      shrinkWrap: true,
+      children: [
+        _buildMenuButton('All Recipes', Icons.menu_book, () {
+          Navigator.pushNamed(context, recipePageRoute);
+        }),
+        _buildMenuButton('Ingredient Inventory', Icons.kitchen, () {
+          Navigator.pushNamed(context, ingredientPageRoute);
+        }),
+        _buildMenuButton('Product Inventory', Icons.inventory, () {
+          Navigator.pushNamed(context, productPageRoute);
+        }),
+        _buildMenuButton('Daily Tasks', Icons.task, () {
+          Navigator.pushNamed(context, taskPageRoute);
+        }),
+        _buildMenuButton('My Account', Icons.account_box_rounded, () {
+          Navigator.pushNamed(context, salesPageRoute);
+        }),
+      ],
     );
-    return Center(child: Text('Home', style: style));
+  }
+
+  Widget _buildMenuButton(String title, IconData icon, VoidCallback onPressed) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color.fromARGB(255, 227, 171, 4),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 8),
+      ),
+      onPressed: onPressed,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 24,
+            color: Colors.white,
+          ),
+          const SizedBox(height: 5),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

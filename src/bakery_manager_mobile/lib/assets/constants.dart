@@ -5,3 +5,4 @@ const String productPageRoute = '/products';
 const String taskPageRoute = '/tasks';
 const String salesPageRoute = '/sales';
 const String loginPageRoute = '/login';
+const String registrationPageRoute = '/registration';
