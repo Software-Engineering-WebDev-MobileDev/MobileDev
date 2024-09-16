@@ -1,5 +1,5 @@
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bakery_manager_mobile/assets/constants.dart';
 
 class LoginPage extends StatefulWidget {
@@ -94,30 +94,28 @@ class LoginPageState extends State<LoginPage> {
         title: const Text('Login'),
         automaticallyImplyLeading: false,
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              const Text(
-                'Sign In',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.orange, 
+      body: SafeArea( // Added SafeArea to avoid overlapping system UI
+        child: SingleChildScrollView( // Wrapped content in SingleChildScrollView to make it scrollable
+          padding: const EdgeInsets.all(16.0), // Added padding here
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                const Text(
+                  'Sign In',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Center( 
-                      child: SizedBox(
-                        width: 300, 
+                const SizedBox(height: 24),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(
+                        width: 300,
                         child: TextFormField(
                           controller: _usernameController,
                           decoration: const InputDecoration(labelText: 'Username'),
@@ -130,10 +128,8 @@ class LoginPageState extends State<LoginPage> {
                           textInputAction: TextInputAction.next,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Center(
-                      child: SizedBox(
+                      const SizedBox(height: 16),
+                      SizedBox(
                         width: 300,
                         child: TextFormField(
                           controller: _passwordController,
@@ -149,44 +145,42 @@ class LoginPageState extends State<LoginPage> {
                           onFieldSubmitted: (_) => _login(),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Checkbox(
-                          value: _rememberMe,
-                          onChanged: (value) {
-                            setState(() {
-                              _rememberMe = value!;
-                            });
-                          },
-                        ),
-                        const Text('Remember Me'),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    Center(
-                      child: SizedBox(
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Checkbox(
+                            value: _rememberMe,
+                            onChanged: (value) {
+                              setState(() {
+                                _rememberMe = value!;
+                              });
+                            },
+                          ),
+                          const Text('Remember Me'),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
                         width: 150,
                         child: ElevatedButton(
                           onPressed: _isButtonDisabled ? null : _login,
                           child: const Text('Login'),
                         ),
                       ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        if (mounted) {
-                          Navigator.pushNamed(context, registrationPageRoute);
-                        }
-                      },
-                      child: const Text('Create an account'),
-                    ),
-                  ],
+                      TextButton(
+                        onPressed: () {
+                          if (mounted) {
+                            Navigator.pushNamed(context, registrationPageRoute);
+                          }
+                        },
+                        child: const Text('Create an account'),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bakery_manager_mobile/assets/constants.dart';
 
 /*
@@ -15,6 +16,23 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String _firstName = '';
+  String _lastName = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _firstName = prefs.getString('first_name') ?? 'First Name';
+      _lastName = prefs.getString('last_name') ?? 'Last Name';
+    });
+  }
+
   void _logout() {
     Navigator.pushReplacementNamed(context, loginPageRoute);
   }
@@ -26,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
         title: const Text('Home'),
         leading: IconButton(
           icon: const Icon(Icons.logout), 
-          onPressed: _logout
+          onPressed: _logout,
         ),
       ),
       body: SafeArea(
@@ -49,9 +67,10 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               const SizedBox(height: 20),
 
-              const Text(
-                'Hi Benjamin Burchfield!',
-                style: TextStyle(
+              // Dynamically displaying the first and last name
+              Text(
+                'Hi $_firstName $_lastName!',
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Colors.orange,
@@ -107,9 +126,6 @@ class OptionsBar extends StatelessWidget {
         _buildMenuButton('Daily Tasks', Icons.task, () {
           Navigator.pushNamed(context, taskPageRoute);
         }),
-        _buildMenuButton('Sales History', Icons.attach_money, () {
-          Navigator.pushNamed(context, salesPageRoute);
-        }),
         _buildMenuButton('My Account', Icons.account_box_rounded, () {
           Navigator.pushNamed(context, salesPageRoute);
         }),
@@ -149,23 +165,3 @@ class OptionsBar extends StatelessWidget {
     );
   }
 }
-
-/*  
- * Title widget:
- * Contains text of the homepage title 
-*/
-class Title extends StatelessWidget {
-  const Title({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final style = theme.textTheme.displaySmall!.copyWith(
-      fontWeight: FontWeight.bold,
-    );
-    return Center(child: Text('Home', style: style));
-  }
-}
-
