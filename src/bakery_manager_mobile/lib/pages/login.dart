@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
-import 'package:bakery_manager_mobile/assets/constants.dart';
+import '../services/api_service.dart';
+import '../assets/constants.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -26,7 +27,8 @@ class LoginPageState extends State<LoginPage> {
 
   void _updateButtonState() {
     setState(() {
-      _isButtonDisabled = _usernameController.text.isEmpty || _passwordController.text.isEmpty;
+      _isButtonDisabled =
+          _usernameController.text.isEmpty || _passwordController.text.isEmpty;
     });
   }
 
@@ -46,6 +48,7 @@ class LoginPageState extends State<LoginPage> {
     }
   }
 
+  // Save credentials to SharedPreferences
   Future<void> _saveCredentials(String username, String password) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (_rememberMe) {
@@ -59,34 +62,38 @@ class LoginPageState extends State<LoginPage> {
     }
   }
 
+  // Login function
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? storedUsername = prefs.getString('username');
-      String? storedPassword = prefs.getString('password');
-
       String enteredUsername = _usernameController.text;
       String enteredPassword = _passwordController.text;
 
-      if (storedUsername == enteredUsername && storedPassword == enteredPassword) {
+      // Call the API to log in
+      final response = await ApiService.login(enteredUsername, enteredPassword);
+
+      if (response['status'] == 'success') {
+        // Save credentials if 'Remember Me' is checked
         await _saveCredentials(enteredUsername, enteredPassword);
 
         if (!mounted) return;
 
+        // Navigate to the home page and show success message
         Navigator.pushReplacementNamed(context, homePageRoute);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login successful')),
         );
       } else {
         if (mounted) {
+          // Show error message if login failed
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Invalid username or password')),
+            SnackBar(content: Text(response['reason'] ?? 'Login failed')),
           );
         }
       }
     }
   }
 
+  // Page Content Build Function
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -106,7 +113,7 @@ class LoginPageState extends State<LoginPage> {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Colors.orange, 
+                  color: Colors.orange,
                 ),
               ),
               const SizedBox(height: 24),
@@ -115,12 +122,13 @@ class LoginPageState extends State<LoginPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    Center( 
+                    Center(
                       child: SizedBox(
-                        width: 300, 
+                        width: 300,
                         child: TextFormField(
                           controller: _usernameController,
-                          decoration: const InputDecoration(labelText: 'Username'),
+                          decoration:
+                              const InputDecoration(labelText: 'Username'),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please enter your username';
@@ -137,7 +145,8 @@ class LoginPageState extends State<LoginPage> {
                         width: 300,
                         child: TextFormField(
                           controller: _passwordController,
-                          decoration: const InputDecoration(labelText: 'Password'),
+                          decoration:
+                              const InputDecoration(labelText: 'Password'),
                           obscureText: true,
                           validator: (value) {
                             if (value == null || value.isEmpty) {

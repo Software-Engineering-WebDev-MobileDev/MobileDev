@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+
 class CreateAccountPage extends StatefulWidget {
   const CreateAccountPage({super.key});
 
@@ -8,6 +9,7 @@ class CreateAccountPage extends StatefulWidget {
   CreateAccountPageState createState() => CreateAccountPageState();
 }
 
+// Create account page state
 class CreateAccountPageState extends State<CreateAccountPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _usernameController = TextEditingController();
@@ -16,55 +18,54 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _employeeIDController = TextEditingController();
 
-Future<void> _createAccount() async {
-  if (_formKey.currentState!.validate()) {
-    // Get user input from the text controllers
-    String firstName = _firstNameController.text;
-    String lastName = _lastNameController.text;
-    String employeeID = _employeeIDController.text;
-    String username = _usernameController.text;
-    String password = _passwordController.text;
+// Create account function calls the API to create an account
+  Future<void> _createAccount() async {
+    if (_formKey.currentState!.validate()) {
+      // Get user input from the text controllers
+      String firstName = _firstNameController.text;
+      String lastName = _lastNameController.text;
+      String employeeID = _employeeIDController.text;
+      String username = _usernameController.text;
+      String password = _passwordController.text;
 
-    // Call the createAccount function and handle the response
-    Map<String, dynamic> response = await ApiService.createAccount(
-      firstName,
-      lastName,
-      employeeID,
-      username,
-      password,
-    );
-
-    bool accountCreated = response['status'] == 'success';
-
-    if (accountCreated) {
-      // Save credentials to SharedPreferences
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('username', username);
-      await prefs.setString('password', password);
-
-      // Ensure the widget is still mounted before using BuildContext
-      if (!mounted) return;
-
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Account created successfully!')),
+      Map<String, dynamic> response = await ApiService.createAccount(
+        firstName,
+        lastName,
+        employeeID,
+        username,
+        password,
       );
 
-      // Navigate back to login page after account creation
-      Navigator.pop(context);
-    } else {
-      // Ensure the widget is still mounted before using BuildContext
-      if (!mounted) return;
+      bool accountCreated = response['status'] == 'success';
 
-      // Show error message if account creation failed
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Account creation failed: ${response['reason']}')),
-      );
+      if (accountCreated) {
+        // Save credentials to SharedPreferences storing the username and password on device
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('username', username);
+        await prefs.setString('password', password);
+
+        // Ensure the widget is still mounted before using BuildContext
+        if (!mounted) return;
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Account created successfully!')),
+        );
+        Navigator.pop(context);
+      } else {
+        // Ensure the widget is still mounted before using BuildContext
+        if (!mounted) return;
+
+        // Show error message if account creation failed
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Account creation failed: ${response['reason']}')),
+        );
+      }
     }
   }
-}
 
-
+  // Page Content Build Function
   @override
   Widget build(BuildContext context) {
     return Scaffold(

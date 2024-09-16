@@ -24,10 +24,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
-        leading: IconButton(
-          icon: const Icon(Icons.logout), 
-          onPressed: _logout
-        ),
+        leading: IconButton(icon: const Icon(Icons.logout), onPressed: _logout),
       ),
       body: SafeArea(
         child: Padding(
@@ -48,7 +45,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               const SizedBox(height: 20),
-
               const Text(
                 'Hi Benjamin Burchfield!',
                 style: TextStyle(
@@ -65,7 +61,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               const SizedBox(height: 30),
-
               const Expanded(
                 child: OptionsBar(),
               ),
@@ -168,4 +163,3 @@ class Title extends StatelessWidget {
     return Center(child: Text('Home', style: style));
   }
 }
-

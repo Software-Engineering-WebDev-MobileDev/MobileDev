@@ -8,12 +8,12 @@ import 'services/navigator_observer.dart';
 /* 
   * Runs the app 
   * Currently only works in Debug mode
-*/ 
-void main() async{
+*/
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  runApp(const MyApp());  
-} 
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -37,6 +37,4 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyAppState extends ChangeNotifier {
-
-}
+class MyAppState extends ChangeNotifier {}

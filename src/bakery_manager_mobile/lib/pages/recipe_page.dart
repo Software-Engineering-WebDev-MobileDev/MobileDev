@@ -11,60 +11,67 @@ class AllRecipesPage extends StatefulWidget {
   AllRecipesPageState createState() => AllRecipesPageState();
 }
 
-
 class AllRecipesPageState extends State<AllRecipesPage> {
   late Future<List<Recipe>> _futureRecipes;
   List<Recipe> _filteredRecipes = [];
 
+  // Page Initialization Function
   @override
   void initState() {
     super.initState();
     _fetchRecipes(); // Lists all recipes
+
+    // Adds the observer to the navigator
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final NavigatorState navigator = Navigator.of(context);
-      final MyNavigatorObserver? observer = navigator.widget.observers.firstWhere(
+      final MyNavigatorObserver? observer =
+          navigator.widget.observers.firstWhere(
         (observer) => observer is MyNavigatorObserver,
-      ) as MyNavigatorObserver?;  
+      ) as MyNavigatorObserver?;
       if (observer != null) {
         observer.onReturned = _fetchRecipes;
       }
     });
   }
 
-void _fetchRecipes() {
-  _futureRecipes = ApiService.getRecipes().then((response) {
-    if (response['status'] == 'success') {
-      List<Recipe> recipes = response['recipes'];
-      setState(() {
-        _filteredRecipes = recipes;
-      });
-      return recipes;
-    } else {
-      throw Exception('Failed to fetch recipes: ${response['message'] ?? 'Unknown error'}');
-    }
-  }).catchError((error) {
-      return <Recipe>[];  // Return an empty list on error
+  // Fetch recipes function
+  void _fetchRecipes() {
+    _futureRecipes = ApiService.getRecipes().then((response) {
+      if (response['status'] == 'success') {
+        List<Recipe> recipes = response['recipes'];
+        setState(() {
+          _filteredRecipes = recipes;
+        });
+        return recipes;
+      } else {
+        throw Exception(
+            'Failed to fetch recipes: ${response['message'] ?? 'Unknown error'}');
+      }
+    }).catchError((error) {
+      return <Recipe>[]; // Return an empty list on error
     });
   }
 
+  // Filter recipes function
   void _filterRecipes(String query) {
     setState(() {
       if (query.isEmpty) {
         _fetchRecipes();
       } else {
         _filteredRecipes = _filteredRecipes
-            .where((recipe) => recipe.recipeName.toLowerCase().contains(query.toLowerCase()))
+            .where((recipe) =>
+                recipe.recipeName.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
     });
   }
 
+  // Page Content Build Function
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('All Recipes',
-            style: TextStyle(color: Colors.white)),
+        title: const Text('All Recipes', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.orange,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -76,7 +83,8 @@ void _fetchRecipes() {
           IconButton(
             icon: const Icon(Icons.home, color: Colors.white),
             onPressed: () {
-              Navigator.popUntil(context, ModalRoute.withName('/')); // Home navigation
+              Navigator.popUntil(
+                  context, ModalRoute.withName('/')); // Home navigation
             },
           ),
         ],
@@ -119,7 +127,8 @@ void _fetchRecipes() {
                     return ListView.builder(
                       itemCount: _filteredRecipes.length,
                       itemBuilder: (context, index) {
-                        return _RecipeItem(name: _filteredRecipes[index].recipeName);
+                        return _RecipeItem(
+                            name: _filteredRecipes[index].recipeName);
                       },
                     );
                   }
@@ -132,7 +141,8 @@ void _fetchRecipes() {
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),

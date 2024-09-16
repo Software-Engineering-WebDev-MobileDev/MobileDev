@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
-
 class AddRecipePage extends StatefulWidget {
   const AddRecipePage({super.key});
 
@@ -16,8 +15,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Recipe',
-            style: TextStyle(color: Colors.white)),
+        title: const Text('Add Recipe', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.orange,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -52,12 +50,12 @@ class _AddRecipePageState extends State<AddRecipePage> {
               keyboardType: TextInputType.multiline,
               maxLines: null,
               decoration: InputDecoration(
-             hintText: 'Recipe Ingredients',
-              border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.0),
+                hintText: 'Recipe Ingredients',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+              ),
             ),
-          ),
-        ),
             const SizedBox(height: 16),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -72,15 +70,19 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 String ingredients = ingredientsController.text;
 
                 // Save recipe
-                Map<String, dynamic> response = await ApiService.addRecipe(recipeName: recipeName, ingredients: ingredients);
+                Map<String, dynamic> response = await ApiService.addRecipe(
+                    recipeName: recipeName, ingredients: ingredients);
                 if (response['status'] == 'success') {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Recipe added successfully')));
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                        content: Text('Recipe added successfully')));
                     Navigator.pop(context);
                   }
                 } else {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to add recipe: ${response['reason']}')));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text(
+                            'Failed to add recipe: ${response['reason']}')));
                   }
                 }
               },
@@ -91,6 +93,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
       ),
     );
   }
+
   @override
   void dispose() {
     recipeNameController.dispose();
