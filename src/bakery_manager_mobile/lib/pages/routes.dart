@@ -9,6 +9,7 @@ import 'package:bakery_manager_mobile/pages/account_registration.dart';
 import 'package:flutter/material.dart';
 import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:bakery_manager_mobile/pages/add_recipe_page.dart';
+import 'package:bakery_manager_mobile/pages/recipe_details_page.dart';
 
 Map<String, WidgetBuilder> appRoutes = {
   homePageRoute: (context) => const MyHomePage(),
@@ -20,4 +21,5 @@ Map<String, WidgetBuilder> appRoutes = {
   loginPageRoute: (context) => const LoginPage(),
   registrationPageRoute: (context) => const CreateAccountPage(),
   addRecipePageRoute: (context) => const AddRecipePage(),
+  recipeDetailsPageRoute: (context) => const RecipeDetailPage(),
 };

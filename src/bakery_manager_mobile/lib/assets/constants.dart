@@ -7,3 +7,5 @@ const String salesPageRoute = '/sales';
 const String loginPageRoute = '/login';
 const String registrationPageRoute = '/login/registration';
 const String addRecipePageRoute = '/recipes/addRecipe';
+const String recipeDetailsPageRoute = '/recipes/details';
+

@@ -128,7 +128,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
                       itemCount: _filteredRecipes.length,
                       itemBuilder: (context, index) {
                         return _RecipeItem(
-                            name: _filteredRecipes[index].recipeName);
+                            recipe: _filteredRecipes[index],);
                       },
                     );
                   }
@@ -162,37 +162,42 @@ class AllRecipesPageState extends State<AllRecipesPage> {
 }
 
 class _RecipeItem extends StatelessWidget {
-  final String name;
+  final Recipe recipe;
+  const _RecipeItem({required this.recipe});
 
-  const _RecipeItem({required this.name});
-
-  @override
+ @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5), // Shadow under items
-            spreadRadius: 2,
-            blurRadius: 8,
-            offset: const Offset(0, 4), // Shadow offset
-          ),
-        ],
-      ),
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+    return InkWell(
+      onTap: () {
+        // Navigate to the target page when tapped
+        Navigator.pushNamed(context, recipeDetailsPageRoute, arguments: recipe);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5), // Shadow under items
+              spreadRadius: 2,
+              blurRadius: 8,
+              offset: const Offset(0, 4), // Shadow offset
+            ),
+          ],
         ),
-        color: const Color(0xFFFDF1E0),
-        elevation: 4, // 3D effect
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            name,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          color: const Color(0xFFFDF1E0),
+          elevation: 4, // 3D effect
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              recipe.recipeName,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
