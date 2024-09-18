@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added api service to handle api calls.
 - Added api calls for login, register, get recipes, and add recipe.
 - Added navigator observer to handle to reload when navigating to a back to a page.
+- Added a custom launcher icon.
 
 ### Changed
 
