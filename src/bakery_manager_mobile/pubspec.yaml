@@ -60,6 +60,7 @@ flutter_icons:
   android: true  # Enable for Android
   ios: true      # Enable for iOS
   image_path: "assets/images/BreadIcon.png"
+  
 
 flutter:
   uses-material-design: true
