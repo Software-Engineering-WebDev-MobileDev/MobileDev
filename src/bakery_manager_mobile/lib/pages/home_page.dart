@@ -126,7 +126,7 @@ class OptionsBar extends StatelessWidget {
           Navigator.pushNamed(context, taskPageRoute);
         }),
         _buildMenuButton('My Account', Icons.account_box_rounded, () {
-          Navigator.pushNamed(context, salesPageRoute);
+          Navigator.pushNamed(context, myAccountRoute);
         }),
       ],
     );

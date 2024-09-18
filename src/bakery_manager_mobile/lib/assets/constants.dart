@@ -8,4 +8,4 @@ const String loginPageRoute = '/login';
 const String registrationPageRoute = '/login/registration';
 const String addRecipePageRoute = '/recipes/addRecipe';
 const String recipeDetailsPageRoute = '/recipes/details';
-
+const String myAccountRoute = '/myaccount';
