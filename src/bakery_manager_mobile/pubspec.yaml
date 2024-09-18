@@ -41,6 +41,7 @@ dependencies:
   provider: ^6.1.2
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.13.1
   flutter_test:
     sdk: flutter
 
@@ -55,7 +56,10 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
-
+flutter_icons:
+  android: true  # Enable for Android
+  ios: true      # Enable for iOS
+  image_path: "assets/images/BreadIcon.png"
 
 flutter:
   uses-material-design: true
@@ -63,6 +67,7 @@ flutter:
   assets:
     - assets/fonts/Pacifico-Regular.ttf
     - .env
+    - assets/images/BreadIcon.png
 
   fonts:
     - family: Pacifico
