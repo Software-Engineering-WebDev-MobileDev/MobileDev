@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Static Home Page 
 - Created a login page.
 - Added custom fonts.
+- added color scheme for all pages
 
 ### Changed
 
