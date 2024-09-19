@@ -56,8 +56,13 @@ class ApiService {
       final response = await http.post(url, headers: headers, body: body);
 
       // Successful response
+      
       if (response.statusCode == 200) {
-        return {'status': 'success'};
+        final responseBody = jsonDecode(response.body);
+        return {'status': 'success',
+                'recipeID': responseBody['recipeID']
+
+                };
       }
       // Failed response
       else {
@@ -75,16 +80,16 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> addRecipeIngredient({String recioeID = "", String ingredientDescription = "", double quantity = 0, String unit = "", int stockQuantity = 0, int reorderFlag = 0}) async {
+  static Future<Map<String, dynamic>> addRecipeIngredient({String recipeID = "", String ingredientDescription = "", double quantity = 0, String unit = "", int stockQuantity = 0, int reorderFlag = 0}) async {
     final url = Uri.parse('$baseApiUrl/add_recipe_ingredient');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({
-      "RecipeID": recioeID,
+      "RecipeID": recipeID,
       "IngredientDescription": ingredientDescription,
       "Quantity": quantity.toString(),
-      "Unit": unit,
-      "StockQuantity": stockQuantity,
-      "ReorderFlag": reorderFlag,
+      "UnitOfMeasure": unit,
+      "QuantityInStock": stockQuantity.toString(),
+      "ReorderFlag": reorderFlag.toString(),
     });
 
     try {
@@ -109,6 +114,48 @@ class ApiService {
       };
     }
   }
+
+  static Future<Map<String, dynamic>> getRecipeIngredients(String recipeID) async {
+      final url = Uri.parse('$baseApiUrl/recipe/$recipeID');
+  final headers = {'Content-Type': 'application/json'};
+
+  try {
+    final response = await http.get(url, headers: headers);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      
+      // Filter ingredients from the full recipe response
+      final ingredients = data['recipe'] 
+          .map((item) => {
+                'RecipeIngredientID': item['RecipeIngredientID'],
+                'IngredientDescription': item['IngredientDescription'],
+                'Quantity': item['Quantity'],
+                'UnitOfMeasure': item['UnitOfMeasure'],
+                'QuantityInStock': item['QuantityInStock'],
+                'ReorderFlag': item['ReorderFlag'],
+                'ModifierID': item['ModifierID'],
+                'ScalingFactorID': item['ScalingFactorID'],
+              })
+          .toList();
+
+      return {
+        'status': 'success',
+        'ingredients': ingredients,  // Only return the ingredients
+      };
+    } else {
+      return {
+        'status': 'error',
+        'reason': 'Failed to fetch recipe: ${response.statusCode}',
+      };
+    }
+  } catch (e) {
+    return {
+      'status': 'error',
+      'reason': 'Network error: $e',
+    };
+  }
+}
 
   // Create Account Function
   static Future<Map<String, dynamic>> createAccount(

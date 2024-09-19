@@ -1,14 +1,14 @@
 class RecipeIngredient {
   String recipeIngredientId;
   String componentId;
-  String ingredientId;
+  String ingredientDescription;
   double quantity;
   String measurement;
 
   RecipeIngredient({
     required this.recipeIngredientId,
     required this.componentId,
-    required this.ingredientId,
+    required this.ingredientDescription,
     required this.quantity,
     required this.measurement,
   });
@@ -17,7 +17,7 @@ class RecipeIngredient {
     return RecipeIngredient(
       recipeIngredientId: json['RecipeIngredientID'] ?? '',
       componentId: json['ComponentID'] ?? '',
-      ingredientId: json['IngredientID'] ?? '',
+      ingredientDescription: json['IngredientDescription'] ?? '',
       quantity: json['Quantity']?.toDouble() ?? 0.0,
       measurement: json['Measurement'] ?? '',
     );

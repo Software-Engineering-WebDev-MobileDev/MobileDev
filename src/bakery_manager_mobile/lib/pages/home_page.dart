@@ -28,8 +28,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _firstName = prefs.getString('first_name') ?? 'First Name';
-      _lastName = prefs.getString('last_name') ?? 'Last Name';
+      _firstName = prefs.getString('first_name') ?? 'John';
+      _lastName = prefs.getString('last_name') ?? 'Doe';
     });
   }
 
@@ -108,7 +108,7 @@ class OptionsBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.count(
-      crossAxisCount: 3,
+      crossAxisCount: 2,
       crossAxisSpacing: 10,
       mainAxisSpacing: 10,
       shrinkWrap: true,
@@ -118,9 +118,6 @@ class OptionsBar extends StatelessWidget {
         }),
         _buildMenuButton('Ingredient Inventory', Icons.kitchen, () {
           Navigator.pushNamed(context, ingredientPageRoute);
-        }),
-        _buildMenuButton('Product Inventory', Icons.inventory, () {
-          Navigator.pushNamed(context, productPageRoute);
         }),
         _buildMenuButton('Daily Tasks', Icons.task, () {
           Navigator.pushNamed(context, taskPageRoute);

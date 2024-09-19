@@ -19,7 +19,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
       ingredients.add(RecipeIngredient(
         recipeIngredientId: '',
         componentId: '',
-        ingredientId: '',
+        ingredientDescription: '',
         quantity: 0.0,
         measurement: '',
       ));
@@ -81,7 +81,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     children: [
                       Expanded(
                         child: TextField(
-                          onChanged: (value) => ingredient.ingredientId = value,
+                          onChanged: (value) => ingredient.ingredientDescription = value,
                           decoration: InputDecoration(
                             hintText: 'Ingredient ID ${idx + 1}',
                             border: const OutlineInputBorder(
@@ -163,24 +163,36 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     ingredients: instructions,
                   );
                   if (response['status'] == 'success') {
-                    String recipeId = response['recipeId'] ?? '';
+                    String recipeId = response['recipeID']; //Message IJ to add to response
+                    List<String> errors = [];
                     for (var ingredient in ingredients) {
-                      await ApiService.addRecipeIngredient(
-                        recioeID: recipeId,
-                        ingredientDescription: ingredient.ingredientId,
+                      Map<String, dynamic> ingredientResponse = await ApiService.addRecipeIngredient(
+                        recipeID: recipeId,
+                        ingredientDescription: ingredient.ingredientDescription,
                         quantity: ingredient.quantity,
                         unit: ingredient.measurement,
                       );
+                      if (ingredientResponse['status'] != 'success') {
+                        errors.add('Failed to add ingredient ${ingredient.ingredientDescription}: ${ingredientResponse['reason']}');
+                      }
                     }
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Recipe added successfully')));
+                      if (errors.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Recipe and all ingredients added successfully')));
+                      } else {
+                        // Show errror if ingredients failed to add
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Recipe added, but some ingredients failed to add. Check recipe details.')));
+                      }
+                      // Pop context even if ingredients failed to add
                       Navigator.pop(context);
                     }
                   } else {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: Text('Failed to add recipe: ${response['reason']}')));
+                      // Do not exit if recipe addition fails
                     }
                   }
                 },
