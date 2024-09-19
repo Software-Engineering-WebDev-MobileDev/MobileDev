@@ -110,6 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               const SizedBox(height: 30),
+
               const Expanded(
                 child: OptionsBar(),
               ),

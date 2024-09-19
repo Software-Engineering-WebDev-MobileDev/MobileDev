@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import '../services/api_service.dart';
-import '../assets/constants.dart';
-import '../models/recipe.dart';
-import '../services/navigator_observer.dart';
 
 class AllRecipesPage extends StatefulWidget {
   const AllRecipesPage({super.key});
@@ -14,61 +10,27 @@ class AllRecipesPage extends StatefulWidget {
 // add safe area
 
 class AllRecipesPageState extends State<AllRecipesPage> {
-  late Future<List<Recipe>> _futureRecipes;
-  List<Recipe> _filteredRecipes = [];
+  final List<String> _recipes = ['Sourdough', 'Baguette', 'Croissant', 'Ciabatta'];
+  List<String> _filteredRecipes = [];
 
-  // Page Initialization Function
   @override
   void initState() {
     super.initState();
-    _fetchRecipes(); // Lists all recipes
-
-    // Adds the observer to the navigator
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final NavigatorState navigator = Navigator.of(context);
-      final MyNavigatorObserver? observer =
-          navigator.widget.observers.firstWhere(
-        (observer) => observer is MyNavigatorObserver,
-      ) as MyNavigatorObserver?;
-      if (observer != null) {
-        observer.onReturned = _fetchRecipes;
-      }
-    });
+    _filteredRecipes = _recipes; // Lists all recipes
   }
 
-  // Fetch recipes function
-  void _fetchRecipes() {
-    _futureRecipes = ApiService.getRecipes().then((response) {
-      if (response['status'] == 'success') {
-        List<Recipe> recipes = response['recipes'];
-        setState(() {
-          _filteredRecipes = recipes;
-        });
-        return recipes;
-      } else {
-        throw Exception(
-            'Failed to fetch recipes: ${response['message'] ?? 'Unknown error'}');
-      }
-    }).catchError((error) {
-      return <Recipe>[]; // Return an empty list on error
-    });
-  }
-
-  // Filter recipes function
   void _filterRecipes(String query) {
     setState(() {
       if (query.isEmpty) {
-        _fetchRecipes();
+        _filteredRecipes = _recipes;
       } else {
-        _filteredRecipes = _filteredRecipes
-            .where((recipe) =>
-                recipe.recipeName.toLowerCase().contains(query.toLowerCase()))
+        _filteredRecipes = _recipes
+            .where((recipe) => recipe.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
     });
   }
 
-  // Page Content Build Function
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,8 +77,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
           IconButton(
             icon: const Icon(Icons.home, color: Color.fromARGB(255, 140,72,27)),
             onPressed: () {
-              Navigator.popUntil(
-                  context, ModalRoute.withName('/')); // Home navigation
+              Navigator.popUntil(context, ModalRoute.withName('/')); // Home navigation
             },
           ),
         ],
@@ -134,7 +95,6 @@ class AllRecipesPageState extends State<AllRecipesPage> {
                   icon: const Icon(Icons.clear),
                   onPressed: () {
                     // Clear search field
-                    _filterRecipes('');
                   },
                 ),
                 border: const OutlineInputBorder(
@@ -146,24 +106,10 @@ class AllRecipesPageState extends State<AllRecipesPage> {
 
             // List of recipes
             Expanded(
-              child: FutureBuilder<List<Recipe>>(
-                future: _futureRecipes,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Text('No recipes found');
-                  } else {
-                    return ListView.builder(
-                      itemCount: _filteredRecipes.length,
-                      itemBuilder: (context, index) {
-                        return _RecipeItem(
-                            name: _filteredRecipes[index].recipeName);
-                      },
-                    );
-                  }
+              child: ListView.builder(
+                itemCount: _filteredRecipes.length,
+                itemBuilder: (context, index) {
+                  return _RecipeItem(name: _filteredRecipes[index]);
                 },
               ),
             ),
@@ -173,15 +119,17 @@ class AllRecipesPageState extends State<AllRecipesPage> {
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 209, 125, 51),
-                padding:
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
               onPressed: () {
                 // Navigate to AddRecipePage
-                Navigator.pushNamed(context, addRecipePageRoute);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AddRecipePage()),
+                );
               },
               icon: const Icon(
                 Icons.add,
@@ -236,6 +184,85 @@ class _RecipeItem extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+          // child: Stack(
+          //   children: [
+          //     Text(
+          //       name,
+          //       style: TextStyle(
+          //         fontSize: 16,
+          //         foreground: Paint()
+          //         ..style = PaintingStyle.stroke
+          //         ..strokeWidth = 6
+          //         ..color = const Color.fromARGB(255, 140,72,27)
+          //       ),
+          //     ),
+          //     Text(
+          //       name,
+          //       style: const TextStyle(
+          //         color: Color.fromARGB(255, 246,235,216),
+          //         fontSize: 16,
+          //         fontWeight: FontWeight.bold,
+          //       ),
+          //     ),
+          //   ],
+          // ), 
+        ),
+      ),
+    );
+  }
+}
+
+class AddRecipePage extends StatelessWidget {
+  const AddRecipePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Add Recipe',
+            style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.orange,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Add a New Recipe',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            const TextField(
+              decoration: InputDecoration(
+                labelText: 'Recipe Name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onPressed: () {
+                //Save recipe
+              },
+              child: const Text('Save Recipe'),
+            ),
+          ],
         ),
       ),
     );
