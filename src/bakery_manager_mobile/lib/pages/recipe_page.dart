@@ -106,10 +106,24 @@ class AllRecipesPageState extends State<AllRecipesPage> {
 
             // List of recipes
             Expanded(
-              child: ListView.builder(
-                itemCount: _filteredRecipes.length,
-                itemBuilder: (context, index) {
-                  return _RecipeItem(name: _filteredRecipes[index]);
+              child: FutureBuilder<List<Recipe>>(
+                future: _futureRecipes,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const CircularProgressIndicator();
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Text('No recipes found');
+                  } else {
+                    return ListView.builder(
+                      itemCount: _filteredRecipes.length,
+                      itemBuilder: (context, index) {
+                        return _RecipeItem(
+                            recipe: _filteredRecipes[index],);
+                      },
+                    );
+                  }
                 },
               ),
             ),
@@ -150,38 +164,43 @@ class AllRecipesPageState extends State<AllRecipesPage> {
 }
 
 class _RecipeItem extends StatelessWidget {
-  final String name;
+  final Recipe recipe;
+  const _RecipeItem({required this.recipe});
 
-  const _RecipeItem({required this.name});
-
-  @override
+ @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        // boxShadow: [
-        //   BoxShadow(
-        //     color: Colors.grey.withOpacity(0.5), // Shadow under items
-        //     spreadRadius: 2,
-        //     blurRadius: 8,
-        //     offset: const Offset(0, 4), // Shadow offset
-        //   ),
-        // ],
-      ),
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+    return InkWell(
+      onTap: () {
+        // Navigate to the target page when tapped
+        Navigator.pushNamed(context, recipeDetailsPageRoute, arguments: recipe);
+      },
+      child: Container(
+        decoration: const BoxDecoration(
+          // boxShadow: [
+          //   BoxShadow(
+          //     color: Colors.grey.withOpacity(0.5), // Shadow under items
+          //     spreadRadius: 2,
+          //     blurRadius: 8,
+          //     offset: const Offset(0, 4), // Shadow offset
+          //   ),
+          // ],
         ),
-        color: const Color.fromARGB(255, 209,126,51),
-        elevation: 4, // 3D effect
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            name,
-            style: const TextStyle(
-              color: Color.fromARGB(255, 246,235,216),
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          color: const Color.fromARGB(255, 209,126,51),
+          elevation: 4, // 3D effect
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              recipe.recipeName,
+              style: const TextStyle(
+                color: Color.fromARGB(255, 246,235,216),
               fontSize: 16,
-              fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           // child: Stack(
@@ -206,98 +225,6 @@ class _RecipeItem extends StatelessWidget {
           //     ),
           //   ],
           // ), 
-        ),
-      ),
-    );
-  }
-}
-
-class AddRecipePage extends StatelessWidget {
-  const AddRecipePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Stack(
-          children: <Widget>[
-            // Stroked text as border.
-            Text(
-              'The Rolling Scones',
-              style: TextStyle(
-                fontFamily: 'Pacifico',
-                fontSize: 30,
-                foreground: Paint()
-                  ..style = PaintingStyle.stroke
-                  ..strokeWidth = 6
-                  ..color = const Color.fromARGB(255, 140,72,27),
-              ),
-            ),
-            // Solid text as fill.
-            const Text(
-              'The Rolling Scones',
-              style: TextStyle(
-                fontFamily: 'Pacifico',
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 246,235,216),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 140,72,27)),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'Add a New Recipe',
-              style: TextStyle(
-                color: Color.fromARGB(255, 209,126,51),
-                fontFamily: 'Pacifico',
-                fontSize: 24, 
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            const TextField(
-              decoration: InputDecoration(
-                labelText: 'Recipe Name',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 209,126,51),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              onPressed: () {
-                //Save recipe
-              },
-              child: const Text(
-                'Save Recipe',
-                style: TextStyle(
-                  color: Color.fromARGB(255, 246,235,216)
-                ),
-              ),
-            ),
-          ],
         ),
       ),
     );

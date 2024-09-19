@@ -28,8 +28,8 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _loadUserData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _firstName = prefs.getString('first_name') ?? 'First Name';
-      _lastName = prefs.getString('last_name') ?? 'Last Name';
+      _firstName = prefs.getString('first_name') ?? 'John';
+      _lastName = prefs.getString('last_name') ?? 'Doe';
     });
   }
 
@@ -153,7 +153,7 @@ class OptionsBar extends StatelessWidget {
           Navigator.pushNamed(context, taskPageRoute);
         }),
         _buildMenuButton('My Account', Icons.account_box_rounded, () {
-          Navigator.pushNamed(context, salesPageRoute);
+          Navigator.pushNamed(context, myAccountRoute);
         }),
       ],
     );

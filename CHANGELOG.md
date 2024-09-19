@@ -15,6 +15,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Static Home Page 
 - Created a login page.
 - Added custom fonts.
+- Added api service to handle api calls.
+- Added api calls for login, register, get recipes, and add recipe.
+- Added navigator observer to handle to reload when navigating to a back to a page.
+- Added a custom launcher icon.
+- Added recipe details page for displaying recipe details.
+- Added Account Page for managing user account.
+- Added Mock ingredients page
+- Added Mock task page
+- Added API Routes for recipe ingredients
 - added color scheme for all pages
 
 ### Changed
