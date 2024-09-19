@@ -113,9 +113,9 @@ class MyAccountPageState extends State<MyAccountPage> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          'Welcome, ${_firstNameController.text} ${_lastNameController.text}!',
-          style: const TextStyle(
+        const Text(
+          'Welcome, John Doe!',
+          style: TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.bold,
             color: Color.fromARGB(255, 209, 126, 51),
