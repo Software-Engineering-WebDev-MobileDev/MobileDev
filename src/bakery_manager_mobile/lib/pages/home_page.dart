@@ -143,7 +143,7 @@ class OptionsBar extends StatelessWidget {
         _buildMenuButton('All Recipes', Icons.menu_book, () {
           Navigator.pushNamed(context, recipePageRoute);
         }),
-        _buildMenuButton('Ingredients\nInventory', Icons.kitchen, () {
+        _buildMenuButton('Inventory', Icons.kitchen, () {
           Navigator.pushNamed(context, ingredientPageRoute);
         }),
         // _buildMenuButton('Product\nInventory', Icons.inventory, () {
