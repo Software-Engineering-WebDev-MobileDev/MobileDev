@@ -88,44 +88,87 @@ class MyHomePage extends StatelessWidget {
 //Align aligns the buttons to the top-left corner.
 //SizedBox is used to create vertical gaps between the buttons.
 class OptionsBar extends StatelessWidget {
-  const OptionsBar({  
-    super.key,
-  });
+  const OptionsBar({super.key});
 
   @override
   Widget build(BuildContext context) {
-    
     return Align(
       alignment: Alignment.center,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [            
-            ElevatedButton(
-              onPressed: () {}, // Do nothing for now - Should route to the Recipies page
-              child: const Text('All Recipes'),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {}, // Do nothing for now - Should route to the Recipies page
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  fixedSize: const Size(130, 130), // Square size (130x130)
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15), // Makes the button square-shaped
+                  ),
+                ),
+                child: const Text('All Recipes', style: TextStyle(color: Colors.white)),
+              ),
+
+              const SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: () {}, // Do nothing for now - Should route to the Ingredient Inventory page
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  fixedSize: const Size(130, 130), // Square size (130x130)
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15), // Square corners
+                  ),
+                ),
+                child: const Text('Ingredient Inventory', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {}, // Do nothing for now - Should route to the Product Inventory page
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  fixedSize: const Size(130, 130), // Square size (130x130)
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15), // Square shape
+                  ),
+                ),
+                child: const Text('Product Inventory', style: TextStyle(color: Colors.white)),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: () {}, // Do nothing for now - Should route to the Tasks page
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  fixedSize: const Size(130, 130), // Square size (130x130)
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15), // Square corners
+                  ),
+                ),
+                child: const Text('Daily Tasks', style: TextStyle(color: Colors.white)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: () {}, // Do nothing for now - Should route to My Account page - May be removed
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              fixedSize: const Size(130, 130), // Square size (130x130)
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15), // Square shape
+              ),
             ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {}, // Do nothing for now - Should route to the Ingredient Inventory page
-              child: const Text('Ingredient Inventory'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {}, // Do nothing for now - Should route to the Product Inventory page
-              child: const Text('Product Inventory'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {}, // Do nothing for now - Should route to the Tasks page
-              child: const Text('Daily Tasks'),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {}, // Do nothing for now - Should route to Sales History page - May be removed
-              child: const Text('Sales History'),
-            ),
-          ],
-        )
+            child: const Text('My Account', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -163,19 +206,54 @@ class VerticalButtonList extends StatelessWidget {
  * Title widget:
  * Contains text of the homepage title 
 */
-//This widget displays the title "HOME" at the center of the screen. 
+//This widget displays the title at the center of the screen. 
 //It uses the app's theme to style the text (specifically displaySmall from the textTheme with a bold font weight).
 class Title extends StatelessWidget {
-  const Title({
-    super.key,
-  });
+  const Title({super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    // Adjust the size of the "Hi Benjamin Burchfield!" text 
     final style = theme.textTheme.displaySmall!.copyWith(
+      //fixedSize: const Size(130, 130), // Square size (130x130)
+      
+      height: 5, // Set the height of the square
       fontWeight: FontWeight.bold,
+      fontSize: theme.textTheme.displaySmall!.fontSize! - 10, // Reduce the font size slightly
+      color: Colors.white,
+      backgroundColor: Colors.orange,
     );
-    return Center(child: Text('Hi Benjamin Burchfield!', style: style));                      
+    final subtitleStyle = theme.textTheme.bodyMedium!.copyWith(
+      height: -5,
+      color: Colors.white,
+      fontWeight: FontWeight.normal,
+    );
+
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min, // Ensures the column takes minimal vertical space
+        crossAxisAlignment: CrossAxisAlignment.start, // Aligns the "Owner" text to the left
+        children: [
+          // Adjust the size of the "Hi Benjamin Burchfield!" text and color.
+          Text('Hi Benjamin Burchfield!', style: style,), //First line of homepage title.
+
+          /*const Text(
+                'Hi Benjamin Burchfield!',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange,
+                ),
+              ),*/
+
+          Padding(
+            padding: const EdgeInsets.only(left: 0.0), // Adds a little left padding to align under "Hi"
+            child: Text('Owner', style: subtitleStyle), // Second line "Owner" aligned to the left
+          ),
+        ],
+      ),
+    );
   }
 }
