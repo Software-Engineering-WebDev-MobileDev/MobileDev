@@ -119,7 +119,7 @@ class LoginPageState extends State<LoginPage> {
                 fontFamily: 'Pacifico',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Color.fromARGB(255, 246,235,216),
               ),
             ),
           ],
@@ -133,6 +133,7 @@ class LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
+                const SizedBox(height: 150),
                 const Text(
                   'Login',
                   style: TextStyle(

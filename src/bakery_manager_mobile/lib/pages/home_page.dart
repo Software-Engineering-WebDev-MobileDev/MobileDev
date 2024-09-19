@@ -109,7 +109,7 @@ class OptionsBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.count(
-      crossAxisCount: 3,
+      crossAxisCount: 2,
       crossAxisSpacing: 10,
       mainAxisSpacing: 10,
       shrinkWrap: true,
@@ -117,12 +117,12 @@ class OptionsBar extends StatelessWidget {
         _buildMenuButton('All Recipes', Icons.menu_book, () {
           Navigator.pushNamed(context, recipePageRoute);
         }),
-        _buildMenuButton('Ingredient Inventory', Icons.kitchen, () {
+        _buildMenuButton('Ingredients\nInventory', Icons.kitchen, () {
           Navigator.pushNamed(context, ingredientPageRoute);
         }),
-        _buildMenuButton('Product Inventory', Icons.inventory, () {
-          Navigator.pushNamed(context, productPageRoute);
-        }),
+        // _buildMenuButton('Product\nInventory', Icons.inventory, () {
+        //   Navigator.pushNamed(context, productPageRoute);
+        // }),
         _buildMenuButton('Daily Tasks', Icons.task, () {
           Navigator.pushNamed(context, taskPageRoute);
         }),
@@ -148,15 +148,15 @@ class OptionsBar extends StatelessWidget {
         children: [
           Icon(
             icon,
-            size: 24,
+            size: 30,
             color: Colors.white,
           ),
           const SizedBox(height: 5),
-          Text(
+          Text( // add a feature for wrapping text
             title,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 12,
+              fontSize: 24,
               color: Colors.white,
             ),
           ),

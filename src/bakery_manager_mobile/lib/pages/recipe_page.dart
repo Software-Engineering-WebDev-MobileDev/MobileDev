@@ -7,6 +7,8 @@ class AllRecipesPage extends StatefulWidget {
   AllRecipesPageState createState() => AllRecipesPageState();
 }
 
+// add safe area
+
 class AllRecipesPageState extends State<AllRecipesPage> {
   final List<String> _recipes = ['Sourdough', 'Baguette', 'Croissant', 'Ciabatta'];
   List<String> _filteredRecipes = [];
@@ -59,7 +61,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
             TextField(
               onChanged: _filterRecipes, // Search feature
               decoration: InputDecoration(
-                hintText: 'Search',
+                labelText: 'Search',
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
                   onPressed: () {
@@ -119,20 +121,20 @@ class _RecipeItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5), // Shadow under items
-            spreadRadius: 2,
-            blurRadius: 8,
-            offset: const Offset(0, 4), // Shadow offset
-          ),
-        ],
+        // boxShadow: [
+        //   BoxShadow(
+        //     color: Colors.grey.withOpacity(0.5), // Shadow under items
+        //     spreadRadius: 2,
+        //     blurRadius: 8,
+        //     offset: const Offset(0, 4), // Shadow offset
+        //   ),
+        // ],
       ),
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        color: const Color(0xFFFDF1E0),
+        color: const Color.fromARGB(255, 209,126,51),
         elevation: 4, // 3D effect
         margin: const EdgeInsets.symmetric(vertical: 8),
         child: Padding(
@@ -140,10 +142,33 @@ class _RecipeItem extends StatelessWidget {
           child: Text(
             name,
             style: const TextStyle(
-              fontSize: 18,
+              color: Color.fromARGB(255, 246,235,216),
+              fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
           ),
+          // child: Stack(
+          //   children: [
+          //     Text(
+          //       name,
+          //       style: TextStyle(
+          //         fontSize: 16,
+          //         foreground: Paint()
+          //         ..style = PaintingStyle.stroke
+          //         ..strokeWidth = 6
+          //         ..color = const Color.fromARGB(255, 140,72,27)
+          //       ),
+          //     ),
+          //     Text(
+          //       name,
+          //       style: const TextStyle(
+          //         color: Color.fromARGB(255, 246,235,216),
+          //         fontSize: 16,
+          //         fontWeight: FontWeight.bold,
+          //       ),
+          //     ),
+          //   ],
+          // ), 
         ),
       ),
     );
@@ -180,7 +205,7 @@ class AddRecipePage extends StatelessWidget {
             const SizedBox(height: 16),
             const TextField(
               decoration: InputDecoration(
-                hintText: 'Recipe Name',
+                labelText: 'Recipe Name',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(10)),
                 ),
