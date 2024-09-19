@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="bakery_manager_mobile"
+        android:label="Rolling Scones"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
