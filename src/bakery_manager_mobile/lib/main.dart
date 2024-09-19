@@ -101,25 +101,28 @@ class OptionsBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {}, // Do nothing for now - Should route to the Recipies page
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
                   fixedSize: const Size(130, 130), // Square size (130x130)
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15), // Makes the button square-shaped
                   ),
                 ),
-                child: const Text('All Recipes'),
+                child: const Text('All Recipes', style: TextStyle(color: Colors.white)),
               ),
+
               const SizedBox(width: 10),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {}, // Do nothing for now - Should route to the Ingredient Inventory page
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
                   fixedSize: const Size(130, 130), // Square size (130x130)
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15), // Square corners
                   ),
                 ),
-                child: const Text('Ingredient Inventory'),
+                child: const Text('Ingredient Inventory', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
@@ -128,38 +131,41 @@ class OptionsBar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {}, // Do nothing for now - Should route to the Product Inventory page
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
                   fixedSize: const Size(130, 130), // Square size (130x130)
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15), // Square shape
                   ),
                 ),
-                child: const Text('Product Inventory'),
+                child: const Text('Product Inventory', style: TextStyle(color: Colors.white)),
               ),
               const SizedBox(width: 10),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {}, // Do nothing for now - Should route to the Tasks page
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
                   fixedSize: const Size(130, 130), // Square size (130x130)
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15), // Square corners
                   ),
                 ),
-                child: const Text('Daily Tasks'),
+                child: const Text('Daily Tasks', style: TextStyle(color: Colors.white)),
               ),
             ],
           ),
           const SizedBox(height: 10),
           ElevatedButton(
-            onPressed: () {},
+            onPressed: () {}, // Do nothing for now - Should route to My Account page - May be removed
             style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
               fixedSize: const Size(130, 130), // Square size (130x130)
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15), // Square shape
               ),
             ),
-            child: const Text('My Account'),
+            child: const Text('My Account', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -209,12 +215,19 @@ class Title extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // Adjust the size of the "Hi Benjamin Burchfield!" text
+    // Adjust the size of the "Hi Benjamin Burchfield!" text 
     final style = theme.textTheme.displaySmall!.copyWith(
+      //fixedSize: const Size(130, 130), // Square size (130x130)
+      
+      height: 5, // Set the height of the square
       fontWeight: FontWeight.bold,
       fontSize: theme.textTheme.displaySmall!.fontSize! - 10, // Reduce the font size slightly
+      color: Colors.white,
+      backgroundColor: Colors.orange,
     );
     final subtitleStyle = theme.textTheme.bodyMedium!.copyWith(
+      height: -5,
+      color: Colors.white,
       fontWeight: FontWeight.normal,
     );
 
@@ -223,7 +236,18 @@ class Title extends StatelessWidget {
         mainAxisSize: MainAxisSize.min, // Ensures the column takes minimal vertical space
         crossAxisAlignment: CrossAxisAlignment.start, // Aligns the "Owner" text to the left
         children: [
-          Text('Hi Benjamin Burchfield!', style: style),
+          // Adjust the size of the "Hi Benjamin Burchfield!" text and color.
+          Text('Hi Benjamin Burchfield!', style: style,), //First line of homepage title.
+
+          /*const Text(
+                'Hi Benjamin Burchfield!',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange,
+                ),
+              ),*/
+
           Padding(
             padding: const EdgeInsets.only(left: 0.0), // Adds a little left padding to align under "Hi"
             child: Text('Owner', style: subtitleStyle), // Second line "Owner" aligned to the left
