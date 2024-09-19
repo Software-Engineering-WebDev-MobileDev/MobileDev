@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
+import '../models/recipe_ingredients.dart';
 
 class AddRecipePage extends StatefulWidget {
   const AddRecipePage({super.key});
@@ -10,7 +11,27 @@ class AddRecipePage extends StatefulWidget {
 
 class _AddRecipePageState extends State<AddRecipePage> {
   final TextEditingController recipeNameController = TextEditingController();
-  final TextEditingController ingredientsController = TextEditingController();
+  final TextEditingController instructionsController = TextEditingController();
+  final List<RecipeIngredient> ingredients = [];
+
+  void _addIngredientField() {
+    setState(() {
+      ingredients.add(RecipeIngredient(
+        recipeIngredientId: '',
+        componentId: '',
+        ingredientId: '',
+        quantity: 0.0,
+        measurement: '',
+      ));
+    });
+  }
+
+  void _removeIngredientField(int index) {
+    setState(() {
+      ingredients.removeAt(index);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,12 +67,78 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 ),
               ),
               const SizedBox(height: 16),
+              const Text(
+                'Ingredients:',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              ...ingredients.asMap().entries.map((entry) {
+                int idx = entry.key;
+                var ingredient = entry.value;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          onChanged: (value) => ingredient.ingredientId = value,
+                          decoration: InputDecoration(
+                            hintText: 'Ingredient ID ${idx + 1}',
+                            border: const OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: TextField(
+                          onChanged: (value) => ingredient.quantity = double.tryParse(value) ?? 0.0,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            hintText: 'Quantity',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: TextField(
+                          onChanged: (value) => ingredient.measurement = value,
+                          decoration: const InputDecoration(
+                            hintText: 'Measurement',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (idx != 0)
+                        IconButton(
+                          icon: const Icon(Icons.remove_circle, color: Colors.red),
+                          onPressed: () => _removeIngredientField(idx),
+                        ),
+                    ],
+                  ),
+                );
+              }),
+              ElevatedButton.icon(
+                onPressed: _addIngredientField,
+                icon: const Icon(Icons.add),
+                label: const Text('Add Ingredient'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                ),
+              ),
+              const SizedBox(height: 16),
               TextField(
-                controller: ingredientsController,
+                controller: instructionsController,
                 keyboardType: TextInputType.multiline,
                 maxLines: null,
                 decoration: InputDecoration(
-                  hintText: 'Recipe Ingredients',
+                  hintText: 'Recipe Instructions',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
@@ -68,22 +155,32 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 ),
                 onPressed: () async {
                   String recipeName = recipeNameController.text;
-                  String ingredients = ingredientsController.text;
+                  String instructions = instructionsController.text;
 
                   // Save recipe
                   Map<String, dynamic> response = await ApiService.addRecipe(
-                      recipeName: recipeName, ingredients: ingredients);
+                    recipeName: recipeName,
+                    ingredients: instructions,
+                  );
                   if (response['status'] == 'success') {
+                    String recipeId = response['recipeId'] ?? '';
+                    for (var ingredient in ingredients) {
+                      await ApiService.addRecipeIngredient(
+                        recioeID: recipeId,
+                        ingredientDescription: ingredient.ingredientId,
+                        quantity: ingredient.quantity,
+                        unit: ingredient.measurement,
+                      );
+                    }
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Recipe added successfully')));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Recipe added successfully')));
                       Navigator.pop(context);
                     }
                   } else {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text(
-                              'Failed to add recipe: ${response['reason']}')));
+                          content: Text('Failed to add recipe: ${response['reason']}')));
                     }
                   }
                 },
@@ -99,7 +196,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
   @override
   void dispose() {
     recipeNameController.dispose();
-    ingredientsController.dispose();
+    instructionsController.dispose();
     super.dispose();
   }
 }

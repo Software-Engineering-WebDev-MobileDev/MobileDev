@@ -43,13 +43,13 @@ class ApiService {
   static Future<Map<String, dynamic>> addRecipe(
       {String recipeName = "",
       String ingredients = "",
-      double scalingFactor = 1.0}) async {
+      int scalingFactor = 1}) async {
     final url = Uri.parse('$baseApiUrl/add_recipe');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({
-      'RecipeName': recipeName,
-      'Instructions': ingredients,
-      'ScalingFactor': scalingFactor.toString(),
+      "RecipeName": recipeName,
+      "Instructions" : ingredients,
+      "Servings": scalingFactor.toString(),
     });
 
     try {
@@ -64,6 +64,41 @@ class ApiService {
         return {
           'status': 'error',
           'reason': 'Failed to add recipe: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      // Network error
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> addRecipeIngredient({String recioeID = "", String ingredientDescription = "", double quantity = 0, String unit = "", int stockQuantity = 0, int reorderFlag = 0}) async {
+    final url = Uri.parse('$baseApiUrl/add_recipe_ingredient');
+    final headers = {'Content-Type': 'application/json'};
+    final body = jsonEncode({
+      "RecipeID": recioeID,
+      "IngredientDescription": ingredientDescription,
+      "Quantity": quantity.toString(),
+      "Unit": unit,
+      "StockQuantity": stockQuantity,
+      "ReorderFlag": reorderFlag,
+    });
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+
+      // Successful response
+      if (response.statusCode == 200) {
+        return {'status': 'success'};
+      }
+      // Failed response
+      else {
+        return {
+          'status': 'error',
+          'reason': 'Failed to add recipe ingredient: ${response.statusCode}',
         };
       }
     } catch (e) {
