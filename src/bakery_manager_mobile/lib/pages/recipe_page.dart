@@ -219,11 +219,36 @@ class AddRecipePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Recipe',
-            style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.orange,
+        centerTitle: true,
+        title: Stack(
+          children: <Widget>[
+            // Stroked text as border.
+            Text(
+              'The Rolling Scones',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                foreground: Paint()
+                  ..style = PaintingStyle.stroke
+                  ..strokeWidth = 6
+                  ..color = const Color.fromARGB(255, 140,72,27),
+              ),
+            ),
+            // Solid text as fill.
+            const Text(
+              'The Rolling Scones',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 246,235,216),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 140,72,27)),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -236,7 +261,12 @@ class AddRecipePage extends StatelessWidget {
           children: [
             const Text(
               'Add a New Recipe',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Color.fromARGB(255, 209,126,51),
+                fontFamily: 'Pacifico',
+                fontSize: 24, 
+                fontWeight: FontWeight.bold,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -251,7 +281,7 @@ class AddRecipePage extends StatelessWidget {
             const SizedBox(height: 16),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+                backgroundColor: const Color.fromARGB(255, 209,126,51),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -260,7 +290,12 @@ class AddRecipePage extends StatelessWidget {
               onPressed: () {
                 //Save recipe
               },
-              child: const Text('Save Recipe'),
+              child: const Text(
+                'Save Recipe',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 246,235,216)
+                ),
+              ),
             ),
           ],
         ),
