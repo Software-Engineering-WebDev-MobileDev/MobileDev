@@ -137,34 +137,12 @@ class LoginPageState extends State<LoginPage> {
                 const Text(
                   'Login',
                   style: TextStyle(
+                    fontFamily: 'Pacifico',
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
                     color: Color.fromARGB(255, 209,126,51),
                   ),
                 ),
-                // Stack(
-                //   children: [
-                //     Text(
-                //       'Login',
-                //       style: TextStyle(
-                //         fontSize: 28,
-                //         foreground: Paint()
-                //            ..style = PaintingStyle.stroke
-                //           ..strokeWidth = 6
-                //           ..color = const Color.fromARGB(255, 140,72,27),
-                //       ),
-                //     ),
-
-                //     const Text(
-                //       'Login',
-                //       style: TextStyle(
-                //         fontSize: 28,
-                //         fontWeight: FontWeight.bold,
-                //         color: Colors.white,
-                //       ),
-                //     ),
-                //   ],
-                // ),
                 const SizedBox(height: 40),
                 Form(
                   key: _formKey,
@@ -176,18 +154,6 @@ class LoginPageState extends State<LoginPage> {
                           controller: _usernameController,
                           decoration: const InputDecoration(
                             labelText: 'Username',
-                            labelStyle: TextStyle(
-                              color: Color.fromARGB(255, 209,126,51)
-                            ),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Color.fromARGB(255, 209,126,51),
-                                width: 1,
-                              ),
-                            ),
-                          ),
-                          style: const TextStyle(
-                            color: Color.fromARGB(255, 92,40,10)
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {

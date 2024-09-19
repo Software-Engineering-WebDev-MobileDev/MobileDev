@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
-        title: 'Bakery Manager Mobile',
+        title: 'The Rolling Scone',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,

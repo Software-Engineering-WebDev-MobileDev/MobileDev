@@ -40,9 +40,45 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // changed app to be more consitent with rest of the UI
       appBar: AppBar(
-        title: const Text('Home'),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(10)
+          ),
+        ),
+        // made the color scheme and design of the title more consistent
+        title: Stack(
+          children: <Widget>[
+            // Stroked text as border.
+            Text(
+              'The Rolling Scones',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                foreground: Paint()
+                  ..style = PaintingStyle.stroke
+                  ..strokeWidth = 6
+                  ..color = const Color.fromARGB(255, 140,72,27),
+              ),
+            ),
+            // Solid text as fill.
+            const Text(
+              'The Rolling Scones',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 246,235,216),
+              ),
+            ),
+          ],
+        ),
+        //changed the color of the icon button
         leading: IconButton(
+          color: const Color.fromARGB(255, 92,40,10),
           icon: const Icon(Icons.logout), 
           onPressed: _logout,
         ),
@@ -51,35 +87,25 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                height: 80,
-                alignment: Alignment.center,
-                child: const Text(
-                  'The Rolling Scones',
-                  style: TextStyle(
-                    fontFamily: 'Pacifico',
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.orange,
-                  ),
-                ),
-              ),
               const SizedBox(height: 20),
 
-              // Dynamically displaying the first and last name
+              // Changed color of the text to fit the theme
               Text(
                 'Hi $_firstName $_lastName!',
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.orange,
+                  color: Color.fromARGB(255, 209, 125, 51),
                 ),
               ),
               const Text(
                 'Owner',
                 style: TextStyle(
                   fontSize: 16,
+                  // added bold to font weight
+                  fontWeight: FontWeight.bold,
                   color: Colors.black54,
                 ),
               ),
@@ -136,7 +162,7 @@ class OptionsBar extends StatelessWidget {
   Widget _buildMenuButton(String title, IconData icon, VoidCallback onPressed) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color.fromARGB(255, 227, 171, 4),
+        backgroundColor: const Color.fromARGB(255, 209,126,51),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
@@ -149,7 +175,7 @@ class OptionsBar extends StatelessWidget {
           Icon(
             icon,
             size: 30,
-            color: Colors.white,
+            color: const Color.fromARGB(255, 246,235,216),
           ),
           const SizedBox(height: 5),
           Text( // add a feature for wrapping text
@@ -157,7 +183,7 @@ class OptionsBar extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 24,
-              color: Colors.white,
+              color: Color.fromARGB(255, 246,235,216),
             ),
           ),
         ],

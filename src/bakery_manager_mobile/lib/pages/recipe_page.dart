@@ -35,18 +35,47 @@ class AllRecipesPageState extends State<AllRecipesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('All Recipes',
-            style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.orange,
+        //matched the theme of tha app bar to that of the home screen
+        title: Stack(
+          children: <Widget>[
+            // Stroked text as border.
+            Text(
+              'All Recipes',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                foreground: Paint()
+                  ..style = PaintingStyle.stroke
+                  ..strokeWidth = 6
+                  ..color = const Color.fromARGB(255, 140,72,27),
+              ),
+            ),
+            // Solid text as fill.
+            const Text(
+              'All Recipes',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 246,235,216),
+              ),
+            ),
+          ],
+        ),
+        //center the title
+        centerTitle: true,
+        //changed the background color
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        //changed the color for both icons in the app bar
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 140,72,27)),
           onPressed: () {
             Navigator.pop(context); // Back navigation
           },
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.home, color: Colors.white),
+            icon: const Icon(Icons.home, color: Color.fromARGB(255, 140,72,27)),
             onPressed: () {
               Navigator.popUntil(context, ModalRoute.withName('/')); // Home navigation
             },
@@ -85,11 +114,11 @@ class AllRecipesPageState extends State<AllRecipesPage> {
               ),
             ),
             const SizedBox(height: 16),
-
+            // changed the color scheme of the button and the icon/text in the button as well
             // Add Recipe Button
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+                backgroundColor: const Color.fromARGB(255, 209, 125, 51),
                 padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -102,8 +131,16 @@ class AllRecipesPageState extends State<AllRecipesPage> {
                   MaterialPageRoute(builder: (context) => const AddRecipePage()),
                 );
               },
-              icon: const Icon(Icons.add),
-              label: const Text('Add recipe'),
+              icon: const Icon(
+                Icons.add,
+                color: Color.fromARGB(255, 246,235,216),
+              ),
+              label: const Text(
+                'Add recipe',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 246,235,216),
+                ),
+              ),
             ),
           ],
         ),
@@ -120,7 +157,7 @@ class _RecipeItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         // boxShadow: [
         //   BoxShadow(
         //     color: Colors.grey.withOpacity(0.5), // Shadow under items
