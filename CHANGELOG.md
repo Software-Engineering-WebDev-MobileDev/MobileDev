@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- nothing
+
+## [0.1.0] - 2024-09-19
+
 ### Added
 
 - Added Page Routing Between Pages. 
@@ -43,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial Commit
 
-[Unreleased]: https://github.com/Swolford0408/MobileDev/compare/v0.0.2...HEAD
+[Unreleased]: https://github.com/Swolford0408/MobileDev/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Swolford0408/MobileDev/compare/v0.0.2...0.1.0
 [0.0.2]: https://github.com/Swolford0408/MobileDev/compare/v0.0.1...v0.0.2
 [0.0.1]: https://github.com/Swolford0408/MobileDev/releases/tag/v0.0.1
