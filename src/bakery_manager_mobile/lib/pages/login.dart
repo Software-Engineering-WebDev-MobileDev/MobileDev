@@ -143,6 +143,7 @@ class LoginPageState extends State<LoginPage> {
                 const Text(
                   'Sign In',
                   style: TextStyle(
+                    fontFamily: 'Pacifico',
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                     color: Color.fromARGB(255, 209,126,51),

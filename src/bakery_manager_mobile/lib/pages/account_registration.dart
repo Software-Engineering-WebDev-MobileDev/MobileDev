@@ -72,6 +72,11 @@ class CreateAccountPageState extends State<CreateAccountPage> {
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         centerTitle: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(10)
+          ),
+        ),
         title: Stack(
           children: <Widget>[
             // Stroked text as border.
