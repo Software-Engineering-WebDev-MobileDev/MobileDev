@@ -1,3 +1,4 @@
+import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:flutter/material.dart';
 import '../models/ingredient.dart';
 
@@ -12,10 +13,10 @@ class IngredientPageState extends State<IngredientPage> {
   // TODO: Replace with actual ingredient data from the database
 
   final List<Ingredient> _ingredients = [
-    Ingredient(name: 'Flour', quantity: 5.0, unit: 'kg'),
-    Ingredient(name: 'Sugar', quantity: 3.0, unit: 'kg'),
-    Ingredient(name: 'Eggs', quantity: 24, unit: 'pcs'),
-    Ingredient(name: 'Milk', quantity: 2.5, unit: 'L'),
+    Ingredient(ingredientID: "12345", name: 'Flour', quantity: 5.0, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
+    Ingredient(ingredientID: "12346", name: 'Sugar', quantity: 3.0, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
+    Ingredient(ingredientID: "12347", name: 'Eggs', quantity: 24, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
+    Ingredient(ingredientID: "12348", name: 'Milk', quantity: 2.5, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
   ];
 
   List<Ingredient> _filteredIngredients = [];
@@ -108,9 +109,7 @@ class _IngredientItem extends StatelessWidget {
     return InkWell(
       onTap: () {
         // TODO: Implement navigation to ingredient details page
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${ingredient.name} details page not implemented yet')),
-        );
+        Navigator.pushNamed(context, ingredientDetailsPageRoute, arguments: ingredient);
       },
       child: Container(
         decoration: BoxDecoration(
@@ -143,7 +142,7 @@ class _IngredientItem extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${ingredient.quantity} ${ingredient.unit}',
+                  '${ingredient.quantity} ${ingredient.quantityUnit}',
                   style: const TextStyle(
                     fontSize: 16,
                   ),

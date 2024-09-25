@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:bakery_manager_mobile/pages/add_recipe_page.dart';
 import 'package:bakery_manager_mobile/pages/recipe_details_page.dart';
+import 'package:bakery_manager_mobile/pages/ingredient_detail_page.dart';
 
 Map<String, WidgetBuilder> appRoutes = {
   homePageRoute: (context) => const MyHomePage(),
@@ -24,4 +25,5 @@ Map<String, WidgetBuilder> appRoutes = {
   addRecipePageRoute: (context) => const AddRecipePage(),
   recipeDetailsPageRoute: (context) => const RecipeDetailPage(),
   myAccountRoute: (context) => const MyAccountPage(),
+  ingredientDetailsPageRoute: (context) => const IngredientDetailPage(),
 };
