@@ -1,3 +1,4 @@
+import 'dart:async';  // Import to use Future and Timer
 import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:flutter/material.dart';
 import '../models/ingredient.dart';
@@ -10,29 +11,34 @@ class IngredientPage extends StatefulWidget {
 }
 
 class IngredientPageState extends State<IngredientPage> {
-  // TODO: Replace with actual ingredient data from the database
+  // Simulate an asynchronous operation that fetches ingredients to mock api return.
+  Future<List<Ingredient>> _fetchIngredients() async {
+    // Simulate network delay
+    return await Future.delayed(const Duration(seconds: 1), () {
+      return [
+        Ingredient(ingredientID: "12345", name: 'Flour', quantity: 5.0, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
+        Ingredient(ingredientID: "12346", name: 'Sugar', quantity: 3.0, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
+        Ingredient(ingredientID: "12347", name: 'Eggs', quantity: 24, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
+        Ingredient(ingredientID: "12348", name: 'Milk', quantity: 2.5, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
+      ];
+    });
+  }
 
-  final List<Ingredient> _ingredients = [
-    Ingredient(ingredientID: "12345", name: 'Flour', quantity: 5.0, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
-    Ingredient(ingredientID: "12346", name: 'Sugar', quantity: 3.0, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
-    Ingredient(ingredientID: "12347", name: 'Eggs', quantity: 24, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
-    Ingredient(ingredientID: "12348", name: 'Milk', quantity: 2.5, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
-  ];
-
+  late Future<List<Ingredient>> _futureIngredients;
   List<Ingredient> _filteredIngredients = [];
 
   @override
   void initState() {
     super.initState();
-    _filteredIngredients = _ingredients;
+    _futureIngredients = _fetchIngredients(); // Fetch ingredients initially
   }
 
-  void _filterIngredients(String query) {
+  void _filterIngredients(String query, List<Ingredient> ingredients) {
     setState(() {
       if (query.isEmpty) {
-        _filteredIngredients = _ingredients;
+        _filteredIngredients = ingredients;
       } else {
-        _filteredIngredients = _ingredients
+        _filteredIngredients = ingredients
             .where((ingredient) =>
                 ingredient.name.toLowerCase().contains(query.toLowerCase()))
             .toList();
@@ -52,13 +58,18 @@ class IngredientPageState extends State<IngredientPage> {
         child: Column(
           children: [
             TextField(
-              onChanged: _filterIngredients,
+              onChanged: (query) {
+                // Call _filterIngredients within the FutureBuilder context
+                _futureIngredients.then((ingredients) {
+                  _filterIngredients(query, ingredients);
+                });
+              },
               decoration: InputDecoration(
                 hintText: 'Search',
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
                   onPressed: () {
-                    _filterIngredients('');
+                    _filterIngredients('', _filteredIngredients);
                   },
                 ),
                 border: const OutlineInputBorder(
@@ -68,10 +79,27 @@ class IngredientPageState extends State<IngredientPage> {
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: ListView.builder(
-                itemCount: _filteredIngredients.length,
-                itemBuilder: (context, index) {
-                  return _IngredientItem(ingredient: _filteredIngredients[index]);
+              child: FutureBuilder<List<Ingredient>>(
+                future: _futureIngredients,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (snapshot.hasData) {
+                    // Populate the filtered ingredients list on the first load
+                    if (_filteredIngredients.isEmpty) {
+                      _filteredIngredients = snapshot.data!;
+                    }
+                    return ListView.builder(
+                      itemCount: _filteredIngredients.length,
+                      itemBuilder: (context, index) {
+                        return _IngredientItem(ingredient: _filteredIngredients[index]);
+                      },
+                    );
+                  } else {
+                    return const Center(child: Text('No ingredients available'));
+                  }
                 },
               ),
             ),
@@ -108,7 +136,7 @@ class _IngredientItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        // TODO: Implement navigation to ingredient details page
+        //Navigate to ingredient details page.
         Navigator.pushNamed(context, ingredientDetailsPageRoute, arguments: ingredient);
       },
       child: Container(
@@ -155,3 +183,4 @@ class _IngredientItem extends StatelessWidget {
     );
   }
 }
+
