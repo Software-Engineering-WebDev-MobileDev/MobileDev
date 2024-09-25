@@ -1,3 +1,4 @@
+import 'dart:async'; // Import to use Future and Timer
 import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:flutter/material.dart';
 import '../models/task.dart';
@@ -10,70 +11,76 @@ class TaskPage extends StatefulWidget {
 }
 
 class TaskPageState extends State<TaskPage> {
-  // TODO: Add tasks from database
-  final List<Task> _tasks = [
-  Task(
-    taskID: '1',
-    recipeID: '101',
-    amountToBake: 10,
-    assignmentDate: DateTime.now().subtract(const Duration(days: 1)),
-    completionDate: DateTime.now().add(const Duration(hours: 2)),
-    employeeID: 'E001',
-    name: 'Banana Bread',
-    status: 'Pending',
-    dueDate: DateTime.now().add(const Duration(hours: 2)),
-  ),
-  Task(
-    taskID: '2',
-    recipeID: '102',
-    amountToBake: 5,
-    assignmentDate: DateTime.now().subtract(const Duration(days: 1)),
-    completionDate: DateTime.now().add(const Duration(hours: 1)),
-    employeeID: 'E002',
-    name: 'Chocolate Cake',
-    status: 'In Progress',
-    dueDate: DateTime.now().add(const Duration(hours: 1)),
-  ),
-  Task(
-    taskID: '3',
-    recipeID: '103',
-    amountToBake: 20,
-    assignmentDate: DateTime.now().subtract(const Duration(days: 2)),
-    completionDate: DateTime.now().subtract(const Duration(hours: 1)),
-    employeeID: 'E003',
-    name: 'Vanilla Cupcakes',
-    status: 'Completed',
-    dueDate: DateTime.now().subtract(const Duration(hours: 1)),
-  ),
-  Task(
-    taskID: '4',
-    recipeID: '104',
-    amountToBake: 8,
-    assignmentDate: DateTime.now().subtract(const Duration(days: 1)),
-    completionDate: DateTime.now().add(const Duration(hours: 3)),
-    employeeID: 'E004',
-    name: 'Scones',
-    status: 'Pending',
-    dueDate: DateTime.now().add(const Duration(hours: 3)),
-  ),
-];
+  // Simulate an asynchronous operation that fetches tasks
+  Future<List<Task>> _fetchTasks() async {
+    // Simulate network delay
+    return await Future.delayed(const Duration(seconds: 1), () {
+      return [
+        Task(
+          taskID: '1',
+          recipeID: '101',
+          amountToBake: 10,
+          assignmentDate: DateTime.now().subtract(const Duration(days: 1)),
+          completionDate: DateTime.now().add(const Duration(hours: 2)),
+          employeeID: 'E001',
+          name: 'Banana Bread',
+          status: 'Pending',
+          dueDate: DateTime.now().add(const Duration(hours: 2)),
+        ),
+        Task(
+          taskID: '2',
+          recipeID: '102',
+          amountToBake: 5,
+          assignmentDate: DateTime.now().subtract(const Duration(days: 1)),
+          completionDate: DateTime.now().add(const Duration(hours: 1)),
+          employeeID: 'E002',
+          name: 'Chocolate Cake',
+          status: 'In Progress',
+          dueDate: DateTime.now().add(const Duration(hours: 1)),
+        ),
+        Task(
+          taskID: '3',
+          recipeID: '103',
+          amountToBake: 20,
+          assignmentDate: DateTime.now().subtract(const Duration(days: 2)),
+          completionDate: DateTime.now().subtract(const Duration(hours: 1)),
+          employeeID: 'E003',
+          name: 'Vanilla Cupcakes',
+          status: 'Completed',
+          dueDate: DateTime.now().subtract(const Duration(hours: 1)),
+        ),
+        Task(
+          taskID: '4',
+          recipeID: '104',
+          amountToBake: 8,
+          assignmentDate: DateTime.now().subtract(const Duration(days: 1)),
+          completionDate: DateTime.now().add(const Duration(hours: 3)),
+          employeeID: 'E004',
+          name: 'Scones',
+          status: 'Pending',
+          dueDate: DateTime.now().add(const Duration(hours: 3)),
+        ),
+      ];
+    });
+  }
 
+  late Future<List<Task>> _futureTasks;
   List<Task> _filteredTasks = [];
   String _currentFilter = 'All';
 
   @override
   void initState() {
     super.initState();
-    _filteredTasks = _tasks;
+    _futureTasks = _fetchTasks(); // Fetch tasks initially
   }
 
-  void _filterTasks(String filter) {
+  void _filterTasks(String status, List<Task> tasks) {
     setState(() {
-      _currentFilter = filter;
-      if (filter == 'All') {
-        _filteredTasks = _tasks;
+      _currentFilter = status;
+      if (status == 'All') {
+        _filteredTasks = tasks;
       } else {
-        _filteredTasks = _tasks.where((task) => task.status == filter).toList();
+        _filteredTasks = tasks.where((task) => task.status == status).toList();
       }
     });
   }
@@ -82,13 +89,14 @@ class TaskPageState extends State<TaskPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Daily Tasks', style: TextStyle(color: Colors.white)),
+        title: const Text('Task List', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.orange,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            // Horizontal filter bar
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -105,10 +113,27 @@ class TaskPageState extends State<TaskPage> {
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: ListView.builder(
-                itemCount: _filteredTasks.length,
-                itemBuilder: (context, index) {
-                  return _TaskItem(task: _filteredTasks[index]);
+              child: FutureBuilder<List<Task>>(
+                future: _futureTasks,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (snapshot.hasData) {
+                    // Populate the filtered tasks list on the first load
+                    if (_filteredTasks.isEmpty) {
+                      _filteredTasks = snapshot.data!;
+                    }
+                    return ListView.builder(
+                      itemCount: _filteredTasks.length,
+                      itemBuilder: (context, index) {
+                        return _TaskItem(task: _filteredTasks[index]);
+                      },
+                    );
+                  } else {
+                    return const Center(child: Text('No tasks available'));
+                  }
                 },
               ),
             ),
@@ -128,7 +153,7 @@ class TaskPageState extends State<TaskPage> {
                 );
               },
               icon: const Icon(Icons.add),
-              label: const Text('Add task'),
+              label: const Text('Add Task'),
             ),
           ],
         ),
@@ -144,7 +169,12 @@ class TaskPageState extends State<TaskPage> {
           borderRadius: BorderRadius.circular(20),
         ),
       ),
-      onPressed: () => _filterTasks(filter),
+      onPressed: () {
+        // Call _filterTasks within the FutureBuilder context
+        _futureTasks.then((tasks) {
+          _filterTasks(filter, tasks);
+        });
+      },
       child: Text(filter),
     );
   }
@@ -158,7 +188,7 @@ class _TaskItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        // TODO: Implement navigation to task details page
+        // Navigate to task details page
         Navigator.pushNamed(context, taskDetailsPageRoute, arguments: task);
       },
       child: Container(
@@ -218,6 +248,7 @@ class _TaskItem extends StatelessWidget {
     );
   }
 
+  // Function to get color based on task status
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Pending':
@@ -231,6 +262,7 @@ class _TaskItem extends StatelessWidget {
     }
   }
 
+  // Function to format due date
   String _formatDate(DateTime date) {
     return '${date.hour}:${date.minute.toString().padLeft(2, '0')}';
   }
