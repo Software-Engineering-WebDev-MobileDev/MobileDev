@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- nothing
+### Added
+
+- Added Dynamic Routing for task items.
+- Added Dynamic Routing for inventory items. 
+- Added Launch Details to README.
+
+### Changed
+
+- Changed task page to build tasks using futures to mock API.
+- Changed ingredients page to build ingredients using futures to mock API.
 
 ## [0.1.0] - 2024-09-19
 

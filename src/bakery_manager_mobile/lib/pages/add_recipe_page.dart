@@ -163,7 +163,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     ingredients: instructions,
                   );
                   if (response['status'] == 'success') {
-                    String recipeId = response['recipeID']; //Message IJ to add to response
+                    String recipeId = response['recipeID'];
                     List<String> errors = [];
                     for (var ingredient in ingredients) {
                       Map<String, dynamic> ingredientResponse = await ApiService.addRecipeIngredient(
