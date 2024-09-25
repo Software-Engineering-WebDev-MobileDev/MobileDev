@@ -16,6 +16,18 @@ String genSessionId() {
 class ApiService {
   static final baseApiUrl = dotenv.env['BASE_URL'];
 
+  // Helper function to get session ID from SharedPreferences
+  static Future<String?> _getSessionId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('session_id');
+  }
+
+  // Helper function to clear session ID from SharedPreferences
+  static Future<void> _clearSessionId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('session_id');
+  }
+
   // Get Recipes Function
   static Future<Map<String, dynamic>> getRecipes() async {
     final url = Uri.parse('$baseApiUrl/recipes');
@@ -247,9 +259,15 @@ class ApiService {
               headers: {'Content-Type': 'application/json'}
           );
           if (sessionPostResponse.statusCode == 200) {
-            debugPrint('Session ID successfully posted: $sessionId');
+            return {
+              'status': 'success',
+              'session_id': sessionId,
+            };
           } else {
-            debugPrint('Failed to post Session ID. Status code: ${sessionPostResponse.statusCode}');
+            return {
+              'status': 'error',
+              'reason': responseBody['reason'] ?? 'Invalid login credentials',
+            };
           }
         }
 
@@ -282,33 +300,32 @@ class ApiService {
   }
 
   // Logout Function
-  static Future<void> logout() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? sessionId = prefs.getString('session_id'); // Retrieve session ID
+  static Future<Map<String, dynamic>> logout() async {
+    final sessionId = await _getSessionId();
+    if (sessionId == null || sessionId.isEmpty) {
+      return {'status': 'error', 'reason': 'Session ID is missing'};
+    }
 
-    if (sessionId != null) {
-      final url = Uri.parse('$baseApiUrl/logout');
-      final headers = {
-        'Content-Type': 'application/json',
-        'session_id': sessionId // Send session_id in the headers
-      };
+    final url = Uri.parse('$baseApiUrl/logout');
+    final headers = {'Content-Type': 'application/json', 'session_id': sessionId};
 
-      try {
-        // Make the POST request to the backend to delete the session
-        final response = await http.post(url, headers: headers);
+    try {
+      final response = await http.post(url, headers: headers);
 
-        if (response.statusCode == 200) {
-          // If successful, clear session data locally
-          await prefs.clear();
-          print('Successfully logged out');
-        } else {
-          print('Failed to log out. Status code: ${response.statusCode}');
-        }
-      } catch (e) {
-        print('Error logging out: $e');
+      if (response.statusCode == 200) {
+        await _clearSessionId(); // Clear session ID locally
+        return {'status': 'success'};
+      } else {
+        return {
+          'status': 'error',
+          'reason': 'Failed to log out. Status code: ${response.statusCode}',
+        };
       }
-    } else {
-      print('No session found to log out.');
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
     }
   }
 
@@ -357,10 +374,4 @@ class ApiService {
       };
     }
   }
-
-  static Future<String?> _getSessionId() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('session_id');
-  }
-
 }
