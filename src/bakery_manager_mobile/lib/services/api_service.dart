@@ -1,7 +1,15 @@
 import 'dart:convert';
+import 'package:flutter/material.dart'; //testing
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/recipe.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:uuid/uuid.dart';
+
+String genSessionId() {
+  var uuid = Uuid();
+  return uuid.v4().replaceAll('-', ''); // Generates a UUID and removes the dashes
+}
 
 // API Service Class
 class ApiService {
@@ -11,7 +19,19 @@ class ApiService {
   static Future<Map<String, dynamic>> getRecipes() async {
     final url = Uri.parse('$baseApiUrl/recipes');
     try {
-      final response = await http.get(url);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? sessionId = prefs.getString('session_id');
+
+      if (sessionId == null) {
+        return {'status': 'error', 'reason': 'No active session'};
+      }
+
+      final headers = {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $sessionId', // Send session ID in header
+      };
+
+      final response = await http.get(url, headers: headers);
 
       // Successful response
       if (response.statusCode == 200) {
@@ -56,7 +76,7 @@ class ApiService {
       final response = await http.post(url, headers: headers, body: body);
 
       // Successful response
-      
+
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
         return {'status': 'success',
@@ -80,7 +100,7 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> addRecipeIngredient({String recipeID = "", String ingredientDescription = "", double quantity = 0, String unit = "", int stockQuantity = 0, int reorderFlag = 0}) async {
+ static Future<Map<String, dynamic>> addRecipeIngredient({String recipeID = "", String ingredientDescription = "", double quantity = 0, String unit = "", int stockQuantity = 0, int reorderFlag = 0}) async {
     final url = Uri.parse('$baseApiUrl/add_recipe_ingredient');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({
@@ -116,53 +136,53 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> getRecipeIngredients(String recipeID) async {
-      final url = Uri.parse('$baseApiUrl/recipe/$recipeID');
-  final headers = {'Content-Type': 'application/json'};
+    final url = Uri.parse('$baseApiUrl/recipe/$recipeID');
+    final headers = {'Content-Type': 'application/json'};
 
-  try {
+    try {
     final response = await http.get(url, headers: headers);
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      
-      // Filter ingredients from the full recipe response
-      final ingredients = data['recipe'] 
-          .map((item) => {
-                'RecipeIngredientID': item['RecipeIngredientID'],
-                'IngredientDescription': item['IngredientDescription'],
-                'Quantity': item['Quantity'],
-                'UnitOfMeasure': item['UnitOfMeasure'],
-                'QuantityInStock': item['QuantityInStock'],
-                'ReorderFlag': item['ReorderFlag'],
-                'ModifierID': item['ModifierID'],
-                'ScalingFactorID': item['ScalingFactorID'],
-              })
-          .toList();
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
 
-      return {
-        'status': 'success',
+        // Filter ingredients from the full recipe response
+        final ingredients = data['recipe']
+            .map((item) => {
+                  'RecipeIngredientID': item['RecipeIngredientID'],
+                  'IngredientDescription': item['IngredientDescription'],
+                  'Quantity': item['Quantity'],
+                  'UnitOfMeasure': item['UnitOfMeasure'],
+                  'QuantityInStock': item['QuantityInStock'],
+                  'ReorderFlag': item['ReorderFlag'],
+                  'ModifierID': item['ModifierID'],
+                  'ScalingFactorID': item['ScalingFactorID'],
+                })
+            .toList();
+
+        return {
+          'status': 'success',
         'ingredients': ingredients,  // Only return the ingredients
-      };
-    } else {
+        };
+      } else {
+        return {
+          'status': 'error',
+          'reason': 'Failed to fetch recipe: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
       return {
         'status': 'error',
-        'reason': 'Failed to fetch recipe: ${response.statusCode}',
+        'reason': 'Network error: $e',
       };
     }
-  } catch (e) {
-    return {
-      'status': 'error',
-      'reason': 'Network error: $e',
-    };
   }
-}
 
   // Create Account Function
   static Future<Map<String, dynamic>> createAccount(
-      String firstName,
-      String lastName,
-      String employeeID,
-      String username,
+    String firstName,
+    String lastName,
+    String employeeID,
+    String username,
       String password) async {
     final url = Uri.parse('$baseApiUrl/create_account');
     final headers = {
@@ -197,48 +217,97 @@ class ApiService {
   }
 
   // Login Function
-  static Future<Map<String, dynamic>> login(
-      String username, String password) async {
+  static Future<Map<String, dynamic>> login(String username, String password) async {
     final url = Uri.parse('$baseApiUrl/login');
-    final headers = <String, String>{
+    final headers = {
+      'Content-Type': 'application/json',
       'username': username,
-      'password': password,
+      'password': password
     };
+
     try {
+      // Make the POST request to the server
       final response = await http.post(url, headers: headers);
 
-      // Successful response
       if (response.statusCode == 201) {
-        // Successfully logged in
         final responseBody = jsonDecode(response.body);
+
+        // Check if the server provided a session_id, if not, generate one
+        String sessionId = responseBody['session_id'] ?? genSessionId();
+
+        // Post the generated session ID to the backend if needed
+        if (responseBody['session_id'] == null) {
+          final sessionPostUrl = Uri.parse('$baseApiUrl/post_login_success');
+          await http.post(sessionPostUrl, body: jsonEncode({'session_id': sessionId}), headers: {'Content-Type': 'application/json'});
+
+           //testing
+          final sessionPostResponse = await http.post(sessionPostUrl, 
+              body: jsonEncode({'session_id': sessionId}), 
+              headers: {'Content-Type': 'application/json'}
+          );
+          if (sessionPostResponse.statusCode == 200) {
+            debugPrint('Session ID successfully posted: $sessionId');
+          } else {
+            debugPrint('Failed to post Session ID. Status code: ${sessionPostResponse.statusCode}');
+          }
+        }
+
+        // Store session ID in SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('session_id', sessionId);
+
         return {
           'status': 'success',
-          'session_id': responseBody['session_id'],
+          'session_id': sessionId,
         };
-      }
-      // Failed response
-      else if (response.statusCode == 400 || response.statusCode == 401) {
-        // Handle client errors
+      } else if (response.statusCode == 400 || response.statusCode == 401) {
         final responseBody = jsonDecode(response.body);
         return {
           'status': 'error',
-          'reason': responseBody['reason'],
+          'reason': responseBody['reason'] ?? 'Invalid login credentials',
         };
-      }
-      // Failed response
-      else {
-        // Handle server errors
+      } else {
         return {
           'status': 'error',
           'reason': 'Unexpected error: ${response.statusCode}',
         };
       }
     } catch (e) {
-      // Handle network errors
       return {
         'status': 'error',
         'reason': 'Network error: $e',
       };
+    }
+  }
+
+  // Logout Function
+  static Future<void> logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? sessionId = prefs.getString('session_id'); // Retrieve session ID
+
+    if (sessionId != null) {
+      final url = Uri.parse('$baseApiUrl/logout');
+      final headers = {
+        'Content-Type': 'application/json',
+        'session_id': sessionId // Send session_id in the headers
+      };
+
+      try {
+        // Make the POST request to the backend to delete the session
+        final response = await http.post(url, headers: headers);
+
+        if (response.statusCode == 200) {
+          // If successful, clear session data locally
+          await prefs.clear();
+          print('Successfully logged out');
+        } else {
+          print('Failed to log out. Status code: ${response.statusCode}');
+        }
+      } catch (e) {
+        print('Error logging out: $e');
+      }
+    } else {
+      print('No session found to log out.');
     }
   }
 }

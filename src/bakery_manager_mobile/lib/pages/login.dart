@@ -25,7 +25,7 @@ class LoginPageState extends State<LoginPage> {
     _savedCredentials();
   }
 
-  void _updateButton() {
+ void _updateButton() {
     setState(() {
       _isButtonDisabled =
           _usernameController.text.isEmpty || _passwordController.text.isEmpty;
@@ -72,8 +72,14 @@ class LoginPageState extends State<LoginPage> {
       final response = await ApiService.login(enteredUsername, enteredPassword);
 
       if (response['status'] == 'success') {
+        String sessionId = response['session_id'];
+
         // Save credentials if 'Remember Me' is checked
         await _saveCredentials(enteredUsername, enteredPassword);
+
+        // Save session ID in SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('session_id', sessionId);
 
         if (!mounted) return;
 
