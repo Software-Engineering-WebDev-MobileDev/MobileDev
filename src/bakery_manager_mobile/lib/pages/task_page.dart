@@ -1,3 +1,4 @@
+import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:flutter/material.dart';
 import '../models/task.dart';
 
@@ -11,11 +12,51 @@ class TaskPage extends StatefulWidget {
 class TaskPageState extends State<TaskPage> {
   // TODO: Add tasks from database
   final List<Task> _tasks = [
-    Task(name: 'Banana Bread', status: 'Pending', dueDate: DateTime.now().add(const Duration(hours: 2))),
-    Task(name: 'Chocolate Cake', status: 'In Progress', dueDate: DateTime.now().add(const Duration(hours: 1))),
-    Task(name: 'Vanilla Cupcakes', status: 'Completed', dueDate: DateTime.now().subtract(const Duration(hours: 1))),
-    Task(name: 'Scones', status: 'Pending', dueDate: DateTime.now().add(const Duration(hours: 3))),
-  ];
+  Task(
+    taskID: '1',
+    recipeID: '101',
+    amountToBake: 10,
+    assignmentDate: DateTime.now().subtract(const Duration(days: 1)),
+    completionDate: DateTime.now().add(const Duration(hours: 2)),
+    employeeID: 'E001',
+    name: 'Banana Bread',
+    status: 'Pending',
+    dueDate: DateTime.now().add(const Duration(hours: 2)),
+  ),
+  Task(
+    taskID: '2',
+    recipeID: '102',
+    amountToBake: 5,
+    assignmentDate: DateTime.now().subtract(const Duration(days: 1)),
+    completionDate: DateTime.now().add(const Duration(hours: 1)),
+    employeeID: 'E002',
+    name: 'Chocolate Cake',
+    status: 'In Progress',
+    dueDate: DateTime.now().add(const Duration(hours: 1)),
+  ),
+  Task(
+    taskID: '3',
+    recipeID: '103',
+    amountToBake: 20,
+    assignmentDate: DateTime.now().subtract(const Duration(days: 2)),
+    completionDate: DateTime.now().subtract(const Duration(hours: 1)),
+    employeeID: 'E003',
+    name: 'Vanilla Cupcakes',
+    status: 'Completed',
+    dueDate: DateTime.now().subtract(const Duration(hours: 1)),
+  ),
+  Task(
+    taskID: '4',
+    recipeID: '104',
+    amountToBake: 8,
+    assignmentDate: DateTime.now().subtract(const Duration(days: 1)),
+    completionDate: DateTime.now().add(const Duration(hours: 3)),
+    employeeID: 'E004',
+    name: 'Scones',
+    status: 'Pending',
+    dueDate: DateTime.now().add(const Duration(hours: 3)),
+  ),
+];
 
   List<Task> _filteredTasks = [];
   String _currentFilter = 'All';
@@ -118,9 +159,7 @@ class _TaskItem extends StatelessWidget {
     return InkWell(
       onTap: () {
         // TODO: Implement navigation to task details page
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${task.name} details page not implemented yet')),
-        );
+        Navigator.pushNamed(context, taskDetailsPageRoute, arguments: task);
       },
       child: Container(
         decoration: BoxDecoration(
