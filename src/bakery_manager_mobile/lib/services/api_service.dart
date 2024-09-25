@@ -7,9 +7,10 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:uuid/uuid.dart';
 
 String genSessionId() {
-  var uuid = Uuid();
+  var uuid = const Uuid();
   return uuid.v4().replaceAll('-', ''); // Generates a UUID and removes the dashes
 }
+
 
 // API Service Class
 class ApiService {
@@ -310,4 +311,56 @@ class ApiService {
       print('No session found to log out.');
     }
   }
+
+  static Future<Map<String, dynamic>> bumpSessionToken() async {
+    final sessionId = await _getSessionId(); // Get session ID from local storage
+
+    if (sessionId == null) {
+      return {
+        'status': 'error',
+        'reason': 'No active session found',
+      };
+    }
+
+    final url = Uri.parse('$baseApiUrl/token_bump');
+    final headers = {
+      'Content-Type': 'application/json',
+      'session_id': sessionId, // Send session_id in the headers
+    };
+
+    try {
+      // Make the POST request to bump the session token
+      final response = await http.post(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        // Token successfully bumped
+        return {
+          'status': 'success',
+        };
+      } else if (response.statusCode == 498) {
+        // Invalid or expired token
+        return {
+          'status': 'error',
+          'reason': 'Invalid or expired session',
+        };
+      } else {
+        // Other server-side error
+        return {
+          'status': 'error',
+          'reason': 'Unexpected error: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  static Future<String?> _getSessionId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('session_id');
+  }
+
 }

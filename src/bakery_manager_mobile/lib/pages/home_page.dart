@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bakery_manager_mobile/assets/constants.dart';
+import 'package:bakery_manager_mobile/services/api_service.dart';
 
 /*
  * Home page for the app
@@ -33,8 +34,9 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _logout() {
-    Navigator.pushReplacementNamed(context, loginPageRoute);
+  Future<void> _logout() async {
+    await ApiService.logout();
+    Navigator.pushNamedAndRemoveUntil(context, loginPageRoute, (route) => false);
   }
 
   @override
