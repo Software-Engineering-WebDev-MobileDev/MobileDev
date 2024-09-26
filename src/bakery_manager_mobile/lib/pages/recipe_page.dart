@@ -14,8 +14,9 @@ class AllRecipesPage extends StatefulWidget {
 class AllRecipesPageState extends State<AllRecipesPage> {
   late Future<List<Recipe>> _futureRecipes;
   List<Recipe> _filteredRecipes = [];
+  String _currentCategoryFilter = 'All'; // Track current category filter
 
-    // Page Initialization Function
+  // Page Initialization Function
   @override
   void initState() {
     super.initState();
@@ -152,6 +153,37 @@ class AllRecipesPageState extends State<AllRecipesPage> {
     });
   }
 
+  // Filter by category function
+  void _filterByCategory(String category, List<Recipe> recipes) {
+    setState(() {
+      _currentCategoryFilter = category;
+      if (category == 'All') {
+        _filteredRecipes = recipes;
+      } else {
+        _filteredRecipes = recipes
+            .where((recipe) => recipe.recipeCategory == category)
+            .toList();
+      }
+    });
+  }
+
+  // Build category filter button
+  Widget _buildCategoryFilterButton(String category, List<Recipe> recipes) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor:
+            _currentCategoryFilter == category ? Colors.orange : Colors.grey,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+      onPressed: () {
+        _filterByCategory(category, recipes);
+      },
+      child: Text(category),
+    );
+  }
+
   // Page Content Build Function
   @override
   Widget build(BuildContext context) {
@@ -179,6 +211,47 @@ class AllRecipesPageState extends State<AllRecipesPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            // Horizontal category filter bar
+            FutureBuilder<List<Recipe>>(
+              future: _futureRecipes,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Text('No recipes found');
+                } else {
+                  final recipes = snapshot.data!;
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        _buildCategoryFilterButton('All', recipes),
+                        const SizedBox(width: 8),
+                        _buildCategoryFilterButton('Bread', recipes),
+                        const SizedBox(width: 8),
+                        _buildCategoryFilterButton('Muffins', recipes),
+                        const SizedBox(width: 8),
+                        _buildCategoryFilterButton('Cookies', recipes),
+                        const SizedBox(width: 8),
+                        _buildCategoryFilterButton('Pastry', recipes),
+                        const SizedBox(width: 8),
+                        _buildCategoryFilterButton('Cake', recipes),
+                        const SizedBox(width: 8),
+                        _buildCategoryFilterButton('Pie', recipes),
+                        const SizedBox(width: 8),
+                        _buildCategoryFilterButton('Cupcakes', recipes),
+                        const SizedBox(width: 8),
+                        _buildCategoryFilterButton('Dessert', recipes),
+                      ],
+                    ),
+                  );
+                }
+              },
+            ),
+            const SizedBox(height: 16),
+
             // Search Bar
             TextField(
               onChanged: _filterRecipes, // Search feature
@@ -214,7 +287,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
                       itemCount: _filteredRecipes.length,
                       itemBuilder: (context, index) {
                         return _RecipeItem(
-                            recipe: _filteredRecipes[index],);
+                          recipe: _filteredRecipes[index],);
                       },
                     );
                   }
@@ -269,20 +342,20 @@ class _RecipeItem extends StatelessWidget {
             ),
           ],
         ),
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        color: const Color(0xFFFDF1E0),
-        elevation: 4, // 3D effect
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            recipe.recipeName,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+        child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          color: const Color(0xFFFDF1E0),
+          elevation: 4, // 3D effect
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              recipe.recipeName,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
