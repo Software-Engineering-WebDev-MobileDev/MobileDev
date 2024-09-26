@@ -15,11 +15,12 @@ class AllRecipesPageState extends State<AllRecipesPage> {
   late Future<List<Recipe>> _futureRecipes;
   List<Recipe> _filteredRecipes = [];
 
-  // Page Initialization Function
+    // Page Initialization Function
   @override
   void initState() {
     super.initState();
-    _fetchRecipes(); // Lists all recipes
+    //    _fetchRecipes(); // Lists all recipes
+    _futureRecipes = _fetchRecipes(); // Fetch recipes initially
 
     // Adds the observer to the navigator
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -34,21 +35,106 @@ class AllRecipesPageState extends State<AllRecipesPage> {
     });
   }
 
-  // Fetch recipes function
-  void _fetchRecipes() {
-    _futureRecipes = ApiService.getRecipes().then((response) {
-      if (response['status'] == 'success') {
-        List<Recipe> recipes = response['recipes'];
+  // // Fetch recipes function
+  // void _fetchRecipes() {
+  //   _futureRecipes = ApiService.getRecipes().then((response) {
+  //     if (response['status'] == 'success') {
+  //       List<Recipe> recipes = response['recipes'];
+  //       setState(() {
+  //         _filteredRecipes = recipes;
+  //       });
+  //       return recipes;
+  //     } else {
+  //       throw Exception(
+  //           'Failed to fetch recipes: ${response['message'] ?? 'Unknown error'}');
+  //     }
+  //   }).catchError((error) {
+  //     return <Recipe>[]; // Return an empty list on error
+  //   });
+  // }
+
+  // Simulate an asynchronous operation to fetch recipes
+  Future<List<Recipe>> _fetchRecipes() async {
+    return await Future.delayed(const Duration(seconds: 1), () {
+      List<Recipe> recipes = [
+        Recipe(
+          recipeId: '1',
+          recipeName: 'Banana Bread',
+          recipeCategory: 'Bread',
+          instructions: 'Mix bananas, flour, sugar, and bake for 60 minutes.',
+          scalingFactor: 1,
+        ),
+        Recipe(
+          recipeId: '2',
+          recipeName: 'Blueberry Muffins',
+          recipeCategory: 'Muffins',
+          instructions: 'Fold blueberries into the batter and bake for 25 minutes.',
+          scalingFactor: 1,
+        ),
+        Recipe(
+          recipeId: '3',
+          recipeName: 'Chocolate Chip Cookies',
+          recipeCategory: 'Cookies',
+          instructions: 'Mix cookie dough with chocolate chips and bake for 15 minutes.',
+          scalingFactor: 1,
+        ),
+        Recipe(
+          recipeId: '4',
+          recipeName: 'Cinnamon Rolls',
+          recipeCategory: 'Pastry',
+          instructions: 'Roll dough with cinnamon filling, bake, and top with icing.',
+          scalingFactor: 1,
+        ),
+        Recipe(
+          recipeId: '5',
+          recipeName: 'Lemon Drizzle Cake',
+          recipeCategory: 'Cake',
+          instructions: 'Bake lemon-flavored cake and drizzle with lemon syrup.',
+          scalingFactor: 1,
+        ),
+        Recipe(
+          recipeId: '6',
+          recipeName: 'Apple Pie',
+          recipeCategory: 'Pie',
+          instructions: 'Fill pie crust with apples and bake for 50 minutes.',
+          scalingFactor: 1,
+        ),
+        Recipe(
+          recipeId: '7',
+          recipeName: 'Sourdough Bread',
+          recipeCategory: 'Bread',
+          instructions: 'Mix sourdough starter, flour, and water, then bake.',
+          scalingFactor: 1,
+        ),
+        Recipe(
+          recipeId: '8',
+          recipeName: 'Pumpkin Spice Cupcakes',
+          recipeCategory: 'Cupcakes',
+          instructions: 'Mix pumpkin spice batter and bake for 20 minutes.',
+          scalingFactor: 1,
+        ),
+        Recipe(
+          recipeId: '9',
+          recipeName: 'Brownies',
+          recipeCategory: 'Dessert',
+          instructions: 'Mix chocolate batter and bake for 30 minutes.',
+          scalingFactor: 1,
+        ),
+        Recipe(
+          recipeId: '10',
+          recipeName: 'Croissants',
+          recipeCategory: 'Pastry',
+          instructions: 'Layer butter and dough, roll, and bake for 20 minutes.',
+          scalingFactor: 1,
+        ),
+      ];
+      // Before calling setState, ensure the widget is still mounted
+      if (mounted) {
         setState(() {
           _filteredRecipes = recipes;
         });
-        return recipes;
-      } else {
-        throw Exception(
-            'Failed to fetch recipes: ${response['message'] ?? 'Unknown error'}');
       }
-    }).catchError((error) {
-      return <Recipe>[]; // Return an empty list on error
+      return recipes;
     });
   }
 
@@ -165,7 +251,7 @@ class _RecipeItem extends StatelessWidget {
   final Recipe recipe;
   const _RecipeItem({required this.recipe});
 
- @override
+  @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
@@ -183,20 +269,20 @@ class _RecipeItem extends StatelessWidget {
             ),
           ],
         ),
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          color: const Color(0xFFFDF1E0),
-          elevation: 4, // 3D effect
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              recipe.recipeName,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        color: const Color(0xFFFDF1E0),
+        elevation: 4, // 3D effect
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            recipe.recipeName,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
               ),
             ),
           ),
