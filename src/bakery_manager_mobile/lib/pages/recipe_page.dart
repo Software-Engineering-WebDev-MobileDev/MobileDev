@@ -13,6 +13,7 @@ class AllRecipesPage extends StatefulWidget {
 
 class AllRecipesPageState extends State<AllRecipesPage> {
   late Future<List<Recipe>> _futureRecipes;
+  List<Recipe> _allRecipes = [];
   List<Recipe> _filteredRecipes = [];
   String _currentCategoryFilter = 'All'; // Track current category filter
 
@@ -36,7 +37,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
     });
   }
 
-  // // Fetch recipes function
+    // // Fetch recipes function
   // void _fetchRecipes() {
   //   _futureRecipes = ApiService.getRecipes().then((response) {
   //     if (response['status'] == 'success') {
@@ -53,7 +54,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
   //     return <Recipe>[]; // Return an empty list on error
   //   });
   // }
-
+  
   // Simulate an asynchronous operation to fetch recipes
   Future<List<Recipe>> _fetchRecipes() async {
     return await Future.delayed(const Duration(seconds: 1), () {
@@ -132,18 +133,19 @@ class AllRecipesPageState extends State<AllRecipesPage> {
       // Before calling setState, ensure the widget is still mounted
       if (mounted) {
         setState(() {
-          _filteredRecipes = recipes;
+          _allRecipes = recipes; // Save all fetched recipes
+          _filteredRecipes = recipes; // Initially show all recipes
         });
       }
       return recipes;
     });
   }
 
-  // Filter recipes function
+  // Filter recipes function by search query
   void _filterRecipes(String query) {
     setState(() {
       if (query.isEmpty) {
-        _fetchRecipes();
+        _filterByCategory(_currentCategoryFilter, _allRecipes); // Restore category filter
       } else {
         _filteredRecipes = _filteredRecipes
             .where((recipe) =>
@@ -212,43 +214,29 @@ class AllRecipesPageState extends State<AllRecipesPage> {
         child: Column(
           children: [
             // Horizontal category filter bar
-            FutureBuilder<List<Recipe>>(
-              future: _futureRecipes,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
-                } else if (snapshot.hasError) {
-                  return Text('Error: ${snapshot.error}');
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Text('No recipes found');
-                } else {
-                  final recipes = snapshot.data!;
-                  return SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        _buildCategoryFilterButton('All', recipes),
-                        const SizedBox(width: 8),
-                        _buildCategoryFilterButton('Bread', recipes),
-                        const SizedBox(width: 8),
-                        _buildCategoryFilterButton('Muffins', recipes),
-                        const SizedBox(width: 8),
-                        _buildCategoryFilterButton('Cookies', recipes),
-                        const SizedBox(width: 8),
-                        _buildCategoryFilterButton('Pastry', recipes),
-                        const SizedBox(width: 8),
-                        _buildCategoryFilterButton('Cake', recipes),
-                        const SizedBox(width: 8),
-                        _buildCategoryFilterButton('Pie', recipes),
-                        const SizedBox(width: 8),
-                        _buildCategoryFilterButton('Cupcakes', recipes),
-                        const SizedBox(width: 8),
-                        _buildCategoryFilterButton('Dessert', recipes),
-                      ],
-                    ),
-                  );
-                }
-              },
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildCategoryFilterButton('All', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Bread', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Muffins', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Cookies', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Pastry', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Cake', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Pie', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Cupcakes', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Dessert', _allRecipes),
+                ],
+              ),
             ),
             const SizedBox(height: 16),
 
@@ -287,7 +275,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
                       itemCount: _filteredRecipes.length,
                       itemBuilder: (context, index) {
                         return _RecipeItem(
-                          recipe: _filteredRecipes[index],);
+                            recipe: _filteredRecipes[index]);
                       },
                     );
                   }
