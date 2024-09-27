@@ -214,6 +214,7 @@ class ApiService {
         final responseBody = jsonDecode(response.body);
         final sessionManager = SessionManager();
         sessionManager.saveSession(responseBody['session_id']);
+        //sessionManager.resetIdleTimer();
         return {
           'status': 'success',
         };
@@ -251,7 +252,7 @@ class ApiService {
     };
     try {
       final response = await http.post(url, headers: headers);
-      if (response.statusCode == 1) {
+      if (response.statusCode == 200) {
         return true;
       }
       else {
@@ -263,4 +264,26 @@ class ApiService {
     }
   }
 
+  static Future<bool> logout() async {
+    final url = Uri.parse('$baseApiUrl/logout');
+    final sessionManager = SessionManager();
+    final sessionID = await sessionManager.getSessionToken();
+    try {
+      final headers = <String, String>{
+        'session_id': sessionID!,
+      };
+    
+      final response = await http.post(url, headers: headers);
+      if (response.statusCode == 200) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    catch(e){
+      return false;
+    }
+
+  }
 }

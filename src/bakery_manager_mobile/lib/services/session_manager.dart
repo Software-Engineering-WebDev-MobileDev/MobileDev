@@ -1,10 +1,15 @@
 import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:async';
 
 class SessionManager {
   final _storage = const FlutterSecureStorage();
   final Duration sessionTimeout = const Duration(hours: 8);
+  final Duration idleTimeout = const Duration(minutes: 15);
+  Timer? _idleTimer;
 
+  VoidCallback? onIdleTimeout;
 
   Future<void> saveSession(String sessionId) async {
     await _storage.write(key: 'session_token', value: sessionId);
@@ -26,6 +31,7 @@ class SessionManager {
   Future<void> clearSession() async {
     await _storage.delete(key: 'session_token');
     await _storage.delete(key: 'session_start_time');
+    stopIdleTimer();
   }
 
   Future<bool> isSessionValid() async {
@@ -38,17 +44,40 @@ class SessionManager {
 
     // Check if the current time exceeds the session timeout duration
     final now = DateTime.now();
-    final sessionDuration = now.difference(sessionStartTime);
+    final sessionTotalDuration = now.difference(sessionStartTime);
 
-    if (sessionDuration > sessionTimeout) {
+    if (sessionTotalDuration > sessionTimeout) {
       return false;  // Session has expired
     }
 
     //SessionID is not vaild on backend
-    if (await ApiService.sessionValidate(sessionID)) {
-      return false;
+    if (await ApiService.sessionValidate(sessionID) == true) {
+      return true;
     }
-
-    return true;  // Session is still valid
+    else {
+     return false;
+    }
+     // Session is still valid
   }
+    // --- Idle Timeout Management ---
+
+  // Reset the idle timeout timer
+  void resetIdleTimer() {
+    _idleTimer?.cancel(); // Cancel any existing idle timer
+    _idleTimer = Timer(idleTimeout, _handleIdleTimeout); // Start a new idle timer
+  }
+
+  // Handle session timeout due to inactivity
+  void _handleIdleTimeout() {
+    if (onIdleTimeout != null) {
+      onIdleTimeout!();  // Trigger the idle timeout callback
+    }
+    clearSession(); // Clear session due to inactivity
+  }
+
+  // Stop the idle timeout timer
+  void stopIdleTimer() {
+    _idleTimer?.cancel();
+  }
+
 }
