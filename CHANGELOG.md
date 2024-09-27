@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added Dynamic Routing for task items.
 - Added Dynamic Routing for inventory items. 
 - Added Launch Details to README.
+- Added Session Management.
+- Added 15 minute idle timout and 8 hour absolute timeout on sessions
+- Added Automatic login if session is currently valid
 
 ### Changed
 

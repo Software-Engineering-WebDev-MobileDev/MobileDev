@@ -1,3 +1,4 @@
+import 'package:bakery_manager_mobile/services/session_manager.dart';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../assets/constants.dart';
@@ -18,11 +19,20 @@ class LoginPageState extends State<LoginPage> {
   bool _isButtonDisabled = true;
 
   @override
-  void initState() {
+  void initState(){
     super.initState();
     _usernameController.addListener(_updateButton);
     _passwordController.addListener(_updateButton);
     _savedCredentials();
+    _checkSession();
+  }
+
+  void _checkSession() async{
+    if (await SessionManager().isSessionValid()) {
+      if (mounted){
+        Navigator.pushReplacementNamed(context, homePageRoute);
+      }
+    }
   }
 
   void _updateButton() {

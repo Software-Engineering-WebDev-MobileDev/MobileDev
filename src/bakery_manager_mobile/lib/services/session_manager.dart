@@ -29,6 +29,7 @@ class SessionManager {
   }
 
   Future<void> clearSession() async {
+    await ApiService.logout();
     await _storage.delete(key: 'session_token');
     await _storage.delete(key: 'session_start_time');
     stopIdleTimer();
