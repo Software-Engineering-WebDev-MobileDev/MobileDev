@@ -1,3 +1,4 @@
+import 'package:bakery_manager_mobile/pages/task_details_page.dart';
 import 'package:flutter/material.dart';
 import '../models/task.dart';
 
@@ -157,19 +158,22 @@ class _TaskItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        // TODO: Implement navigation to task details page
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${task.name} details page not implemented yet')),
+        // Navigate to TaskDetailsPage with the selected task
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TaskDetailsPage(task: task),
+          ),
         );
       },
       child: Container(
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 2,
-              blurRadius: 8,
-              offset: const Offset(0, 4),
+              color: Colors.grey.withOpacity(0.3), // Slight shadow
+              spreadRadius: 1,
+              blurRadius: 4,
+              offset: const Offset(0, 2), // Soft shadow
             ),
           ],
         ),
@@ -178,8 +182,8 @@ class _TaskItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
           ),
           color: const Color(0xFFFDF1E0),
-          elevation: 4,
-          margin: const EdgeInsets.symmetric(vertical: 8),
+          elevation: 2, // Slight elevation for shadow effect
+          margin: const EdgeInsets.symmetric(vertical: 6), // Slightly reduced space
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
