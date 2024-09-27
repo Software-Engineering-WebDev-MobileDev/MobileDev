@@ -47,10 +47,8 @@ class LoginPageState extends State<LoginPage> {
     bool rememberMe = prefs.getBool('remember_me') ?? false;
     if (rememberMe) {
       String? savedUsername = prefs.getString('username');
-      String? savedPassword = prefs.getString('password');
-      if (savedUsername != null && savedPassword != null) {
+      if (savedUsername != null) {
         _usernameController.text = savedUsername;
-        _passwordController.text = savedPassword;
         setState(() {
           _rememberMe = rememberMe;
         });
@@ -63,11 +61,9 @@ class LoginPageState extends State<LoginPage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (_rememberMe) {
       await prefs.setString('username', username);
-      await prefs.setString('password', password);
       await prefs.setBool('remember_me', true);
     } else {
       await prefs.remove('username');
-      await prefs.remove('password');
       await prefs.setBool('remember_me', false);
     }
   }
