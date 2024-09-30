@@ -91,7 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 height: 80,
                 alignment: Alignment.center,
                 child: const Text(
-                  'The Rolling Scones',
+                  'A Simple Bakery',
                   style: TextStyle(
                     fontFamily: 'Pacifico',
                     fontSize: 28,
