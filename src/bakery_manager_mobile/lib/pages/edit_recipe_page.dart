@@ -1,3 +1,4 @@
+import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:flutter/material.dart';
 import '../models/recipe.dart';
 // import '../services/api_service.dart';  // Commented out for now
@@ -225,7 +226,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
                   ),
                 ),
                 onPressed: () {
-                  // Handle update logic here
+                  Navigator.pushNamed(context, recipeDetailsPageRoute, arguments: recipe);
                 },
                 child: const Text('Update Recipe'),
               ),
