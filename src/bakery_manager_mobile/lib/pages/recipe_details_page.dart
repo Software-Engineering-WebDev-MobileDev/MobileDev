@@ -1,6 +1,8 @@
 import 'package:bakery_manager_mobile/models/recipe.dart';
 import 'package:flutter/material.dart';
+import '../models/recipe.dart';
 import '../services/api_service.dart';
+import '../assets/constants.dart';
 
 class RecipeDetailPage extends StatefulWidget {
   const RecipeDetailPage({super.key});
@@ -95,7 +97,36 @@ class RecipeDetailPageState extends State<RecipeDetailPage> {
               ),
               Text(
                 recipe.instructions.isNotEmpty ? recipe.instructions : 'No instructions provided.',
-                style: const TextStyle(fontSize: 16)
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 24),
+              
+              // Edit Recipe Button
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pushNamed(
+                    context, 
+                    editRecipePageRoute,
+                    arguments: recipe, // Pass the recipe object to the EditRecipePage
+                  );
+                },
+                icon: const Icon(
+                  Icons.edit,
+                  color: Color.fromARGB(255, 246,235,216),
+                ),
+                label: const Text(
+                  'Edit recipe',
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 246,235,216),
+                  ),
+                ),
               ),
             ],
           ),
