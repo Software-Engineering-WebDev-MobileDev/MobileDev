@@ -13,13 +13,16 @@ class AllRecipesPage extends StatefulWidget {
 
 class AllRecipesPageState extends State<AllRecipesPage> {
   late Future<List<Recipe>> _futureRecipes;
+  List<Recipe> _allRecipes = [];
   List<Recipe> _filteredRecipes = [];
+  String _currentCategoryFilter = 'All'; // Track current category filter
 
   // Page Initialization Function
   @override
   void initState() {
     super.initState();
-    _fetchRecipes(); // Lists all recipes
+    //    _fetchRecipes(); // Lists all recipes
+    _futureRecipes = _fetchRecipes(); // Fetch recipes initially
 
     // Adds the observer to the navigator
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -34,29 +37,115 @@ class AllRecipesPageState extends State<AllRecipesPage> {
     });
   }
 
-  // Fetch recipes function
-  void _fetchRecipes() {
-    _futureRecipes = ApiService.getRecipes().then((response) {
-      if (response['status'] == 'success') {
-        List<Recipe> recipes = response['recipes'];
+    // // Fetch recipes function
+  // void _fetchRecipes() {
+  //   _futureRecipes = ApiService.getRecipes().then((response) {
+  //     if (response['status'] == 'success') {
+  //       List<Recipe> recipes = response['recipes'];
+  //       setState(() {
+  //         _filteredRecipes = recipes;
+  //       });
+  //       return recipes;
+  //     } else {
+  //       throw Exception(
+  //           'Failed to fetch recipes: ${response['message'] ?? 'Unknown error'}');
+  //     }
+  //   }).catchError((error) {
+  //     return <Recipe>[]; // Return an empty list on error
+  //   });
+  // }
+  
+  // Simulate an asynchronous operation to fetch recipes
+  Future<List<Recipe>> _fetchRecipes() async {
+    return await Future.delayed(const Duration(seconds: 1), () {
+      List<Recipe> recipes = [
+        Recipe(
+          recipeId: '1',
+          recipeName: 'Banana Bread',
+          recipeCategory: 'Bread',
+          instructions: 'Mix bananas, flour, sugar, and bake for 60 minutes.',
+          scalingFactor: 1,
+        ),
+        Recipe(
+          recipeId: '2',
+          recipeName: 'Blueberry Muffins',
+          recipeCategory: 'Muffins',
+          instructions: 'Fold blueberries into the batter and bake for 25 minutes.',
+          scalingFactor: 1,
+        ),
+        Recipe(
+          recipeId: '3',
+          recipeName: 'Chocolate Chip Cookies',
+          recipeCategory: 'Cookies',
+          instructions: 'Mix cookie dough with chocolate chips and bake for 15 minutes.',
+          scalingFactor: 1,
+        ),
+        Recipe(
+          recipeId: '4',
+          recipeName: 'Cinnamon Rolls',
+          recipeCategory: 'Pastry',
+          instructions: 'Roll dough with cinnamon filling, bake, and top with icing.',
+          scalingFactor: 1,
+        ),
+        Recipe(
+          recipeId: '5',
+          recipeName: 'Lemon Drizzle Cake',
+          recipeCategory: 'Cake',
+          instructions: 'Bake lemon-flavored cake and drizzle with lemon syrup.',
+          scalingFactor: 1,
+        ),
+        Recipe(
+          recipeId: '6',
+          recipeName: 'Apple Pie',
+          recipeCategory: 'Pie',
+          instructions: 'Fill pie crust with apples and bake for 50 minutes.',
+          scalingFactor: 1,
+        ),
+        Recipe(
+          recipeId: '7',
+          recipeName: 'Sourdough Bread',
+          recipeCategory: 'Bread',
+          instructions: 'Mix sourdough starter, flour, and water, then bake.',
+          scalingFactor: 1,
+        ),
+        Recipe(
+          recipeId: '8',
+          recipeName: 'Pumpkin Spice Cupcakes',
+          recipeCategory: 'Cupcakes',
+          instructions: 'Mix pumpkin spice batter and bake for 20 minutes.',
+          scalingFactor: 1,
+        ),
+        Recipe(
+          recipeId: '9',
+          recipeName: 'Brownies',
+          recipeCategory: 'Dessert',
+          instructions: 'Mix chocolate batter and bake for 30 minutes.',
+          scalingFactor: 1,
+        ),
+        Recipe(
+          recipeId: '10',
+          recipeName: 'Croissants',
+          recipeCategory: 'Pastry',
+          instructions: 'Layer butter and dough, roll, and bake for 20 minutes.',
+          scalingFactor: 1,
+        ),
+      ];
+      // Before calling setState, ensure the widget is still mounted
+      if (mounted) {
         setState(() {
-          _filteredRecipes = recipes;
+          _allRecipes = recipes; // Save all fetched recipes
+          _filteredRecipes = recipes; // Initially show all recipes
         });
-        return recipes;
-      } else {
-        throw Exception(
-            'Failed to fetch recipes: ${response['message'] ?? 'Unknown error'}');
       }
-    }).catchError((error) {
-      return <Recipe>[]; // Return an empty list on error
+      return recipes;
     });
   }
 
-  // Filter recipes function
+  // Filter recipes function by search query
   void _filterRecipes(String query) {
     setState(() {
       if (query.isEmpty) {
-        _fetchRecipes();
+        _filterByCategory(_currentCategoryFilter, _allRecipes); // Restore category filter
       } else {
         _filteredRecipes = _filteredRecipes
             .where((recipe) =>
@@ -64,6 +153,37 @@ class AllRecipesPageState extends State<AllRecipesPage> {
             .toList();
       }
     });
+  }
+
+  // Filter by category function
+  void _filterByCategory(String category, List<Recipe> recipes) {
+    setState(() {
+      _currentCategoryFilter = category;
+      if (category == 'All') {
+        _filteredRecipes = recipes;
+      } else {
+        _filteredRecipes = recipes
+            .where((recipe) => recipe.recipeCategory == category)
+            .toList();
+      }
+    });
+  }
+
+  // Build category filter button
+  Widget _buildCategoryFilterButton(String category, List<Recipe> recipes) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor:
+            _currentCategoryFilter == category ? Colors.orange : Colors.grey,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+      onPressed: () {
+        _filterByCategory(category, recipes);
+      },
+      child: Text(category),
+    );
   }
 
   // Page Content Build Function
@@ -122,6 +242,33 @@ class AllRecipesPageState extends State<AllRecipesPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            // Horizontal category filter bar
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildCategoryFilterButton('All', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Bread', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Muffins', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Cookies', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Pastry', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Cake', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Pie', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Cupcakes', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Dessert', _allRecipes),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
             // Search Bar
             TextField(
               onChanged: _filterRecipes, // Search feature
@@ -157,7 +304,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
                       itemCount: _filteredRecipes.length,
                       itemBuilder: (context, index) {
                         return _RecipeItem(
-                            recipe: _filteredRecipes[index],);
+                            recipe: _filteredRecipes[index]);
                       },
                     );
                   }
@@ -202,7 +349,7 @@ class _RecipeItem extends StatelessWidget {
   final Recipe recipe;
   const _RecipeItem({required this.recipe});
 
- @override
+  @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
