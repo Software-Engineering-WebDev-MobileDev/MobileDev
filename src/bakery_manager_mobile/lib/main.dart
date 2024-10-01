@@ -4,35 +4,57 @@ import 'package:provider/provider.dart';
 import 'pages/routes.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'services/navigator_observer.dart';
+import 'services/session_manager.dart';  // Import your SessionManager class
 
-/* 
-  * Runs the app 
-  * Currently only works in Debug mode
-*/
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final SessionManager _sessionManager = SessionManager();
+
+  @override
+  void initState() {
+    super.initState();
+    _sessionManager.onIdleTimeout = () =>_handleIdleTimeout(context);
+  }
+
+  void _handleIdleTimeout(BuildContext context) {
+    // Handle session timeout due to inactivity (e.g., navigate to login)
+    navigatorKey.currentState?.pushReplacementNamed(loginPageRoute);
+  }
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
-      child: MaterialApp(
-        title: 'The Rolling Scone',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color.fromARGB(0, 255, 187, 0)),
+      child: GestureDetector(
+        onTap: () =>_sessionManager.resetIdleTimer,  // Reset idle timer on tap
+        onPanDown: (details) => _sessionManager.resetIdleTimer(),  // Reset idle timer on drag
+        child: MaterialApp(
+          title: 'Bakery Manager Mobile',
+          debugShowCheckedModeBanner: false,
+          navigatorKey: navigatorKey,
+          theme: ThemeData(
+            useMaterial3: true,
+            colorScheme: ColorScheme.fromSeed(
+                seedColor: const Color.fromARGB(0, 255, 187, 0)),
+          ),
+          initialRoute: loginPageRoute,
+          routes: appRoutes,
+          navigatorObservers: [MyNavigatorObserver()],
         ),
-        initialRoute: loginPageRoute,
-        routes: appRoutes,
-        navigatorObservers: [MyNavigatorObserver()],
       ),
     );
   }
