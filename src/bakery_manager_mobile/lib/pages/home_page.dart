@@ -1,3 +1,5 @@
+import 'package:bakery_manager_mobile/services/api_service.dart';
+import 'package:bakery_manager_mobile/services/session_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bakery_manager_mobile/assets/constants.dart';
@@ -33,8 +35,14 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void _logout() {
-    Navigator.pushReplacementNamed(context, loginPageRoute);
+  void _logout() async{
+    if (await ApiService.logout()){
+      if (!mounted){
+        return;
+      }  
+      SessionManager().clearSession();
+      Navigator.pushReplacementNamed(context, loginPageRoute);
+    }
   }
 
   @override
