@@ -226,7 +226,8 @@ class _EditRecipePageState extends State<EditRecipePage> {
                   ),
                 ),
                 onPressed: () {
-                  Navigator.pushNamed(context, recipeDetailsPageRoute, arguments: recipe);
+                  Navigator.pushReplacementNamed(context, recipeDetailsPageRoute, arguments: recipe);
+                  Navigator.pop(context);
                 },
                 child: const Text('Update Recipe'),
               ),
