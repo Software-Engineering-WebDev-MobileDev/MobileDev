@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/recipe.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'session_manager.dart';
 
 // API Service Class
 class ApiService {
-  static final baseApiUrl = dotenv.env['BASE_URL'];
+  static final baseApiUrl = dotenv.env['BASE_URL']; 
 
   // Get Recipes Function
   static Future<Map<String, dynamic>> getRecipes() async {
@@ -198,7 +199,7 @@ class ApiService {
 
   // Login Function
   static Future<Map<String, dynamic>> login(
-      String username, String password) async {
+    String username, String password) async {
     final url = Uri.parse('$baseApiUrl/login');
     final headers = <String, String>{
       'username': username,
@@ -211,9 +212,11 @@ class ApiService {
       if (response.statusCode == 201) {
         // Successfully logged in
         final responseBody = jsonDecode(response.body);
+        final sessionManager = SessionManager();
+        sessionManager.saveSession(responseBody['session_id']);
+        //sessionManager.resetIdleTimer();
         return {
           'status': 'success',
-          'session_id': responseBody['session_id'],
         };
       }
       // Failed response
@@ -240,5 +243,47 @@ class ApiService {
         'reason': 'Network error: $e',
       };
     }
+  }
+
+  static Future<bool> sessionValidate(sessionID) async {
+    final url = Uri.parse('$baseApiUrl/token_bump');
+    final headers = <String, String>{
+      'session_id': sessionID,
+    };
+    try {
+      final response = await http.post(url, headers: headers);
+      if (response.statusCode == 200) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    catch(e){
+      return false;
+    }
+  }
+
+  static Future<bool> logout() async {
+    final url = Uri.parse('$baseApiUrl/logout');
+    final sessionManager = SessionManager();
+    final sessionID = await sessionManager.getSessionToken();
+    try {
+      final headers = <String, String>{
+        'session_id': sessionID!,
+      };
+    
+      final response = await http.post(url, headers: headers);
+      if (response.statusCode == 200) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    catch(e){
+      return false;
+    }
+
   }
 }

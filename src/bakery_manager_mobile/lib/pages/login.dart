@@ -1,3 +1,4 @@
+import 'package:bakery_manager_mobile/services/session_manager.dart';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 import '../assets/constants.dart';
@@ -18,11 +19,20 @@ class LoginPageState extends State<LoginPage> {
   bool _isButtonDisabled = true;
 
   @override
-  void initState() {
+  void initState(){
     super.initState();
     _usernameController.addListener(_updateButton);
     _passwordController.addListener(_updateButton);
     _savedCredentials();
+    _checkSession();
+  }
+
+  void _checkSession() async{
+    if (await SessionManager().isSessionValid()) {
+      if (mounted){
+        Navigator.pushReplacementNamed(context, homePageRoute);
+      }
+    }
   }
 
   void _updateButton() {
@@ -37,10 +47,8 @@ class LoginPageState extends State<LoginPage> {
     bool rememberMe = prefs.getBool('remember_me') ?? false;
     if (rememberMe) {
       String? savedUsername = prefs.getString('username');
-      String? savedPassword = prefs.getString('password');
-      if (savedUsername != null && savedPassword != null) {
+      if (savedUsername != null) {
         _usernameController.text = savedUsername;
-        _passwordController.text = savedPassword;
         setState(() {
           _rememberMe = rememberMe;
         });
@@ -53,11 +61,9 @@ class LoginPageState extends State<LoginPage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (_rememberMe) {
       await prefs.setString('username', username);
-      await prefs.setString('password', password);
       await prefs.setBool('remember_me', true);
     } else {
       await prefs.remove('username');
-      await prefs.remove('password');
       await prefs.setBool('remember_me', false);
     }
   }
