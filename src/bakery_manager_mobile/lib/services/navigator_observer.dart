@@ -1,3 +1,4 @@
+import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:bakery_manager_mobile/services/session_manager.dart';
 import 'package:flutter/material.dart';
 
@@ -26,7 +27,7 @@ class MyNavigatorObserver extends NavigatorObserver {
   Future<void> _checkSession(Route<dynamic> route) async {
     bool isValid = await _sessionManager.isSessionValid();
 
-    if (!isValid) {
+    if (!isValid && route.settings.name != registrationPageRoute) {
       // If the session is not valid, clear session and redirect to login
       await _sessionManager.clearSession();
       WidgetsBinding.instance.addPostFrameCallback((_) {
