@@ -45,13 +45,22 @@ class ApiService {
   static Future<Map<String, dynamic>> addRecipe(
       {String recipeName = "",
       String ingredients = "",
-      int scalingFactor = 1}) async {
+      int servings = 1,
+      String description = "",
+      String category = "",
+      double prepTime = 0,
+      double cookTime = 0
+      }) async {
     final url = Uri.parse('$baseApiUrl/add_recipe');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({
       "RecipeName": recipeName,
       "Instructions" : ingredients,
-      "Servings": scalingFactor.toString(),
+      "Servings": servings.toString(),
+      "Category": category,
+      "PrepTime": prepTime,
+      "CookTime": cookTime,
+      "Description": description
     });
 
     try {
