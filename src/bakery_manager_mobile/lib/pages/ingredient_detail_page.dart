@@ -28,35 +28,101 @@ class IngredientDetailPage extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: Center( // Ensure everything is centered on the page
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center, // Center items horizontally
             children: [
+              // Display Ingredient name, quantity, and shelf life centered
               Text(
-                'Ingredient: ${ingredient.name}',
+                ingredient.name,
                 style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center, // Center text
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Details:',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
               Text(
                 '• Quantity: ${ingredient.quantity} ${ingredient.quantityUnit}',
                 style: const TextStyle(fontSize: 16),
+                textAlign: TextAlign.center, // Center text
               ),
               const SizedBox(height: 8),
               Text(
                 '• Shelf Life: ${ingredient.shelfLife} ${ingredient.shelfLifeUnit}',
                 style: const TextStyle(fontSize: 16),
+                textAlign: TextAlign.center, // Center text
               ),
-              const SizedBox(height: 8),
-              Text(
-                '• Ingredient ID: ${ingredient.ingredientID}',
-                style: const TextStyle(fontSize: 16),
+              const SizedBox(height: 32), // Add space before the buttons
+
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 40),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () {
+                  // TODO: Implement View Records functionality
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('View Records functionality not implemented yet')),
+                  );
+                },
+                child: const Text('View Records', style: TextStyle(fontSize: 20)),
+              ),
+              const SizedBox(height: 32), // Add space between buttons
+
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange, // Make the button orange
+                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 40),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () {
+                  // TODO: Implement Edit Stock Levels functionality
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Edit Stock Levels functionality not implemented yet')),
+                  );
+                },
+                child: const Text('Edit Stock Levels', style: TextStyle(fontSize: 20)),
+              ),
+              const SizedBox(height: 32),
+
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange, // Make the button orange
+                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 40),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () {
+                  // TODO: Implement Edit Ingredient functionality
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Edit Ingredient functionality not implemented yet')),
+                  );
+                },
+                child: const Text('Edit Ingredient Details', style: TextStyle(fontSize: 20)),
+              ),
+              const SizedBox(height: 32),
+
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange, // Make the button orange
+                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 40),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () {
+                  // TODO: Implement Delete Ingredient functionality
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Delete Ingredient functionality not implemented yet')),
+                  );
+                },
+                child: const Text('Delete Ingredient', style: TextStyle(fontSize: 20)),
               ),
             ],
           ),
