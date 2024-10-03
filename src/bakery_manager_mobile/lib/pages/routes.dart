@@ -13,6 +13,7 @@ import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:bakery_manager_mobile/pages/add_recipe_page.dart';
 import 'package:bakery_manager_mobile/pages/recipe_details_page.dart';
 import 'package:bakery_manager_mobile/pages/ingredient_detail_page.dart';
+import 'package:bakery_manager_mobile/pages/edit_account.dart';
 
 
 Map<String, WidgetBuilder> appRoutes = {
@@ -29,4 +30,5 @@ Map<String, WidgetBuilder> appRoutes = {
   recipeDetailsPageRoute: (context) => const RecipeDetailPage(),
   myAccountRoute: (context) => const MyAccountPage(),
   ingredientDetailsPageRoute: (context) => const IngredientDetailPage(),
+  editAccountPageRoute: (context) => const EditAccountPage(),
 };

@@ -11,3 +11,4 @@ const String addRecipePageRoute = '/recipes/addRecipe';
 const String recipeDetailsPageRoute = '/recipes/details';
 const String myAccountRoute = '/myaccount';
 const String ingredientDetailsPageRoute = "/ingredients/details";
+const String editAccountPageRoute = "/myaccount/edit";

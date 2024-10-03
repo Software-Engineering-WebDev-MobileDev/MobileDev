@@ -1,4 +1,6 @@
+import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:flutter/material.dart';
+import '../pages/edit_account.dart';
 // import '../services/api_service.dart'; // This is the API service placeholder
 
 class MyAccountPage extends StatefulWidget {
@@ -90,73 +92,95 @@ class MyAccountPageState extends State<MyAccountPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 16),
-                    Text(
-                      'First Name: ${account['FirstName']}',
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Last Name: ${account['LastName']}',
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    // Employee ID with eye toggle
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Employee ID: ${_obscureEmployeeID ? '••••••••' : account['EmployeeID']}',
-                            style: const TextStyle(fontSize: 18),
-                          ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            _obscureEmployeeID ? Icons.visibility_off : Icons.visibility,
-                            color: Colors.grey,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscureEmployeeID = !_obscureEmployeeID;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
 
-                    Text(
-                      'Username: ${account['Username']}',
-                      style: const TextStyle(fontSize: 18),
+                    // First Name
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        'First Name: ${account['FirstName']}',
+                        style: const TextStyle(fontSize: 18),
+                      ),
                     ),
-                    Text(
-                      'Role: ${account['RoleID']}',
-                      style: const TextStyle(fontSize: 18),
+
+                    // Last Name
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        'Last Name: ${account['LastName']}',
+                        style: const TextStyle(fontSize: 18),
+                      ),
                     ),
-                    const SizedBox(height: 16),
-                    
+
+                    // Employee ID with eye toggle
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Employee ID: ${_obscureEmployeeID ? '••••••••' : account['EmployeeID']}',
+                              style: const TextStyle(fontSize: 18),
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(
+                              _obscureEmployeeID ? Icons.visibility_off : Icons.visibility,
+                              color: Colors.grey,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscureEmployeeID = !_obscureEmployeeID;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+
+                                        // Role
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        'Role: ${account['RoleID']}',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ),
+
+                    // Username
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
+                        'Username: ${account['Username']}',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ),
+
                     // Password with eye toggle
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            'Password: ${_obscurePassword ? '••••••••' : account['Password']}',
-                            style: const TextStyle(fontSize: 18),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Password: ${_obscurePassword ? '••••••••' : account['Password']}',
+                              style: const TextStyle(fontSize: 18),
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                            color: Colors.grey,
+                          IconButton(
+                            icon: Icon(
+                              _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                              color: Colors.grey,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _obscurePassword = !_obscurePassword;
+                              });
+                            },
                           ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
+                    
                     const SizedBox(height: 16),
 
                     // Emails Section
@@ -197,14 +221,23 @@ class MyAccountPageState extends State<MyAccountPage> {
                     ),
                     const SizedBox(height: 32),
 
-                    // Edit Account Button (Does nothing for now)
                     Center(
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        child: const Text('Edit Account'),
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pushNamed(context, editAccountPageRoute);
+                        },
+                        icon: const Icon(Icons.edit),
+                        label: const Text('Edit Account'),
                       ),
                     ),
-                    const SizedBox(height: 16),
+
 
                     // Log Out Button
                     Center(

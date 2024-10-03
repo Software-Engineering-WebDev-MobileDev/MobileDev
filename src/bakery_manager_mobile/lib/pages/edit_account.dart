@@ -1,0 +1,358 @@
+import 'package:flutter/material.dart';
+
+class EditAccountPage extends StatefulWidget {
+  const EditAccountPage({super.key});
+
+  @override
+  State<EditAccountPage> createState() => _EditAccountPageState();
+}
+
+class _EditAccountPageState extends State<EditAccountPage> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController employeeIDController;
+  late TextEditingController firstNameController;
+  late TextEditingController lastNameController;
+  late TextEditingController usernameController;
+  late TextEditingController passwordController;
+
+  bool _obscurePassword = true;
+  List<TextEditingController> _emailControllers = [];
+  List<TextEditingController> _phoneControllers = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize controllers with mock data (replace with API data in the future)
+    employeeIDController = TextEditingController(text: '12345-ABCDE');
+    firstNameController = TextEditingController(text: 'John');
+    lastNameController = TextEditingController(text: 'Doe');
+    usernameController = TextEditingController(text: 'johndoe');
+    passwordController = TextEditingController(text: 'password123');
+
+    // Mock email and phone data (replace with API data in the future)
+    _emailControllers = [
+      TextEditingController(text: 'johndoe@example.com'),
+      TextEditingController(text: 'john.doe@work.com')
+    ];
+    _phoneControllers = [
+      TextEditingController(text: '+1234567890'),
+      TextEditingController(text: '+0987654321')
+    ];
+  }
+
+  Future<void> _saveAccountChanges() async {
+    if (_formKey.currentState!.validate()) {
+      // Get user input from the text controllers
+      String firstName = firstNameController.text;
+      String lastName = lastNameController.text;
+      String employeeID = employeeIDController.text;
+      String username = usernameController.text;
+      String password = passwordController.text;
+
+      // Mock API call (Replace with actual API call to update account details)
+      Map<String, dynamic> response = await Future.delayed(const Duration(seconds: 2), () {
+        return {'status': 'success'};
+      });
+
+      bool accountUpdated = response['status'] == 'success';
+
+      if (accountUpdated) {
+        // Ensure the widget is still mounted before using BuildContext
+        if (!mounted) return;
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Account updated successfully!')),
+        );
+        Navigator.pop(context); // Go back after success
+      } else {
+        // Ensure the widget is still mounted before using BuildContext
+        if (!mounted) return;
+
+        // Show error message if account update failed
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Account update failed: ${response['reason']}')),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    // Dispose all controllers
+    employeeIDController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
+    usernameController.dispose();
+    passwordController.dispose();
+    _emailControllers.forEach((controller) => controller.dispose());
+    _phoneControllers.forEach((controller) => controller.dispose());
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Edit Account', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.orange,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 16),
+
+                // EmployeeID Field
+                TextFormField(
+                  controller: employeeIDController,
+                  decoration: const InputDecoration(
+                    labelText: 'Employee ID',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Employee ID is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // FirstName Field
+                TextFormField(
+                  controller: firstNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'First Name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'First Name is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // LastName Field
+                TextFormField(
+                  controller: lastNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Last Name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Last Name is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Username Field
+                TextFormField(
+                  controller: usernameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Username',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Username is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // Password Field with Eye Toggle
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: const InputDecoration(
+                          labelText: 'Password',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Password is required';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Emails Section
+                const Text(
+                  'Emails:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Column(
+                  children: _emailControllers.asMap().entries.map((entry) {
+                    int idx = entry.key;
+                    var controller = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: controller,
+                              decoration: InputDecoration(
+                                hintText: 'Email ${idx + 1}',
+                                border: const OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Email is required';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          if (idx != 0) // Show delete button for additional emails
+                            IconButton(
+                              icon: const Icon(Icons.remove_circle, color: Colors.red),
+                              onPressed: () {
+                                setState(() {
+                                  _emailControllers.removeAt(idx);
+                                });
+                              },
+                            ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _emailControllers.add(TextEditingController());
+                    });
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Email'),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                ),
+                const SizedBox(height: 16),
+
+                // Phone Numbers Section
+                const Text(
+                  'Phone Numbers:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Column(
+                  children: _phoneControllers.asMap().entries.map((entry) {
+                    int idx = entry.key;
+                    var controller = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: controller,
+                              decoration: InputDecoration(
+                                hintText: 'Phone ${idx + 1}',
+                                border: const OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Phone number is required';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          if (idx != 0) // Show delete button for additional phones
+                            IconButton(
+                              icon: const Icon(Icons.remove_circle, color: Colors.red),
+                              onPressed: () {
+                                setState(() {
+                                  _phoneControllers.removeAt(idx);
+                                });
+                              },
+                            ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _phoneControllers.add(TextEditingController());
+                    });
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Phone'),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                ),
+                const SizedBox(height: 32),
+
+                // Update Account Button
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: _saveAccountChanges, // Call the save function
+                  child: const Text('Update Account'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
