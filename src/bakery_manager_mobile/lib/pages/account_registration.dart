@@ -9,25 +9,48 @@ class CreateAccountPage extends StatefulWidget {
   CreateAccountPageState createState() => CreateAccountPageState();
 }
 
-// Create account page state
 class CreateAccountPageState extends State<CreateAccountPage> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _employeeIDController = TextEditingController();
+  late TextEditingController employeeIDController;
+  late TextEditingController firstNameController;
+  late TextEditingController lastNameController;
+  late TextEditingController usernameController;
+  late TextEditingController passwordController;
+  bool _obscurePassword = true;
 
-// Create account function calls the API to create an account
+  List<Map<String, dynamic>> _emails = [];
+  List<Map<String, dynamic>> _phones = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize controllers for new account creation
+    employeeIDController = TextEditingController();
+    firstNameController = TextEditingController();
+    lastNameController = TextEditingController();
+    usernameController = TextEditingController();
+    passwordController = TextEditingController();
+
+    // Initialize email and phone entries with default values
+    _emails = [
+      {'controller': TextEditingController(), 'type': 'Work', 'primary': true},
+    ];
+    _phones = [
+      {'controller': TextEditingController(), 'type': 'Mobile', 'primary': true},
+    ];
+  }
+
   Future<void> _createAccount() async {
     if (_formKey.currentState!.validate()) {
       // Get user input from the text controllers
-      String firstName = _firstNameController.text;
-      String lastName = _lastNameController.text;
-      String employeeID = _employeeIDController.text;
-      String username = _usernameController.text;
-      String password = _passwordController.text;
+      String firstName = firstNameController.text;
+      String lastName = lastNameController.text;
+      String employeeID = employeeIDController.text;
+      String username = usernameController.text;
+      String password = passwordController.text;
 
+      // Example mock API call (replace with the actual API)
       Map<String, dynamic> response = await ApiService.createAccount(
         firstName,
         lastName,
@@ -39,38 +62,49 @@ class CreateAccountPageState extends State<CreateAccountPage> {
       bool accountCreated = response['status'] == 'success';
 
       if (accountCreated) {
-        // Save credentials to SharedPreferences storing the username and password on device
+        // Save credentials to SharedPreferences
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('username', username);
         await prefs.setString('password', password);
 
-        // Ensure the widget is still mounted before using BuildContext
         if (!mounted) return;
-
-        // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Account created successfully!')),
         );
-        Navigator.pop(context);
+        Navigator.pop(context); // Go back after success
       } else {
-        // Ensure the widget is still mounted before using BuildContext
         if (!mounted) return;
-
-        // Show error message if account creation failed
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Account creation failed: ${response['reason']}')),
+          SnackBar(content: Text('Account creation failed: ${response['reason']}')),
         );
       }
     }
   }
 
-  // Page Content Build Function
+  @override
+  void dispose() {
+    employeeIDController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
+    usernameController.dispose();
+    passwordController.dispose();
+    _emails.forEach((email) => email['controller'].dispose());
+    _phones.forEach((phone) => phone['controller'].dispose());
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Account'),
+        title: const Text('Create Account', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.orange,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -80,9 +114,17 @@ class CreateAccountPageState extends State<CreateAccountPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                const SizedBox(height: 16),
+
+                // EmployeeID Field
                 TextFormField(
-                  controller: _employeeIDController,
-                  decoration: const InputDecoration(labelText: 'Employee ID'),
+                  controller: employeeIDController,
+                  decoration: const InputDecoration(
+                    labelText: 'Employee ID',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Employee ID is required';
@@ -91,9 +133,16 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                   },
                 ),
                 const SizedBox(height: 16),
+
+                // FirstName Field
                 TextFormField(
-                  controller: _firstNameController,
-                  decoration: const InputDecoration(labelText: 'First Name'),
+                  controller: firstNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'First Name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'First Name is required';
@@ -102,9 +151,16 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                   },
                 ),
                 const SizedBox(height: 16),
+
+                // LastName Field
                 TextFormField(
-                  controller: _lastNameController,
-                  decoration: const InputDecoration(labelText: 'Last Name'),
+                  controller: lastNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Last Name',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Last Name is required';
@@ -113,9 +169,16 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                   },
                 ),
                 const SizedBox(height: 16),
+
+                // Username Field
                 TextFormField(
-                  controller: _usernameController,
-                  decoration: const InputDecoration(labelText: 'Username'),
+                  controller: usernameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Username',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Username is required';
@@ -124,20 +187,211 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                   },
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: const InputDecoration(labelText: 'Password'),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Password is required';
-                    }
-                    return null;
-                  },
+
+                // Password Field with Eye Toggle
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: const InputDecoration(
+                          labelText: 'Password',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Password is required';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
+
+                const Text(
+                  'Emails:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+
+                // Email Section
+                Column(
+                  children: _emails.asMap().entries.map((entry) {
+                    int idx = entry.key;
+                    var email = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: email['controller'],
+                              decoration: InputDecoration(
+                                hintText: 'Email ${idx + 1}',
+                                border: const OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Email is required';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          DropdownButton<String>(
+                            value: email['type'],
+                            onChanged: (newValue) {
+                              setState(() {
+                                email['type'] = newValue!;
+                              });
+                            },
+                            items: ['Work', 'Home', 'Other'].map((type) {
+                              return DropdownMenuItem(
+                                value: type,
+                                child: Text(type),
+                              );
+                            }).toList(),
+                          ),
+                          Radio<bool>(
+                            value: true,
+                            groupValue: email['primary'],
+                            onChanged: (value) {
+                              setState(() {
+                                for (var em in _emails) {
+                                  em['primary'] = false;
+                                }
+                                email['primary'] = true;
+                              });
+                            },
+                          ),
+                          const Text('Primary'),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _emails.add({
+                        'controller': TextEditingController(),
+                        'type': 'Work',
+                        'primary': false
+                      });
+                    });
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Email'),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                ),
+                const SizedBox(height: 16),
+
+                // Phone Numbers Section with types and primary toggle
+                const Text(
+                  'Phone Numbers:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Column(
+                  children: _phones.asMap().entries.map((entry) {
+                    int idx = entry.key;
+                    var phone = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: phone['controller'],
+                              decoration: InputDecoration(
+                                hintText: 'Phone ${idx + 1}',
+                                border: const OutlineInputBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Phone number is required';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          DropdownButton<String>(
+                            value: phone['type'],
+                            onChanged: (newValue) {
+                              setState(() {
+                                phone['type'] = newValue!;
+                              });
+                            },
+                            items: ['Mobile', 'Home', 'Work'].map((type) {
+                              return DropdownMenuItem(
+                                value: type,
+                                child: Text(type),
+                              );
+                            }).toList(),
+                          ),
+                          Radio<bool>(
+                            value: true,
+                            groupValue: phone['primary'],
+                            onChanged: (value) {
+                              setState(() {
+                                for (var ph in _phones) {
+                                  ph['primary'] = false;
+                                }
+                                phone['primary'] = true;
+                              });
+                            },
+                          ),
+                          const Text('Primary'),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      _phones.add({
+                        'controller': TextEditingController(),
+                        'type': 'Mobile',
+                        'primary': false
+                      });
+                    });
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add Phone'),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                ),
+                const SizedBox(height: 32),
+
+                // Create Account Button
                 ElevatedButton(
-                  onPressed: _createAccount,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: _createAccount, // Call the create account function
                   child: const Text('Create Account'),
                 ),
               ],
@@ -146,15 +400,5 @@ class CreateAccountPageState extends State<CreateAccountPage> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    _passwordController.dispose();
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _employeeIDController.dispose();
-    super.dispose();
   }
 }
