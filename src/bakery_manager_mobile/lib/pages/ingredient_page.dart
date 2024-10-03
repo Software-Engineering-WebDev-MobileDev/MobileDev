@@ -1,5 +1,7 @@
 import 'dart:async';  // Import to use Future and Timer
 import 'package:bakery_manager_mobile/assets/constants.dart';
+import 'package:bakery_manager_mobile/services/api_service.dart';
+import 'package:bakery_manager_mobile/services/session_manager.dart';
 import 'package:flutter/material.dart';
 import '../models/ingredient.dart';
 
@@ -11,26 +13,29 @@ class IngredientPage extends StatefulWidget {
 }
 
 class IngredientPageState extends State<IngredientPage> {
-  // Simulate an asynchronous operation that fetches ingredients to mock api return.
-  Future<List<Ingredient>> _fetchIngredients() async {
-    // Simulate network delay
-    return await Future.delayed(const Duration(seconds: 1), () {
-      return [
-        Ingredient(ingredientID: "12345", name: 'Flour', quantity: 5.0, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
-        Ingredient(ingredientID: "12346", name: 'Sugar', quantity: 3.0, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
-        Ingredient(ingredientID: "12347", name: 'Eggs', quantity: 24, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
-        Ingredient(ingredientID: "12348", name: 'Milk', quantity: 2.5, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
-      ];
-    });
-  }
-
   late Future<List<Ingredient>> _futureIngredients;
   List<Ingredient> _filteredIngredients = [];
 
   @override
   void initState() {
     super.initState();
-    _futureIngredients = _fetchIngredients(); // Fetch ingredients initially
+    _futureIngredients = _fetchIngredients(); // Fetch ingredients from API initially
+  }
+
+  Future<List<Ingredient>> _fetchIngredients() async {
+    
+    String sessionId = await SessionManager().getSessionToken() ?? "";
+
+
+
+    // Call getInventory function
+    final result = await ApiService.getInventory(sessionId);
+
+    if (result['status'] == 'success') {
+      return result['inventory'];
+    } else {
+      throw Exception(result['reason']);
+    }
   }
 
   void _filterIngredients(String query, List<Ingredient> ingredients) {
@@ -59,7 +64,6 @@ class IngredientPageState extends State<IngredientPage> {
           children: [
             TextField(
               onChanged: (query) {
-                // Call _filterIngredients within the FutureBuilder context
                 _futureIngredients.then((ingredients) {
                   _filterIngredients(query, ingredients);
                 });
@@ -183,4 +187,3 @@ class _IngredientItem extends StatelessWidget {
     );
   }
 }
-
