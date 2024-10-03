@@ -27,8 +27,8 @@ class Recipe {
       description: json['Description'] ?? '',
       category: json['Category'],
       servings: json['Servings'] ?? 1,
-      cookTime: json['CookTime'] ?? 1,
-      prepTime: json['PrepTime'] ?? 1
+      cookTime: json['CookTime']?.toDouble() ?? 1.0,
+      prepTime: json['PrepTime']?.toDouble() ?? 1.0
     );
   }
 }
