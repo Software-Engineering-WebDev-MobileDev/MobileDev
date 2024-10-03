@@ -16,8 +16,8 @@ class _EditAccountPageState extends State<EditAccountPage> {
   late TextEditingController passwordController;
 
   bool _obscurePassword = true;
-  List<TextEditingController> _emailControllers = [];
-  List<TextEditingController> _phoneControllers = [];
+  List<Map<String, dynamic>> _emails = [];
+  List<Map<String, dynamic>> _phones = [];
 
   @override
   void initState() {
@@ -31,13 +31,13 @@ class _EditAccountPageState extends State<EditAccountPage> {
     passwordController = TextEditingController(text: 'password123');
 
     // Mock email and phone data (replace with API data in the future)
-    _emailControllers = [
-      TextEditingController(text: 'johndoe@example.com'),
-      TextEditingController(text: 'john.doe@work.com')
+    _emails = [
+      {'address': 'johndoe@example.com', 'type': 'Work', 'primary': true},
+      {'address': 'john.doe@home.com', 'type': 'Home', 'primary': false},
     ];
-    _phoneControllers = [
-      TextEditingController(text: '+1234567890'),
-      TextEditingController(text: '+0987654321')
+    _phones = [
+      {'number': '+1234567890', 'type': 'Mobile', 'primary': true},
+      {'number': '+0987654321', 'type': 'Home', 'primary': false},
     ];
   }
 
@@ -58,22 +58,15 @@ class _EditAccountPageState extends State<EditAccountPage> {
       bool accountUpdated = response['status'] == 'success';
 
       if (accountUpdated) {
-        // Ensure the widget is still mounted before using BuildContext
         if (!mounted) return;
-
-        // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Account updated successfully!')),
         );
         Navigator.pop(context); // Go back after success
       } else {
-        // Ensure the widget is still mounted before using BuildContext
         if (!mounted) return;
-
-        // Show error message if account update failed
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Account update failed: ${response['reason']}')),
+          SnackBar(content: Text('Account update failed: ${response['reason']}')),
         );
       }
     }
@@ -81,14 +74,11 @@ class _EditAccountPageState extends State<EditAccountPage> {
 
   @override
   void dispose() {
-    // Dispose all controllers
     employeeIDController.dispose();
     firstNameController.dispose();
     lastNameController.dispose();
     usernameController.dispose();
     passwordController.dispose();
-    _emailControllers.forEach((controller) => controller.dispose());
-    _phoneControllers.forEach((controller) => controller.dispose());
     super.dispose();
   }
 
@@ -222,23 +212,23 @@ class _EditAccountPageState extends State<EditAccountPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Emails Section
+                // Emails Section with types and primary toggle
                 const Text(
                   'Emails:',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Column(
-                  children: _emailControllers.asMap().entries.map((entry) {
+                  children: _emails.asMap().entries.map((entry) {
                     int idx = entry.key;
-                    var controller = entry.value;
+                    var email = entry.value;
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
                       child: Row(
                         children: [
                           Expanded(
                             child: TextFormField(
-                              controller: controller,
+                              controller: TextEditingController(text: email['address']),
                               decoration: InputDecoration(
                                 hintText: 'Email ${idx + 1}',
                                 border: const OutlineInputBorder(
@@ -253,15 +243,33 @@ class _EditAccountPageState extends State<EditAccountPage> {
                               },
                             ),
                           ),
-                          if (idx != 0) // Show delete button for additional emails
-                            IconButton(
-                              icon: const Icon(Icons.remove_circle, color: Colors.red),
-                              onPressed: () {
-                                setState(() {
-                                  _emailControllers.removeAt(idx);
-                                });
-                              },
-                            ),
+                          DropdownButton<String>(
+                            value: email['type'],
+                            onChanged: (newValue) {
+                              setState(() {
+                                email['type'] = newValue!;
+                              });
+                            },
+                            items: ['Work', 'Home', 'Other'].map((type) {
+                              return DropdownMenuItem(
+                                value: type,
+                                child: Text(type),
+                              );
+                            }).toList(),
+                          ),
+                          Radio<bool>(
+                            value: true,
+                            groupValue: email['primary'],
+                            onChanged: (value) {
+                              setState(() {
+                                for (var em in _emails) {
+                                  em['primary'] = false;
+                                }
+                                email['primary'] = true;
+                              });
+                            },
+                          ),
+                          const Text('Primary'),
                         ],
                       ),
                     );
@@ -270,7 +278,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                 ElevatedButton.icon(
                   onPressed: () {
                     setState(() {
-                      _emailControllers.add(TextEditingController());
+                      _emails.add({'address': '', 'type': 'Work', 'primary': false});
                     });
                   },
                   icon: const Icon(Icons.add),
@@ -279,23 +287,23 @@ class _EditAccountPageState extends State<EditAccountPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Phone Numbers Section
+                // Phone Numbers Section with types and primary toggle
                 const Text(
                   'Phone Numbers:',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Column(
-                  children: _phoneControllers.asMap().entries.map((entry) {
+                  children: _phones.asMap().entries.map((entry) {
                     int idx = entry.key;
-                    var controller = entry.value;
+                    var phone = entry.value;
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
                       child: Row(
                         children: [
                           Expanded(
                             child: TextFormField(
-                              controller: controller,
+                              controller: TextEditingController(text: phone['number']),
                               decoration: InputDecoration(
                                 hintText: 'Phone ${idx + 1}',
                                 border: const OutlineInputBorder(
@@ -310,15 +318,33 @@ class _EditAccountPageState extends State<EditAccountPage> {
                               },
                             ),
                           ),
-                          if (idx != 0) // Show delete button for additional phones
-                            IconButton(
-                              icon: const Icon(Icons.remove_circle, color: Colors.red),
-                              onPressed: () {
-                                setState(() {
-                                  _phoneControllers.removeAt(idx);
-                                });
-                              },
-                            ),
+                          DropdownButton<String>(
+                            value: phone['type'],
+                            onChanged: (newValue) {
+                              setState(() {
+                                phone['type'] = newValue!;
+                              });
+                            },
+                            items: ['Mobile', 'Home', 'Work'].map((type) {
+                              return DropdownMenuItem(
+                                value: type,
+                                child: Text(type),
+                              );
+                            }).toList(),
+                          ),
+                          Radio<bool>(
+                            value: true,
+                            groupValue: phone['primary'],
+                            onChanged: (value) {
+                              setState(() {
+                                for (var ph in _phones) {
+                                  ph['primary'] = false;
+                                }
+                                phone['primary'] = true;
+                              });
+                            },
+                          ),
+                          const Text('Primary'),
                         ],
                       ),
                     );
@@ -327,7 +353,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                 ElevatedButton.icon(
                   onPressed: () {
                     setState(() {
-                      _phoneControllers.add(TextEditingController());
+                      _phones.add({'number': '', 'type': 'Mobile', 'primary': false});
                     });
                   },
                   icon: const Icon(Icons.add),
