@@ -34,10 +34,10 @@ class CreateAccountPageState extends State<CreateAccountPage> {
 
     // Initialize email and phone entries with default values
     _emails = [
-      {'controller': TextEditingController(), 'type': 'Work', 'primary': true},
+      {'controller': TextEditingController(), 'type': 'Work'},
     ];
     _phones = [
-      {'controller': TextEditingController(), 'type': 'Mobile', 'primary': true},
+      {'controller': TextEditingController(), 'type': 'Mobile'},
     ];
   }
 
@@ -269,41 +269,14 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                               );
                             }).toList(),
                           ),
-                          Radio<bool>(
-                            value: true,
-                            groupValue: email['primary'],
-                            onChanged: (value) {
-                              setState(() {
-                                for (var em in _emails) {
-                                  em['primary'] = false;
-                                }
-                                email['primary'] = true;
-                              });
-                            },
-                          ),
-                          const Text('Primary'),
                         ],
                       ),
                     );
                   }).toList(),
                 ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _emails.add({
-                        'controller': TextEditingController(),
-                        'type': 'Work',
-                        'primary': false
-                      });
-                    });
-                  },
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Email'),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                ),
                 const SizedBox(height: 16),
 
-                // Phone Numbers Section with types and primary toggle
+                // Phone Numbers Section with types
                 const Text(
                   'Phone Numbers:',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -348,37 +321,10 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                               );
                             }).toList(),
                           ),
-                          Radio<bool>(
-                            value: true,
-                            groupValue: phone['primary'],
-                            onChanged: (value) {
-                              setState(() {
-                                for (var ph in _phones) {
-                                  ph['primary'] = false;
-                                }
-                                phone['primary'] = true;
-                              });
-                            },
-                          ),
-                          const Text('Primary'),
                         ],
                       ),
                     );
                   }).toList(),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _phones.add({
-                        'controller': TextEditingController(),
-                        'type': 'Mobile',
-                        'primary': false
-                      });
-                    });
-                  },
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Phone'),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
                 ),
                 const SizedBox(height: 32),
 
