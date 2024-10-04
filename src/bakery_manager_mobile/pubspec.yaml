@@ -85,14 +85,3 @@ flutter:
       fonts:
         - asset: assets/fonts/Inter-Regular.ttf
           weight: 400
-    - family: Lovely Bakery
-      fonts:
-        - asset: assets/fonts/Lovely-Bakery.ttf
-    - family: Bakery Holland
-      fonts:
-        - asset: assets/fonts/Bakery Holland.ttf
-    - family: Troops Display
-      fonts:
-        - asset: assets/fonts/Troops Display DEMO.ttf
-
-

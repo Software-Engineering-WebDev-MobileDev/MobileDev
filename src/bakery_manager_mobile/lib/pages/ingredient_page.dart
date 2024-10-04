@@ -51,7 +51,6 @@ class IngredientPageState extends State<IngredientPage> {
             Text(
               'Inventory',
               style: TextStyle(
-                fontFamily: 'Pacifico',
                 fontSize: 30,
                 foreground: Paint()
                   ..style = PaintingStyle.stroke
@@ -63,7 +62,6 @@ class IngredientPageState extends State<IngredientPage> {
             const Text(
               'Inventory',
               style: TextStyle(
-                fontFamily: 'Pacifico',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
                 color: Color.fromARGB(255, 246,235,216),
@@ -117,7 +115,7 @@ class IngredientPageState extends State<IngredientPage> {
             const SizedBox(height: 16),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+                backgroundColor: const Color.fromARGB(255, 209, 125, 51),
                 padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),

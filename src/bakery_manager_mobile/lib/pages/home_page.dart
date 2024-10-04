@@ -53,10 +53,11 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             // Stroked text as border.
             Text(
-              'The Rolling Scones',
+              'The Simple Bakery',
               style: TextStyle(
                 fontFamily: 'Pacifico',
                 fontSize: 30,
+                fontWeight: FontWeight.bold,
                 foreground: Paint()
                   ..style = PaintingStyle.stroke
                   ..strokeWidth = 6
@@ -65,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             // Solid text as fill.
             const Text(
-              'The Rolling Scones',
+              'The Simple Bakery',
               style: TextStyle(
                 fontFamily: 'Pacifico',
                 fontSize: 30,

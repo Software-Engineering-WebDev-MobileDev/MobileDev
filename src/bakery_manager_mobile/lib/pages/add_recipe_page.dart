@@ -41,10 +41,11 @@ class _AddRecipePageState extends State<AddRecipePage> {
           children: <Widget>[
             // Stroked text as border.
             Text(
-              'The Rolling Scones',
+              'Add a New Recipe',
               style: TextStyle(
                 fontFamily: 'Pacifico',
                 fontSize: 30,
+                fontWeight: FontWeight.bold,
                 foreground: Paint()
                   ..style = PaintingStyle.stroke
                   ..strokeWidth = 6
@@ -53,7 +54,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
             ),
             // Solid text as fill.
             const Text(
-              'The Rolling Scones',
+              'Add a New Recipe',
               style: TextStyle(
                 fontFamily: 'Pacifico',
                 fontSize: 30,
@@ -77,11 +78,6 @@ class _AddRecipePageState extends State<AddRecipePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
-                'Add a New Recipe',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
               const SizedBox(height: 16),
               TextField(
                 controller: recipeNameController,
@@ -143,7 +139,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                       ),
                       if (idx != 0)
                         IconButton(
-                          icon: const Icon(Icons.remove_circle, color: Colors.red),
+                          icon: const Icon(Icons.remove_circle, color: Color.fromARGB(255, 167,0,0)),
                           onPressed: () => _removeIngredientField(idx),
                         ),
                     ],
@@ -155,7 +151,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 icon: const Icon(Icons.add),
                 label: const Text('Add Ingredient'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
+                  backgroundColor: const Color.fromARGB(255, 82,141,96),
                 ),
               ),
               const SizedBox(height: 16),

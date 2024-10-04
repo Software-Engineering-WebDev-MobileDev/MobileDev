@@ -78,8 +78,8 @@ class AllRecipesPageState extends State<AllRecipesPage> {
             Text(
               'All Recipes',
               style: TextStyle(
-                fontFamily: 'Pacifico',
                 fontSize: 30,
+                fontWeight: FontWeight.bold,
                 foreground: Paint()
                   ..style = PaintingStyle.stroke
                   ..strokeWidth = 6
@@ -90,7 +90,6 @@ class AllRecipesPageState extends State<AllRecipesPage> {
             const Text(
               'All Recipes',
               style: TextStyle(
-                fontFamily: 'Pacifico',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
                 color: Color.fromARGB(255, 246,235,216),
@@ -169,7 +168,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
             // Add Recipe Button
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+                backgroundColor: const Color.fromARGB(255, 84,124,75),
                 padding:
                     const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
@@ -187,7 +186,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
               label: const Text(
                 'Add recipe',
                 style: TextStyle(
-                  color: Color.fromARGB(255, 246,235,216),
+                  color: Colors.black,
                 ),
               ),
             ),

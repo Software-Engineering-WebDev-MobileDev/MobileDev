@@ -49,8 +49,8 @@ class TaskPageState extends State<TaskPage> {
             Text(
               'Daily Tasks',
               style: TextStyle(
-                fontFamily: 'Pacifico',
                 fontSize: 30,
+                fontWeight: FontWeight.bold,
                 foreground: Paint()
                   ..style = PaintingStyle.stroke
                   ..strokeWidth = 6
@@ -61,7 +61,6 @@ class TaskPageState extends State<TaskPage> {
             const Text(
               'Daily Tasks',
               style: TextStyle(
-                fontFamily: 'Pacifico',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
                 color: Color.fromARGB(255, 246,235,216),
@@ -114,7 +113,7 @@ class TaskPageState extends State<TaskPage> {
             const SizedBox(height: 16),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+                backgroundColor: const Color.fromARGB(255, 209, 125, 51),
                 padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -138,7 +137,7 @@ class TaskPageState extends State<TaskPage> {
   Widget _buildFilterButton(String filter) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: _currentFilter == filter ? Colors.orange : Colors.grey,
+        backgroundColor: _currentFilter == filter ? const Color.fromARGB(255, 209, 125, 51) : Colors.grey,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),

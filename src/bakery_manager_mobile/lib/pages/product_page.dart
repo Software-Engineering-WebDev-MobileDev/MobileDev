@@ -15,8 +15,8 @@ class ProductPage extends StatelessWidget {
             Text(
               'Product Inventory',
               style: TextStyle(
-                fontFamily: 'Pacifico',
                 fontSize: 30,
+                fontWeight: FontWeight.bold,
                 foreground: Paint()
                   ..style = PaintingStyle.stroke
                   ..strokeWidth = 6
@@ -27,7 +27,6 @@ class ProductPage extends StatelessWidget {
             const Text(
               'Product Inventory',
               style: TextStyle(
-                fontFamily: 'Pacifico',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
                 color: Color.fromARGB(255, 246,235,216),

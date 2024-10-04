@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
-        title: 'The Rolling Scone',
+        title: 'The Rolling Scones',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,

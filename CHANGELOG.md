@@ -7,7 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- nothing
+### Added
+
+- Modified color scheme across all pages
+- made generic titles generic font
 
 ## [0.1.0] - 2024-09-19
 

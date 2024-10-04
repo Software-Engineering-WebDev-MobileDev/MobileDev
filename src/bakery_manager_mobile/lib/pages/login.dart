@@ -113,6 +113,7 @@ class LoginPageState extends State<LoginPage> {
               style: TextStyle(
                 fontFamily: 'Pacifico',
                 fontSize: 30,
+                fontWeight: FontWeight.bold,
                 foreground: Paint()
                   ..style = PaintingStyle.stroke
                   ..strokeWidth = 6
@@ -145,7 +146,6 @@ class LoginPageState extends State<LoginPage> {
                   const Text(
                     'Sign In',
                     style: TextStyle(
-                      fontFamily: 'Troops Display',
                       fontSize: 30,
                       color: Color.fromARGB(255, 209,126,51),
                     ),
@@ -208,7 +208,16 @@ class LoginPageState extends State<LoginPage> {
                           width: 150,
                           child: ElevatedButton(
                             onPressed: _isButtonDisabled ? null : _login,
-                            child: const Text('Login'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color.fromARGB(255, 82,141,96)
+                            ),
+                            child: const Text(
+                              'Login',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
                         TextButton(

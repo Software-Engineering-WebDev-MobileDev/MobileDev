@@ -83,8 +83,9 @@ class CreateAccountPageState extends State<CreateAccountPage> {
             Text(
               'Registration',
               style: TextStyle(
-                fontFamily: 'Pacifico',
+                fontFamily: 'Roboto',
                 fontSize: 30,
+                fontWeight: FontWeight.bold,
                 foreground: Paint()
                   ..style = PaintingStyle.stroke
                   ..strokeWidth = 6
@@ -95,7 +96,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
             const Text(
               'Registration',
               style: TextStyle(
-                fontFamily: 'Pacifico',
+                fontFamily: 'Roboto',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
                 color: Color.fromARGB(255, 246,235,216),
@@ -175,8 +176,17 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 82,141,96)
+                  ),
                   onPressed: _createAccount,
-                  child: const Text('Create Account'),
+                  child: const Text(
+                      'Create Account',
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 92,40,10)
+
+                    ),
+                  ),
                 ),
               ],
             ),
