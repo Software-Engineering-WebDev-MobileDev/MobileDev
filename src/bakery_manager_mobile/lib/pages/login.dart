@@ -133,99 +133,101 @@ class LoginPageState extends State<LoginPage> {
         ),
         automaticallyImplyLeading: false,
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                const Text(
-                  'Sign In',
-                  style: TextStyle(
-                    fontFamily: 'Pacifico',
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 209,126,51),
+      body: Center(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  const Text(
+                    'Sign In',
+                    style: TextStyle(
+                      fontFamily: 'Troops Display',
+                      fontSize: 30,
+                      color: Color.fromARGB(255, 209,126,51),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    children: <Widget>[
-                      SizedBox(
-                        width: 300,
-                        child: TextFormField(
-                          controller: _usernameController,
-                          decoration:
-                              const InputDecoration(labelText: 'Username'),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your username';
-                            }
-                            return null;
-                          },
-                          textInputAction: TextInputAction.next,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: 300,
-                        child: TextFormField(
-                          controller: _passwordController,
-                          decoration:
-                              const InputDecoration(labelText: 'Password'),
-                          obscureText: true,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
-                            }
-                            return null;
-                          },
-                          textInputAction: TextInputAction.done,
-                          onFieldSubmitted: (_) => _login(),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Checkbox(
-                            value: _rememberMe,
-                            onChanged: (value) {
-                              setState(() {
-                                _rememberMe = value!;
-                              });
+                  const SizedBox(height: 75),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: <Widget>[
+                        SizedBox(
+                          width: 300,
+                          child: TextFormField(
+                            controller: _usernameController,
+                            decoration:
+                                const InputDecoration(labelText: 'Username'),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your username';
+                              }
+                              return null;
                             },
+                            textInputAction: TextInputAction.next,
                           ),
-                          const Text('Remember Me'),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: 150,
-                        child: ElevatedButton(
-                          onPressed: _isButtonDisabled ? null : _login,
-                          child: const Text('Login'),
                         ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          if (mounted) {
-                            Navigator.pushNamed(context, registrationPageRoute);
-                          }
-                        },
-                        child: const Text('Create an account'),
-                      ),
-                    ],
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: 300,
+                          child: TextFormField(
+                            controller: _passwordController,
+                            decoration:
+                                const InputDecoration(labelText: 'Password'),
+                            obscureText: true,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your password';
+                              }
+                              return null;
+                            },
+                            textInputAction: TextInputAction.done,
+                            onFieldSubmitted: (_) => _login(),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Checkbox(
+                              value: _rememberMe,
+                              onChanged: (value) {
+                                setState(() {
+                                  _rememberMe = value!;
+                                });
+                              },
+                            ),
+                            const Text('Remember Me'),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: 150,
+                          child: ElevatedButton(
+                            onPressed: _isButtonDisabled ? null : _login,
+                            child: const Text('Login'),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            if (mounted) {
+                              Navigator.pushNamed(context, registrationPageRoute);
+                            }
+                          },
+                          child: const Text('Create an account'),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
+      )
     );
   }
 
