@@ -148,7 +148,11 @@ class TaskPageState extends State<TaskPage> {
         ),
       ),
       onPressed: () => _filterTasks(filter),
-      child: Text(filter),
+      child: Text(
+        filter,
+        style: const TextStyle(
+          color: Colors.white,
+        ),),
     );
   }
 }
