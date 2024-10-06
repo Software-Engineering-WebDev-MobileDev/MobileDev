@@ -181,12 +181,12 @@ class AllRecipesPageState extends State<AllRecipesPage> {
               },
               icon: const Icon(
                 Icons.add,
-                color: Color.fromARGB(255, 246,235,216),
+                color: Colors.white,
               ),
               label: const Text(
                 'Add recipe',
                 style: TextStyle(
-                  color: Colors.black,
+                  color: Colors.white,
                 ),
               ),
             ),

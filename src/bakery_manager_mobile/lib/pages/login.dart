@@ -99,7 +99,7 @@ class LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        // backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
             bottom: Radius.circular(10)
@@ -127,7 +127,7 @@ class LoginPageState extends State<LoginPage> {
                 fontFamily: 'Pacifico',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 246,235,216),
+                color: Colors.white,
               ),
             ),
           ],
@@ -214,7 +214,7 @@ class LoginPageState extends State<LoginPage> {
                             child: const Text(
                               'Login',
                               style: TextStyle(
-                                color: Colors.black,
+                                color: Colors.white,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

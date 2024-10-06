@@ -99,7 +99,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                 fontFamily: 'Roboto',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 246,235,216),
+                color: Colors.white,
               ),
             ),
           ],
@@ -183,7 +183,8 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                   child: const Text(
                       'Create Account',
                       style: TextStyle(
-                        color: Color.fromARGB(255, 92,40,10)
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
 
                     ),
                   ),

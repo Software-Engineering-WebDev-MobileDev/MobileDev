@@ -126,7 +126,12 @@ class TaskPageState extends State<TaskPage> {
                 );
               },
               icon: const Icon(Icons.add),
-              label: const Text('Add task'),
+              label: const Text(
+                'Add task',
+                style: TextStyle(
+                  color: Colors.white,
+                ),
+              ),
             ),
           ],
         ),
@@ -162,16 +167,16 @@ class _TaskItem extends StatelessWidget {
         );
       },
       child: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 2,
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
+        // decoration: BoxDecoration(
+        //   boxShadow: [
+        //     BoxShadow(
+        //       color: Colors.grey.withOpacity(0.5),
+        //       spreadRadius: 2,
+        //       blurRadius: 8,
+        //       offset: const Offset(0, 4),
+        //     ),
+        //   ],
+        // ),
         child: Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
