@@ -117,46 +117,46 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> getRecipeIngredients(String recipeID) async {
-      final url = Uri.parse('$baseApiUrl/recipe/$recipeID');
-  final headers = {'Content-Type': 'application/json'};
+    final url = Uri.parse('$baseApiUrl/recipe/$recipeID');
+    final headers = {'Content-Type': 'application/json'};
 
-  try {
-    final response = await http.get(url, headers: headers);
+    try {
+      final response = await http.get(url, headers: headers);
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      
-      // Filter ingredients from the full recipe response
-      final ingredients = data['recipe'] 
-          .map((item) => {
-                'RecipeIngredientID': item['RecipeIngredientID'],
-                'IngredientDescription': item['IngredientDescription'],
-                'Quantity': item['Quantity'],
-                'UnitOfMeasure': item['UnitOfMeasure'],
-                'QuantityInStock': item['QuantityInStock'],
-                'ReorderFlag': item['ReorderFlag'],
-                'ModifierID': item['ModifierID'],
-                'ScalingFactorID': item['ScalingFactorID'],
-              })
-          .toList();
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        
+        // Filter ingredients from the full recipe response
+        final ingredients = data['recipe'] 
+            .map((item) => {
+                  'RecipeIngredientID': item['RecipeIngredientID'],
+                  'IngredientDescription': item['IngredientDescription'],
+                  'Quantity': item['Quantity'],
+                  'UnitOfMeasure': item['UnitOfMeasure'],
+                  'QuantityInStock': item['QuantityInStock'],
+                  'ReorderFlag': item['ReorderFlag'],
+                  'ModifierID': item['ModifierID'],
+                  'ScalingFactorID': item['ScalingFactorID'],
+                })
+            .toList();
 
-      return {
-        'status': 'success',
-        'ingredients': ingredients,  // Only return the ingredients
-      };
-    } else {
+        return {
+          'status': 'success',
+          'ingredients': ingredients,  // Only return the ingredients
+        };
+      } else {
+        return {
+          'status': 'error',
+          'reason': 'Failed to fetch recipe: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
       return {
         'status': 'error',
-        'reason': 'Failed to fetch recipe: ${response.statusCode}',
+        'reason': 'Network error: $e',
       };
     }
-  } catch (e) {
-    return {
-      'status': 'error',
-      'reason': 'Network error: $e',
-    };
   }
-}
 
   // Create Account Function
   static Future<Map<String, dynamic>> createAccount(
@@ -186,6 +186,68 @@ class ApiService {
         return {
           'status': 'error',
           'reason': 'Failed to create account: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      // Network error
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  // Add Email Function
+  static Future<Map<String, dynamic>> addEmail(
+      String email, String employeeID, String emailTypeID) async {
+    final url = Uri.parse('$baseApiUrl/add_user_email');
+    final headers = {
+      'employee_id': employeeID,
+      'email_address': email,
+      'email_type_id': emailTypeID,
+    };
+
+    try {
+      final response = await http.post(url, headers: headers);
+
+      // Successful response
+      if (response.statusCode == 201) {
+        return {'status': 'success'};
+      } else {
+        return {
+          'status': 'error',
+          'reason': 'Failed to add email: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      // Network error
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  // Add Phone Number Function
+  static Future<Map<String, dynamic>> addPhoneNumber(
+      String phoneNumber, String employeeID, String phoneTypeID) async {
+    final url = Uri.parse('$baseApiUrl/add_user_phone');
+    final headers = {
+      'employee_id': employeeID,
+      'phone_number': phoneNumber,
+      'phone_type_id': phoneTypeID,
+    };
+
+    try {
+      final response = await http.post(url, headers: headers);
+
+      // Successful response
+      if (response.statusCode == 201) {
+        return {'status': 'success'};
+      } else {
+        return {
+          'status': 'error',
+          'reason': 'Failed to add phone number: ${response.statusCode}',
         };
       }
     } catch (e) {
