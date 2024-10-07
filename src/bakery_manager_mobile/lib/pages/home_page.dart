@@ -49,8 +49,43 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(10)
+          ),
+        ),
+        // made the color scheme and design of the title more consistent
+        title: Stack(
+          children: <Widget>[
+            // Stroked text as border.
+            Text(
+              'The Rolling Scones',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                foreground: Paint()
+                  ..style = PaintingStyle.stroke
+                  ..strokeWidth = 6
+                  ..color = const Color.fromARGB(255, 140,72,27),
+              ),
+            ),
+            // Solid text as fill.
+            const Text(
+              'The Rolling Scones',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 246,235,216),
+              ),
+            ),
+          ],
+        ),
+        //changed the color of the icon button
         leading: IconButton(
+          color: const Color.fromARGB(255, 92,40,10),
           icon: const Icon(Icons.logout), 
           onPressed: _logout,
         ),
@@ -64,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 height: 80,
                 alignment: Alignment.center,
                 child: const Text(
-                  'The Rolling Scones',
+                  'A Simple Bakery',
                   style: TextStyle(
                     fontFamily: 'Pacifico',
                     fontSize: 28,
@@ -81,7 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.orange,
+                  color: Color.fromARGB(255, 209, 125, 51),
                 ),
               ),
               const Text(
@@ -140,7 +175,7 @@ class OptionsBar extends StatelessWidget {
   Widget _buildMenuButton(String title, IconData icon, VoidCallback onPressed) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color.fromARGB(255, 227, 171, 4),
+        backgroundColor: const Color.fromARGB(255, 209,126,51),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
@@ -153,7 +188,7 @@ class OptionsBar extends StatelessWidget {
           Icon(
             icon,
             size: 24,
-            color: Colors.white,
+            color: const Color.fromARGB(255, 246,235,216),
           ),
           const SizedBox(height: 5),
           Text(
@@ -161,7 +196,7 @@ class OptionsBar extends StatelessWidget {
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 12,
-              color: Colors.white,
+              color: Color.fromARGB(255, 246,235,216),
             ),
           ),
         ],

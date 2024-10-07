@@ -6,7 +6,7 @@ class Task {
   final DateTime completionDate;
   final String employeeID;
   final String name;
-  final String status;
+  late final String status;
   final DateTime dueDate;
 
   Task({

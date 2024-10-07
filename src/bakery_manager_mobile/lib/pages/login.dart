@@ -104,7 +104,39 @@ class LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(10)
+          ),
+        ),
+        title: Stack(
+          children: <Widget>[
+            // Stroked text as border.
+            Text(
+              'The Rolling Scones',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                foreground: Paint()
+                  ..style = PaintingStyle.stroke
+                  ..strokeWidth = 6
+                  ..color = const Color.fromARGB(255, 140,72,27),
+              ),
+            ),
+            // Solid text as fill.
+            const Text(
+              'The Rolling Scones',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 246,235,216),
+              ),
+            ),
+          ],
+        ),
         automaticallyImplyLeading: false,
       ),
       body: SafeArea(
@@ -117,9 +149,10 @@ class LoginPageState extends State<LoginPage> {
                 const Text(
                   'Sign In',
                   style: TextStyle(
+                    fontFamily: 'Pacifico',
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: Colors.orange,
+                    color: Color.fromARGB(255, 209,126,51),
                   ),
                 ),
                 const SizedBox(height: 24),

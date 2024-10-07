@@ -17,7 +17,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
   final TextEditingController servingsController = TextEditingController();  // New field
   final List<RecipeIngredient> ingredients = [];
 
-  final List<String> categories = ['Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snack'];
+  final List<String> categories = ['Bread', 'Muffins', 'Cookies', 'Pastry', 'Cake', 'Pie', 'Cupcakes', 'Dessert'];
   String? selectedCategory;
 
   void _addIngredientField() {
@@ -42,10 +42,36 @@ class _AddRecipePageState extends State<AddRecipePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Recipe', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.orange,
+        centerTitle: true,
+        title: Stack(
+          children: <Widget>[
+            // Stroked text as border.
+            Text(
+              'The Rolling Scones',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                foreground: Paint()
+                  ..style = PaintingStyle.stroke
+                  ..strokeWidth = 6
+                  ..color = const Color.fromARGB(255, 140,72,27),
+              ),
+            ),
+            // Solid text as fill.
+            const Text(
+              'The Rolling Scones',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 246,235,216),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 140,72,27)),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -237,7 +263,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
               const SizedBox(height: 16),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
+                  backgroundColor: const Color.fromARGB(255, 209, 125, 51),
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),

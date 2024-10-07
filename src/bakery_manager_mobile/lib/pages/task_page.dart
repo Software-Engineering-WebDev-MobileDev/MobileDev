@@ -89,7 +89,7 @@ class TaskPageState extends State<TaskPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Task List', style: TextStyle(color: Colors.white)),
+        title: const Text('Daily Tasks', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.orange,
       ),
       body: Padding(
@@ -195,10 +195,10 @@ class _TaskItem extends StatelessWidget {
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 2,
-              blurRadius: 8,
-              offset: const Offset(0, 4),
+              color: Colors.grey.withOpacity(0.3), // Slight shadow
+              spreadRadius: 1,
+              blurRadius: 4,
+              offset: const Offset(0, 2), // Soft shadow
             ),
           ],
         ),
@@ -207,8 +207,8 @@ class _TaskItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
           ),
           color: const Color(0xFFFDF1E0),
-          elevation: 4,
-          margin: const EdgeInsets.symmetric(vertical: 8),
+          elevation: 2, // Slight elevation for shadow effect
+          margin: const EdgeInsets.symmetric(vertical: 6), // Slightly reduced space
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
