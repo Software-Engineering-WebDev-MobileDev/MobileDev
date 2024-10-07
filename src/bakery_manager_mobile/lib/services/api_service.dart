@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/recipe.dart';
+import '../models/account.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'session_manager.dart';
 
@@ -346,6 +347,37 @@ class ApiService {
     catch(e){
       return false;
     }
-
   }
+
+  // Get Account Function
+  static Future<Map<String, dynamic>> getAccount(String userID) async {
+    final url = Uri.parse('$baseApiUrl/account/$userID');
+    try {
+      final response = await http.get(url);
+
+      // Successful response
+      if (response.statusCode == 200) {
+        Map<String, dynamic> body = json.decode(response.body);
+        return {
+          'status': 'success',
+          'accountDetails': Account.fromJson(body),
+        };
+      }
+      // Failed response
+      else {
+        return {
+          'status': 'error',
+          'reason': 'Failed to load account details: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      // Network error
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+
 }
