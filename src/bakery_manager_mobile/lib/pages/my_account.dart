@@ -1,7 +1,7 @@
 import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:flutter/material.dart';
 import '../pages/edit_account.dart';
-// import '../services/api_service.dart'; // This is the API service placeholder
+import '../services/api_service.dart';
 
 class MyAccountPage extends StatefulWidget {
   const MyAccountPage({super.key});
@@ -13,38 +13,26 @@ class MyAccountPage extends StatefulWidget {
 class MyAccountPageState extends State<MyAccountPage> {
   late Future<Map<String, dynamic>> _futureAccountDetails;
   bool _obscurePassword = true;
-  bool _obscureEmployeeID = true;  // New variable to control employee ID visibility
+  bool _obscureEmployeeID = true;
 
-  // Simulating a future to fetch account details
+  // Fetch account details from the API
   Future<Map<String, dynamic>> _fetchAccountDetails() async {
-    // Simulating the API response
-    await Future.delayed(const Duration(seconds: 2)); // Simulate network delay
+    var userID = "12345"; // Use the actual user ID here
+    try {
+      final response = await ApiService.getAccount(userID);
 
-    // Replace this with the actual API call when available
-    // final response = await ApiService.getAccountDetails();
-    // if (response['status'] == 'success') {
-    //   return response['accountDetails'];
-    // } else {
-    //   throw Exception('Failed to load account details');
-    // }
-
-    // Simulated account details for now
-    return {
-      'EmployeeID': '12345-ABCDE',
-      'FirstName': 'John',
-      'LastName': 'Doe',
-      'Username': 'johndoe',
-      'RoleID': 'Manager',
-      'Password': 'password123', // This should be hashed in a real app
-      'Emails': [
-        'johndoe@example.com',
-        'john.doe@work.com'
-      ],
-      'PhoneNumbers': [
-        '+1234567890',
-        '+0987654321'
-      ]
-    };
+      if (response['status'] == 'success') {
+        return response['accountDetails'];
+      } else {
+        // Log the error message or response
+        debugPrint('Error: ${response['reason']}');
+        throw Exception('Failed to load account details: ${response['reason']}');
+      }
+    } catch (error) {
+      // Print out the error for more detailed analysis
+      debugPrint('Fetch account error: $error');
+      throw Exception('Failed to load account details');
+    }
   }
 
   @override
@@ -137,7 +125,7 @@ class MyAccountPageState extends State<MyAccountPage> {
                       ),
                     ),
 
-                                        // Role
+                    // Role
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
                       child: Text(
@@ -180,7 +168,6 @@ class MyAccountPageState extends State<MyAccountPage> {
                         ],
                       ),
                     ),
-                    
                     const SizedBox(height: 16),
 
                     // Emails Section
@@ -237,7 +224,6 @@ class MyAccountPageState extends State<MyAccountPage> {
                         label: const Text('Edit Account'),
                       ),
                     ),
-
 
                     // Log Out Button
                     Center(
