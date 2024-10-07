@@ -198,30 +198,49 @@ class ApiService {
     }
   }
 
-  // Add Email Function
-  static Future<Map<String, dynamic>> addEmail(
-      String email, String employeeID, String emailTypeID) async {
-    final url = Uri.parse('$baseApiUrl/add_user_email');
-    final headers = {
-      'employee_id': employeeID,
-      'email_address': email,
-      'email_type_id': emailTypeID,
-    };
+  // Add User Email Function
+  static Future<Map<String, dynamic>> addUserEmail({
+    required String sessionID,
+    required String emailAddress,
+    required String emailType,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/api/add_user_email');  // API endpoint URL
 
     try {
-      final response = await http.post(url, headers: headers);
+      // Perform the POST request
+      final response = await http.post(
+        url,
+        headers: {
+          'session_id': sessionID,
+          'email_address': emailAddress,
+          'type': emailType,  // <personal|work|other>
+        },
+      );
 
-      // Successful response
-      if (response.statusCode == 201) {
-        return {'status': 'success'};
-      } else {
+      // If the response status is 200, parse the JSON response
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseBody = json.decode(response.body);
+        return {
+          'status': responseBody['status'],
+        };
+      } 
+      // If the session is invalid or expired, handle 498 error
+      else if (response.statusCode == 498) {
+        Map<String, dynamic> responseBody = json.decode(response.body);
+        return {
+          'status': 'error',
+          'reason': responseBody['reason'],
+        };
+      } 
+      // Other errors
+      else {
         return {
           'status': 'error',
           'reason': 'Failed to add email: ${response.statusCode}',
         };
       }
     } catch (e) {
-      // Network error
+      // Catch network or parsing errors
       return {
         'status': 'error',
         'reason': 'Network error: $e',
@@ -229,36 +248,6 @@ class ApiService {
     }
   }
 
-  // Add Phone Number Function
-  static Future<Map<String, dynamic>> addPhoneNumber(
-      String phoneNumber, String employeeID, String phoneTypeID) async {
-    final url = Uri.parse('$baseApiUrl/add_user_phone');
-    final headers = {
-      'employee_id': employeeID,
-      'phone_number': phoneNumber,
-      'phone_type_id': phoneTypeID,
-    };
-
-    try {
-      final response = await http.post(url, headers: headers);
-
-      // Successful response
-      if (response.statusCode == 201) {
-        return {'status': 'success'};
-      } else {
-        return {
-          'status': 'error',
-          'reason': 'Failed to add phone number: ${response.statusCode}',
-        };
-      }
-    } catch (e) {
-      // Network error
-      return {
-        'status': 'error',
-        'reason': 'Network error: $e',
-      };
-    }
-  }
 
   // Login Function
   static Future<Map<String, dynamic>> login(
@@ -379,5 +368,70 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> checkEmployeeIDExists(String employeeID) async {
+    final url = Uri.parse('$baseApiUrl/check_employee_id');
+    final headers = {
+      'Content-Type': 'application/json',
+    };
+    final body = json.encode({'employee_id': employeeID});
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData = json.decode(response.body);
+        return {
+          'status': responseData['exists'] ? 'exists' : 'not_exists',
+        };
+      } else {
+        return {'status': 'error', 'reason': 'Failed to check Employee ID'};
+      }
+    } catch (e) {
+      return {'status': 'error', 'reason': 'Network error: $e'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> checkEmailExists(String email) async {
+    final url = Uri.parse('$baseApiUrl/check_email');
+    final headers = {
+      'Content-Type': 'application/json',
+    };
+    final body = json.encode({'email': email});
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData = json.decode(response.body);
+        return {
+          'status': responseData['exists'] ? 'exists' : 'not_exists',
+        };
+      } else {
+        return {'status': 'error', 'reason': 'Failed to check Email'};
+      }
+    } catch (e) {
+      return {'status': 'error', 'reason': 'Network error: $e'};
+    }
+  }
+
+  static Future<Map<String, dynamic>> checkUsernameExists(String username) async {
+    final url = Uri.parse('$baseApiUrl/check_username');
+    final headers = {
+      'Content-Type': 'application/json',
+    };
+    final body = json.encode({'username': username});
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+      if (response.statusCode == 200) {
+        Map<String, dynamic> responseData = json.decode(response.body);
+        return {
+          'status': responseData['exists'] ? 'exists' : 'not_exists',
+        };
+      } else {
+        return {'status': 'error', 'reason': 'Failed to check Username'};
+      }
+    } catch (e) {
+      return {'status': 'error', 'reason': 'Network error: $e'};
+    }
+  }
 
 }

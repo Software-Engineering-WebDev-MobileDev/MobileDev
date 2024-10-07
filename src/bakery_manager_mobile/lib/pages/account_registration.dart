@@ -39,6 +39,9 @@ class CreateAccountPageState extends State<CreateAccountPage> {
 
   Future<void> _createAccount() async {
     if (_formKey.currentState!.validate()) {
+      // Debugging: Print to confirm form validation passed
+      print("Form validation passed. Starting account creation process.");
+
       // Get user input from the text controllers
       String firstName = firstNameController.text;
       String lastName = lastNameController.text;
@@ -46,36 +49,92 @@ class CreateAccountPageState extends State<CreateAccountPage> {
       String username = usernameController.text;
       String password = passwordController.text;
       String email = emailController.text;
-      String phoneNumber = phoneController.text;
+      String phoneNumber = phoneController.text;  // Will not be used for now
 
-      // Create account using the API
-      Map<String, dynamic> response = await ApiService.createAccount(
-        firstName,
-        lastName,
-        employeeID,
-        username,
-        password,
-      );
-
-      bool accountCreated = response['status'] == 'success';
-
-      if (accountCreated) {
-        // Save credentials to SharedPreferences
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('username', username);
-        await prefs.setString('password', password);
-
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Account created successfully!')),
+      try {
+        // Step 1: Attempt to create account
+        Map<String, dynamic> accountResponse = await ApiService.createAccount(
+          firstName,
+          lastName,
+          employeeID,
+          username,
+          password,
         );
-        Navigator.pop(context); // Go back after success
-      } else {
-        if (!mounted) return;
+
+        // Debugging: Check account creation response
+        print("Account creation response: $accountResponse");
+
+        if (accountResponse['status'] == 'success') {
+          // Step 2: Attempt to add email
+          Map<String, dynamic> emailResponse = await ApiService.addUserEmail(
+            sessionID: accountResponse['sessionID'],  // Assuming sessionID is part of the account creation response
+            emailAddress: email,
+            emailType: _emailType,  // Email type selected from dropdown
+          );
+
+          // Debugging: Check email addition response
+          print("Email addition response: $emailResponse");
+
+          if (emailResponse['status'] == 'success') {
+            // Step 3: Commented out the phone number addition logic
+            
+            /*
+            Map<String, dynamic> phoneResponse = await ApiService.addPhoneNumber(
+              phoneNumber,
+              employeeID,  // Use employeeID from the created account
+              _phoneType,  // Phone type selected from dropdown
+            );
+
+            // Debugging: Check phone number addition response
+            print("Phone number addition response: $phoneResponse");
+
+            if (phoneResponse['status'] == 'success') {
+            */
+
+            // Step 4: All succeeded, save credentials and show success message
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            await prefs.setString('username', username);
+            await prefs.setString('password', password);
+
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Account created successfully!')),
+            );
+            Navigator.pop(context); // Go back after success
+
+            /*
+            } else {
+              // Phone addition failed
+              print("Phone addition failed: ${phoneResponse['reason']}");
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to add phone number: ${phoneResponse['reason']}')),
+              );
+            }
+            */
+
+          } else {
+            // Email addition failed
+            print("Email addition failed: ${emailResponse['reason']}");
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Failed to add email: ${emailResponse['reason']}')),
+            );
+          }
+        } else {
+          // Account creation failed
+          print("Account creation failed: ${accountResponse['reason']}");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Account creation failed: ${accountResponse['reason']}')),
+          );
+        }
+      } catch (e) {
+        // Handle any unexpected errors
+        print("Error occurred during account creation: $e");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Account creation failed: ${response['reason']}')),
+          SnackBar(content: Text('An error occurred: $e')),
         );
       }
+    } else {
+      print("Form validation failed.");
     }
   }
 
