@@ -1,7 +1,6 @@
 import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:flutter/material.dart';
-import '../pages/edit_account.dart';
-import '../services/api_service.dart';
+//import '../services/api_service.dart';
 
 class MyAccountPage extends StatefulWidget {
   const MyAccountPage({super.key});
@@ -15,22 +14,21 @@ class MyAccountPageState extends State<MyAccountPage> {
   bool _obscurePassword = true;
   bool _obscureEmployeeID = true;
 
+  // TODO: replace mock data with real data
   Map<String, dynamic> _accountPlaceholder = {
-    'FirstName': 'John', // Mock data
-    'LastName': 'Doe', // Mock data
-    'EmployeeID': '12345', // Mock data
-    'RoleID': 'Manager', // Mock data
-    'Username': 'johndoe', // Mock data
-    'Password': 'password123', // Mock data
-    'Emails': ['johndoe@example.com', 'john.doe@home.com'], // Mock data
-    'PhoneNumbers': ['+1234567890', '+0987654321'], // Mock data
+    'FirstName': 'John', 
+    'LastName': 'Doe',
+    'EmployeeID': '12345',
+    'RoleID': 'Manager',
+    'Username': 'johndoe',
+    'Password': 'password123',
+    'Emails': ['johndoe@example.com', 'john.doe@home.com'], 
+    'PhoneNumbers': ['+1234567890', '+0987654321'],
   };
 
   // Fetch account details from the API
   Future<Map<String, dynamic>> _fetchAccountDetails() async {
-    var userID = "12345"; // Use the actual user ID here
     try {
-      // Simulating a real API call with mock data.
       /*
       final response = await ApiService.getAccount(userID);
       if (response['status'] == 'success') {
@@ -41,11 +39,10 @@ class MyAccountPageState extends State<MyAccountPage> {
       }
       */
       
-      // Using mock data for now:
       return _accountPlaceholder;
     } catch (error) {
       debugPrint('Fetch account error: $error');
-      return _accountPlaceholder; // Return mock data in case of error
+      return _accountPlaceholder;
     }
   }
 
@@ -123,7 +120,7 @@ class MyAccountPageState extends State<MyAccountPage> {
                         ),
                       ),
 
-                      // Employee ID with eye toggle
+                      // Employee ID
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Row(
@@ -175,7 +172,7 @@ class MyAccountPageState extends State<MyAccountPage> {
                         ),
                       ),
 
-                      // Password with eye toggle
+                      // Password
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Row(
@@ -212,7 +209,7 @@ class MyAccountPageState extends State<MyAccountPage> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Emails Section
+                      // Emails
                       const Text(
                         'Emails:',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -231,7 +228,7 @@ class MyAccountPageState extends State<MyAccountPage> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Phone Numbers Section
+                      // Phone Numbers
                       const Text(
                         'Phone Numbers:',
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),

@@ -22,8 +22,8 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  String _emailType = 'Work'; // Single email type
-  String _phoneType = 'Mobile'; // Single phone type
+  String _emailType = 'Work';
+  String _phoneType = 'Mobile';
 
   // Password requirement indicators
   bool _has8Characters = false;
@@ -34,11 +34,9 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   void initState() {
     super.initState();
 
-    // Add listener to password controller
     passwordController.addListener(_validatePassword);
   }
 
-  // Function to validate password requirements
   void _validatePassword() {
     String password = passwordController.text;
     setState(() {
@@ -50,7 +48,6 @@ class CreateAccountPageState extends State<CreateAccountPage> {
 
   Future<void> _createAccount() async {
     if (_formKey.currentState!.validate()) {
-      // Get user input from the text controllers
       String firstName = firstNameController.text.trim();
       String lastName = lastNameController.text.trim();
       String employeeID = employeeIDController.text.trim();
@@ -70,25 +67,23 @@ class CreateAccountPageState extends State<CreateAccountPage> {
         );
 
         if (accountResponse['status'] == 'success') {
-          // Step 2: Add email using session ID from account creation response
+          // Step 2: Add email from account creation response
           Map<String, dynamic> emailResponse = await ApiService.addUserEmail(
             sessionID: '',
             emailAddress: email,
-            emailType: _emailType, // Email type selected from dropdown
+            emailType: _emailType, 
           );
 
           if (emailResponse['status'] == 'success') {
-            // Step 3: Commented out the phone number addition logic
+            // Step 3: Add email from account creation response
             
             /*
             Map<String, dynamic> phoneResponse = await ApiService.addPhoneNumber(
               phoneNumber,
-              employeeID,  // Use employeeID from the created account
-              _phoneType,  // Phone type selected from dropdown
+              employeeID,
+              _phoneType,
             );
 
-            // Debugging: Check phone number addition response
-            print("Phone number addition response: $phoneResponse");
 
             if (phoneResponse['status'] == 'success') {
             */
@@ -106,7 +101,6 @@ class CreateAccountPageState extends State<CreateAccountPage> {
             /*
             } else {
               // Phone addition failed
-              print("Phone addition failed: ${phoneResponse['reason']}");
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Failed to add phone number: ${phoneResponse['reason']}')),
               );
@@ -114,25 +108,21 @@ class CreateAccountPageState extends State<CreateAccountPage> {
             */
 
           } else {
-            // Handle email addition failure
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('${emailResponse['reason']}')),
             );
           }
         } else {
-          // Account creation failed
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Account creation failed: ${accountResponse['reason']}')),
           );
         }
       } catch (e) {
-        // Handle any unexpected errors
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('An error occurred: $e')),
         );
       }
     } else {
-      // Form validation failed
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill out all fields correctly')),
       );
@@ -141,14 +131,13 @@ class CreateAccountPageState extends State<CreateAccountPage> {
 
   @override
   void dispose() {
-    // Remove listener and dispose controllers
     passwordController.removeListener(_validatePassword);
     employeeIDController.dispose();
     firstNameController.dispose();
     lastNameController.dispose();
     usernameController.dispose();
     passwordController.dispose();
-    confirmPasswordController.dispose(); // Dispose confirm password controller
+    confirmPasswordController.dispose();
     emailController.dispose();
     phoneController.dispose();
     super.dispose();
@@ -249,7 +238,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Password Field with Eye Toggle
+                // Password Field
                 Row(
                   children: [
                     Expanded(
@@ -336,7 +325,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Confirm Password Field with Eye Toggle
+                // Confirm Password Field
                 Row(
                   children: [
                     Expanded(
@@ -374,7 +363,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Email Section
+                // Email Field
                 const Text(
                   'Email:',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -432,7 +421,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Phone Number Section
+                // Phone Number Field
                 const Text(
                   'Phone Number:',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),

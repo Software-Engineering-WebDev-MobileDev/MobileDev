@@ -34,7 +34,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
   void initState() {
     super.initState();
 
-    // Initialize controllers with mock data (replace with API data in the future)
+    // TODO: replace mock data with real data
     employeeIDController = TextEditingController(text: '12345-ABCDE');
     firstNameController = TextEditingController(text: 'John');
     lastNameController = TextEditingController(text: 'Doe');
@@ -42,7 +42,6 @@ class _EditAccountPageState extends State<EditAccountPage> {
     passwordController = TextEditingController(text: 'password123');
     confirmPasswordController = TextEditingController();
 
-    // Mock email and phone data (replace with API data in the future)
     _emails = [
       {'address': 'johndoe@example.com', 'type': 'Work', 'primary': true},
       {'address': 'john.doe@home.com', 'type': 'Home', 'primary': false},
@@ -52,17 +51,14 @@ class _EditAccountPageState extends State<EditAccountPage> {
       {'number': '+0987654321', 'type': 'Home', 'primary': false},
     ];
 
-    // Create controllers for emails and phones
     _emailControllers = _emails.map((email) => TextEditingController(text: email['address'])).toList();
     _phoneControllers = _phones.map((phone) => TextEditingController(text: phone['number'])).toList();
 
-    // Add listener to password controller for dynamic validation
     passwordController.addListener(_validatePassword);
   }
 
   @override
   void dispose() {
-    // Dispose all controllers
     employeeIDController.dispose();
     firstNameController.dispose();
     lastNameController.dispose();
@@ -150,7 +146,6 @@ class _EditAccountPageState extends State<EditAccountPage> {
       String username = usernameController.text;
       String password = passwordController.text;
 
-      // Mock API call (Replace with actual API call to update account details)
       Map<String, dynamic> response = await Future.delayed(const Duration(seconds: 2), () {
         return {'status': 'success'};
       });
@@ -267,7 +262,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Password Field with Eye Toggle and Validation
+                // Password Field
                 Row(
                   children: [
                     Expanded(
@@ -354,7 +349,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Confirm Password Field with Eye Toggle
+                // Confirm Password Field
                 Row(
                   children: [
                     Expanded(
@@ -392,7 +387,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Emails Section with types and primary toggle
+                // Emails Field
                 const Text(
                   'Emails:',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -411,15 +406,15 @@ class _EditAccountPageState extends State<EditAccountPage> {
                               controller: _emailControllers[idx],
                               decoration: InputDecoration(
                                 hintText: 'Email ${idx + 1}',
-                                border: OutlineInputBorder(  // Remove the `const` keyword here
-                                  borderRadius: const BorderRadius.all(Radius.circular(10)),  // You can keep `const` here
+                                border: OutlineInputBorder(
+                                  borderRadius: const BorderRadius.all(Radius.circular(10)),
                                   borderSide: BorderSide(
-                                    color: _validateEmail(_emailControllers[idx].text) == null ? Colors.grey : Colors.red, // This is now dynamic
+                                    color: _validateEmail(_emailControllers[idx].text) == null ? Colors.grey : Colors.red,
                                   ),
                                 ),
                               ),
                               onChanged: (value) {
-                                setState(() {}); // This triggers re-validation on input changes
+                                setState(() {});
                               },
                               validator: (value) => _validateEmail(value!),
                             ),
@@ -474,7 +469,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Phone Numbers Section with types and primary toggle
+                // Phone Numbers Field
                 const Text(
                   'Phone Numbers:',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -498,10 +493,10 @@ class _EditAccountPageState extends State<EditAccountPage> {
                                   borderSide: BorderSide(
                                     color: _validatePhone(_phoneControllers[idx].text) == null
                                         ? Colors.grey
-                                        : Colors.red, // Red border on error
+                                        : Colors.red,
                                   ),
                                 ),
-                                errorMaxLines: 3, // Allows error message to span multiple lines
+                                errorMaxLines: 3,
                               ),
                               onChanged: (value) {
                                 setState(() {});
