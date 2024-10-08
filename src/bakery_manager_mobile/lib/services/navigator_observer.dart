@@ -25,14 +25,16 @@ class MyNavigatorObserver extends NavigatorObserver {
   }
 
   Future<void> _checkSession(Route<dynamic> route) async {
-    bool isValid = await _sessionManager.isSessionValid();
+    if (route is PageRoute) {
+      bool isValid = await _sessionManager.isSessionValid();
 
-    if (!isValid && route.settings.name != registrationPageRoute) {
+      if (!isValid && route.settings.name != registrationPageRoute && route.settings.name != '/login') {
       // If the session is not valid, clear session and redirect to login
-      await _sessionManager.clearSession();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        navigator?.pushReplacementNamed('/login');
-      });
+        await _sessionManager.clearSession();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          navigator?.pushReplacementNamed('/login');
+        });
+      }
     }
   }
 }
