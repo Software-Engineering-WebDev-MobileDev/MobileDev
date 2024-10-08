@@ -66,7 +66,7 @@ class TaskDetailPage extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                '• Completion Date: ${_formatDate(task.completionDate.toLocal())}',
+                '• Completion Date: ${task.completionDate != null ? _formatDate(task.completionDate!.toLocal()) : 'No completion date'}',
                 style: const TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 8),

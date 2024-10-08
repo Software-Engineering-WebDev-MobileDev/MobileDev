@@ -3,10 +3,10 @@ class Task {
   final String recipeID;
   final int amountToBake;
   final DateTime assignmentDate;
-  final DateTime completionDate;
+  final DateTime? completionDate;
   final String employeeID;
-  final String name;
-  late final String status;
+  String? name;
+  final String status;
   final DateTime dueDate;
 
   Task({
@@ -14,10 +14,25 @@ class Task {
     required this.recipeID,
     required this.amountToBake,
     required this.assignmentDate,
-    required this.completionDate,
+    this.completionDate,
     required this.employeeID,
-    required this.name,
+    this.name,
     required this.status,
     required this.dueDate,
   });
+
+  factory Task.fromJson(Map<String, dynamic> json) {
+    return Task(
+      taskID: json['TaskID'],
+      recipeID: json['RecipeID'],
+      amountToBake: json['AmountToBake'],
+      status: json['Status'],
+      assignmentDate: DateTime.parse(json['AssignmentDate']),
+      dueDate: DateTime.parse(json['DueDate']),
+      completionDate: json['CompletionDate'] != null
+          ? DateTime.parse(json['CompletionDate'])
+          : null, // Handle null value for CompletionDate
+      employeeID: json['AssignedEmployeeID'],
+    );
+  }
 }

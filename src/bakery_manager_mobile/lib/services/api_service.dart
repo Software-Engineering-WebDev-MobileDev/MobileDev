@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:bakery_manager_mobile/models/ingredient.dart';
+import 'package:bakery_manager_mobile/models/task.dart';
 import 'package:http/http.dart' as http;
 import '../models/recipe.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -250,6 +251,37 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> getRecipeName(String recipeID) async {
+  final url = Uri.parse('$baseApiUrl/recipe/$recipeID');
+  final headers = {'Content-Type': 'application/json'};
+
+  try {
+    final response = await http.get(url, headers: headers);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      // Extract the recipe name from the response
+      final String recipeName = data['recipe'][0]['RecipeName'];
+      return {
+        'status': 'success',
+        'recipeName': recipeName,
+      };
+    } else {
+      return {
+        'status': 'error',
+        'reason': 'Failed to fetch recipe name: ${response.statusCode}',
+      };
+    }
+  } catch (e) {
+    return {
+      'status': 'error',
+      'reason': 'Network error: $e',
+    };
+  }
+}
+
+
   static Future<Map<String, dynamic>> getInventory(
       {int page = 1, int pageSize = 20}) async {
     final url = Uri.parse('$baseApiUrl/inventory');
@@ -332,6 +364,42 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> getTasks() async {
+    final url = Uri.parse('$baseApiUrl/tasks');
+    String sessionId = await SessionManager().getSessionToken() ?? "";
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'session_id': sessionId,
+        },
+      );
+
+      // Successful response
+      if (response.statusCode == 200) {
+        Map<String, dynamic> body = json.decode(response.body);
+        List<dynamic> taskList = body['recipes']; // Assuming 'tasks' as key
+        return {
+          'status': 'success',
+          'tasks': taskList.map((dynamic item) => Task.fromJson(item)).toList(),
+        };
+      }
+      // Failed response
+      else {
+        return {
+          'status': 'error',
+          'reason': 'Failed to load tasks: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      // Network error
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
   // Login Function
   static Future<Map<String, dynamic>> login(
       String username, String password) async {
