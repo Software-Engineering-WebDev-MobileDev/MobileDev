@@ -52,6 +52,7 @@ class IngredientPageState extends State<IngredientPage> {
               'Inventory',
               style: TextStyle(
                 fontSize: 30,
+                fontWeight: FontWeight.bold,
                 foreground: Paint()
                   ..style = PaintingStyle.stroke
                   ..strokeWidth = 6
@@ -115,7 +116,7 @@ class IngredientPageState extends State<IngredientPage> {
             const SizedBox(height: 16),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+                backgroundColor: const Color.fromARGB(255, 84,124,75),
                 padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -127,8 +128,16 @@ class IngredientPageState extends State<IngredientPage> {
                   const SnackBar(content: Text('Add ingredient functionality not implemented yet')),
                 );
               },
-              icon: const Icon(Icons.add),
-              label: const Text('Add ingredient'),
+              icon: const Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
+              label: const Text(
+                'Add ingredient',
+                style: TextStyle(
+                  color: Colors.white,
+                )
+              ),
             ),
           ],
         ),
@@ -152,14 +161,14 @@ class _IngredientItem extends StatelessWidget {
       },
       child: Container(
         decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 2,
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          // boxShadow: [
+          //   BoxShadow(
+          //     color: Colors.grey.withOpacity(0.5),
+          //     spreadRadius: 2,
+          //     blurRadius: 8,
+          //     offset: const Offset(0, 4),
+          //   ),
+          // ],
         ),
         child: Card(
           shape: RoundedRectangleBorder(

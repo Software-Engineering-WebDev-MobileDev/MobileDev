@@ -113,7 +113,7 @@ class TaskPageState extends State<TaskPage> {
             const SizedBox(height: 16),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+                backgroundColor: const Color.fromARGB(255, 84,124,75),
                 padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
@@ -125,7 +125,10 @@ class TaskPageState extends State<TaskPage> {
                   const SnackBar(content: Text('Add task functionality not implemented yet')),
                 );
               },
-              icon: const Icon(Icons.add),
+              icon: const Icon(
+                Icons.add,
+                color: Colors.white,
+              ),
               label: const Text(
                 'Add task',
                 style: TextStyle(
