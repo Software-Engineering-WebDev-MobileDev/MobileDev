@@ -16,31 +16,38 @@ class MyAccountPageState extends State<MyAccountPage> {
   bool _obscureEmployeeID = true;
 
   Map<String, dynamic> _accountPlaceholder = {
-    'FirstName': '',
-    'LastName': '',
-    'EmployeeID': '',
-    'RoleID': '',
-    'Username': '',
-    'Password': '',
-    'Emails': [],
-    'PhoneNumbers': []
+    'FirstName': 'John', // Mock data
+    'LastName': 'Doe', // Mock data
+    'EmployeeID': '12345', // Mock data
+    'RoleID': 'Manager', // Mock data
+    'Username': 'johndoe', // Mock data
+    'Password': 'password123', // Mock data
+    'Emails': ['johndoe@example.com', 'john.doe@home.com'], // Mock data
+    'PhoneNumbers': ['+1234567890', '+0987654321'], // Mock data
   };
 
   // Fetch account details from the API
   Future<Map<String, dynamic>> _fetchAccountDetails() async {
     var userID = "12345"; // Use the actual user ID here
     try {
+      // Simulating a real API call with mock data.
+      // Uncomment this section and remove the mock data when using a real API.
+      /*
       final response = await ApiService.getAccount(userID);
-
       if (response['status'] == 'success') {
         return response['accountDetails'];
       } else {
         debugPrint('Error: ${response['reason']}');
         throw Exception('Failed to load account details: ${response['reason']}');
       }
+      */
+      
+      // Using mock data for now:
+      return _accountPlaceholder;
+
     } catch (error) {
       debugPrint('Fetch account error: $error');
-      return _accountPlaceholder;
+      return _accountPlaceholder; // Return mock data in case of error
     }
   }
 
@@ -87,18 +94,28 @@ class MyAccountPageState extends State<MyAccountPage> {
                   // First Name
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      'First Name: ${account['FirstName'] ?? ''}',
-                      style: const TextStyle(fontSize: 18),
+                    child: RichText(
+                      text: TextSpan(
+                        style: const TextStyle(fontSize: 18, color: Colors.black),
+                        children: [
+                          const TextSpan(text: 'First Name: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                          TextSpan(text: account['FirstName'] ?? ''),
+                        ],
+                      ),
                     ),
                   ),
 
                   // Last Name
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      'Last Name: ${account['LastName'] ?? ''}',
-                      style: const TextStyle(fontSize: 18),
+                    child: RichText(
+                      text: TextSpan(
+                        style: const TextStyle(fontSize: 18, color: Colors.black),
+                        children: [
+                          const TextSpan(text: 'Last Name: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                          TextSpan(text: account['LastName'] ?? ''),
+                        ],
+                      ),
                     ),
                   ),
 
@@ -108,9 +125,14 @@ class MyAccountPageState extends State<MyAccountPage> {
                     child: Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            'Employee ID: ${_obscureEmployeeID ? '••••••••' : account['EmployeeID'] ?? ''}',
-                            style: const TextStyle(fontSize: 18),
+                          child: RichText(
+                            text: TextSpan(
+                              style: const TextStyle(fontSize: 18, color: Colors.black),
+                              children: [
+                                const TextSpan(text: 'Employee ID: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(text: _obscureEmployeeID ? '••••••••' : account['EmployeeID'] ?? ''),
+                              ],
+                            ),
                           ),
                         ),
                         IconButton(
@@ -128,21 +150,17 @@ class MyAccountPageState extends State<MyAccountPage> {
                     ),
                   ),
 
-                  // Role
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      'Role: ${account['RoleID'] ?? ''}',
-                      style: const TextStyle(fontSize: 18),
-                    ),
-                  ),
-
                   // Username
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      'Username: ${account['Username'] ?? ''}',
-                      style: const TextStyle(fontSize: 18),
+                    child: RichText(
+                      text: TextSpan(
+                        style: const TextStyle(fontSize: 18, color: Colors.black),
+                        children: [
+                          const TextSpan(text: 'Username: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                          TextSpan(text: account['Username'] ?? ''),
+                        ],
+                      ),
                     ),
                   ),
 
@@ -152,9 +170,14 @@ class MyAccountPageState extends State<MyAccountPage> {
                     child: Row(
                       children: [
                         Expanded(
-                          child: Text(
-                            'Password: ${_obscurePassword ? '••••••••' : account['Password'] ?? ''}',
-                            style: const TextStyle(fontSize: 18),
+                          child: RichText(
+                            text: TextSpan(
+                              style: const TextStyle(fontSize: 18, color: Colors.black),
+                              children: [
+                                const TextSpan(text: 'Password: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                                TextSpan(text: _obscurePassword ? '••••••••' : account['Password'] ?? ''),
+                              ],
+                            ),
                           ),
                         ),
                         IconButton(
