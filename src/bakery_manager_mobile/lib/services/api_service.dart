@@ -91,6 +91,55 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> updateRecipe({
+    required String recipeId,
+    required String recipeName,
+    required String instructions,
+    required int servings,
+    required String category,
+    required double prepTime,
+    required double cookTime,
+    required String description,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/update_recipe/$recipeId');
+    final headers = {'Content-Type': 'application/json'};
+    final now = DateTime.now();
+    final formattedDate = now.toIso8601String().split('T').join(' ').split('.').first;
+
+    final body = jsonEncode({
+      "RecipeName": recipeName,
+      "Instructions": instructions,
+      "Servings": servings.toString(),
+      "Category": category,
+      "PrepTime": prepTime,
+      "CookTime": cookTime,
+      "Description": description,
+      "UpdatedAt": formattedDate,  // Pass updated date
+    });
+
+    try {
+      final response = await http.put(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'success',
+          'updatedAt': responseBody['updatedAt'],
+        };
+      } else {
+        return {
+          'status': 'error',
+          'reason': 'Failed to update recipe: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
   static Future<Map<String, dynamic>> addRecipeIngredient({String recipeID = "", String ingredientDescription = "", double quantity = 0, String unit = "", int stockQuantity = 0, int reorderFlag = 0}) async {
     final url = Uri.parse('$baseApiUrl/add_recipe_ingredient');
     final headers = {'Content-Type': 'application/json'};

@@ -11,3 +11,4 @@ const String editRecipePageRoute = '/recipes/editRecipe';
 const String recipeDetailsPageRoute = '/recipes/details';
 const String myAccountRoute = '/myaccount';
 const String ingredientDetailsPageRoute = "/ingredients/details";
+final List<String> recipeCatagories = ['Bread', 'Muffins', 'Cookies', 'Pastry', 'Cake', 'Pie', 'Cupcakes', 'Dessert', 'Other'];

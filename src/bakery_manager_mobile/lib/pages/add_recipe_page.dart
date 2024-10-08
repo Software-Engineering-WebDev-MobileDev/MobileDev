@@ -1,3 +1,4 @@
+import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:flutter/material.dart';
 import '../models/recipe_ingredients.dart';
@@ -17,7 +18,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
   final TextEditingController servingsController = TextEditingController();  // New field
   final List<RecipeIngredient> ingredients = [];
 
-  final List<String> categories = ['Bread', 'Muffins', 'Cookies', 'Pastry', 'Cake', 'Pie', 'Cupcakes', 'Dessert'];
+  final List<String> categories = recipeCatagories;
   String? selectedCategory;
 
   void _addIngredientField() {
