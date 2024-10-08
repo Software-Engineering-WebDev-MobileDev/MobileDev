@@ -23,6 +23,11 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   String _emailType = 'Work'; // Single email type
   String _phoneType = 'Mobile'; // Single phone type
 
+  // Password requirement indicators
+  bool _has8Characters = false;
+  bool _hasNumber = false;
+  bool _hasSpecialCharacter = false;
+
   @override
   void initState() {
     super.initState();
@@ -34,22 +39,32 @@ class CreateAccountPageState extends State<CreateAccountPage> {
     usernameController = TextEditingController();
     passwordController = TextEditingController();
     emailController = TextEditingController();
-    phoneController = TextEditingController(); 
+    phoneController = TextEditingController();
+
+    // Add listener to password controller
+    passwordController.addListener(_validatePassword);
+  }
+
+  // Function to validate password requirements
+  void _validatePassword() {
+    String password = passwordController.text;
+    setState(() {
+      _has8Characters = password.length >= 8;
+      _hasNumber = password.contains(RegExp(r'\d'));
+      _hasSpecialCharacter = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+    });
   }
 
   Future<void> _createAccount() async {
     if (_formKey.currentState!.validate()) {
-      // Debugging: Print to confirm form validation passed
-      print("Form validation passed. Starting account creation process.");
-
       // Get user input from the text controllers
-      String firstName = firstNameController.text;
-      String lastName = lastNameController.text;
-      String employeeID = employeeIDController.text;
-      String username = usernameController.text;
-      String password = passwordController.text;
-      String email = emailController.text;
-      String phoneNumber = phoneController.text;  // Will not be used for now
+      String firstName = firstNameController.text.trim();
+      String lastName = lastNameController.text.trim();
+      String employeeID = employeeIDController.text.trim();
+      String username = usernameController.text.trim();
+      String password = passwordController.text.trim();
+      String email = emailController.text.trim();
+      String phoneNumber = phoneController.text.trim();
 
       try {
         // Step 1: Attempt to create account
@@ -61,19 +76,13 @@ class CreateAccountPageState extends State<CreateAccountPage> {
           password,
         );
 
-        // Debugging: Check account creation response
-        print("Account creation response: $accountResponse");
-
         if (accountResponse['status'] == 'success') {
-          // Step 2: Attempt to add email
+          // Step 2: Add email using session ID from account creation response
           Map<String, dynamic> emailResponse = await ApiService.addUserEmail(
-            sessionID: accountResponse['sessionID'],  // Assuming sessionID is part of the account creation response
+            sessionID: '',
             emailAddress: email,
-            emailType: _emailType,  // Email type selected from dropdown
+            emailType: _emailType, // Email type selected from dropdown
           );
-
-          // Debugging: Check email addition response
-          print("Email addition response: $emailResponse");
 
           if (emailResponse['status'] == 'success') {
             // Step 3: Commented out the phone number addition logic
@@ -101,7 +110,6 @@ class CreateAccountPageState extends State<CreateAccountPage> {
               const SnackBar(content: Text('Account created successfully!')),
             );
             Navigator.pop(context); // Go back after success
-
             /*
             } else {
               // Phone addition failed
@@ -113,40 +121,42 @@ class CreateAccountPageState extends State<CreateAccountPage> {
             */
 
           } else {
-            // Email addition failed
-            print("Email addition failed: ${emailResponse['reason']}");
+            // Handle email addition failure
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Failed to add email: ${emailResponse['reason']}')),
+              SnackBar(content: Text('${emailResponse['reason']}')),
             );
           }
         } else {
           // Account creation failed
-          print("Account creation failed: ${accountResponse['reason']}");
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Account creation failed: ${accountResponse['reason']}')),
           );
         }
       } catch (e) {
         // Handle any unexpected errors
-        print("Error occurred during account creation: $e");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('An error occurred: $e')),
         );
       }
     } else {
-      print("Form validation failed.");
+      // Form validation failed
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill out all fields correctly')),
+      );
     }
   }
 
   @override
   void dispose() {
+    // Remove listener and dispose controllers
+    passwordController.removeListener(_validatePassword);
     employeeIDController.dispose();
     firstNameController.dispose();
     lastNameController.dispose();
     usernameController.dispose();
     passwordController.dispose();
-    emailController.dispose(); // Dispose single email controller
-    phoneController.dispose(); // Dispose single phone controller
+    emailController.dispose();
+    phoneController.dispose();
     super.dispose();
   }
 
@@ -262,6 +272,15 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                           if (value == null || value.isEmpty) {
                             return 'Password is required';
                           }
+                          if (!_has8Characters) {
+                            return 'Password must be at least 8 characters';
+                          }
+                          if (!_hasNumber) {
+                            return 'Password must contain at least one number';
+                          }
+                          if (!_hasSpecialCharacter) {
+                            return 'Password must contain at least one special character';
+                          }
                           return null;
                         },
                       ),
@@ -275,6 +294,49 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                           _obscurePassword = !_obscurePassword;
                         });
                       },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+                // Password Requirements
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          _has8Characters ? Icons.check_circle : Icons.radio_button_unchecked,
+                          color: _has8Characters ? Colors.green : Colors.grey,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('At least 8 characters'),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          _hasNumber ? Icons.check_circle : Icons.radio_button_unchecked,
+                          color: _hasNumber ? Colors.green : Colors.grey,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Contains a number'),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          _hasSpecialCharacter ? Icons.check_circle : Icons.radio_button_unchecked,
+                          color: _hasSpecialCharacter ? Colors.green : Colors.grey,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Contains a special character'),
+                      ],
                     ),
                   ],
                 ),
@@ -301,7 +363,9 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                           if (value == null || value.isEmpty) {
                             return 'Email is required';
                           }
-                          // Add email format validation if necessary
+                          if (!value.contains('@')) {
+                            return 'Please enter a valid email address';
+                          }
                           return null;
                         },
                       ),
