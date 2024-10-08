@@ -35,6 +35,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
     super.initState();
 
     passwordController.addListener(_validatePassword);
+    usernameController.addListener(_checkRequirement);
   }
 
   void _validatePassword() {
@@ -45,6 +46,29 @@ class CreateAccountPageState extends State<CreateAccountPage> {
       _hasSpecialCharacter = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
     });
   }
+
+  void _checkRequirement() {
+    if (usernameController.text.toLowerCase() == 'velociraptor') {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('RAWRRRRRR!!!!!!! 🦖'),
+            content: const Text('Ya like velociprators?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Close'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
 
   Future<void> _createAccount() async {
     if (_formKey.currentState!.validate()) {
@@ -166,24 +190,6 @@ class CreateAccountPageState extends State<CreateAccountPage> {
               children: [
                 const SizedBox(height: 16),
 
-                // EmployeeID Field
-                TextFormField(
-                  controller: employeeIDController,
-                  decoration: const InputDecoration(
-                    labelText: 'Employee ID',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Employee ID is required';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
                 // FirstName Field
                 TextFormField(
                   controller: firstNameController,
@@ -214,6 +220,24 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Last Name is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // EmployeeID Field
+                TextFormField(
+                  controller: employeeIDController,
+                  decoration: const InputDecoration(
+                    labelText: 'Employee ID',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Employee ID is required';
                     }
                     return null;
                   },

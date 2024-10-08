@@ -190,24 +190,6 @@ class _EditAccountPageState extends State<EditAccountPage> {
               children: [
                 const SizedBox(height: 16),
 
-                // EmployeeID Field
-                TextFormField(
-                  controller: employeeIDController,
-                  decoration: const InputDecoration(
-                    labelText: 'Employee ID',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Employee ID is required';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
                 // FirstName Field
                 TextFormField(
                   controller: firstNameController,
@@ -238,6 +220,24 @@ class _EditAccountPageState extends State<EditAccountPage> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Last Name is required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
+
+                // EmployeeID Field
+                TextFormField(
+                  controller: employeeIDController,
+                  decoration: const InputDecoration(
+                    labelText: 'Employee ID',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Employee ID is required';
                     }
                     return null;
                   },
