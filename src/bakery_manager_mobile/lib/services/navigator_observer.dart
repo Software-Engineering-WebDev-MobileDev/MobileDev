@@ -30,7 +30,7 @@ class MyNavigatorObserver extends NavigatorObserver {
       // If the session is not valid, clear session and redirect to login
       await _sessionManager.clearSession();
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        navigator?.pushReplacementNamed('/login');
+      //  navigator?.pushReplacementNamed('/login');
       });
     }
   }
