@@ -18,6 +18,11 @@ class _EditAccountPageState extends State<EditAccountPage> {
   bool _obscurePassword = true;
   List<Map<String, dynamic>> _emails = [];
   List<Map<String, dynamic>> _phones = [];
+  List<TextEditingController> _emailControllers = [];
+  List<TextEditingController> _phoneControllers = [];
+
+  final List<String> emailTypes = ['Work', 'Home', 'Other'];
+  final List<String> phoneTypes = ['Mobile', 'Home', 'Work', 'Fax'];
 
   @override
   void initState() {
@@ -39,6 +44,30 @@ class _EditAccountPageState extends State<EditAccountPage> {
       {'number': '+1234567890', 'type': 'Mobile', 'primary': true},
       {'number': '+0987654321', 'type': 'Home', 'primary': false},
     ];
+
+    // Create controllers for emails and phones
+    _emailControllers = _emails.map((email) => TextEditingController(text: email['address'])).toList();
+    _phoneControllers = _phones.map((phone) => TextEditingController(text: phone['number'])).toList();
+  }
+
+  @override
+  void dispose() {
+    // Dispose all controllers
+    employeeIDController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
+    usernameController.dispose();
+    passwordController.dispose();
+
+    for (var controller in _emailControllers) {
+      controller.dispose();
+    }
+
+    for (var controller in _phoneControllers) {
+      controller.dispose();
+    }
+
+    super.dispose();
   }
 
   Future<void> _saveAccountChanges() async {
@@ -70,16 +99,6 @@ class _EditAccountPageState extends State<EditAccountPage> {
         );
       }
     }
-  }
-
-  @override
-  void dispose() {
-    employeeIDController.dispose();
-    firstNameController.dispose();
-    lastNameController.dispose();
-    usernameController.dispose();
-    passwordController.dispose();
-    super.dispose();
   }
 
   @override
@@ -228,7 +247,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                         children: [
                           Expanded(
                             child: TextFormField(
-                              controller: TextEditingController(text: email['address']),
+                              controller: _emailControllers[idx],
                               decoration: InputDecoration(
                                 hintText: 'Email ${idx + 1}',
                                 border: const OutlineInputBorder(
@@ -250,7 +269,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                                 email['type'] = newValue!;
                               });
                             },
-                            items: ['Work', 'Home', 'Other'].map((type) {
+                            items: emailTypes.map((type) {
                               return DropdownMenuItem(
                                 value: type,
                                 child: Text(type),
@@ -279,6 +298,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                   onPressed: () {
                     setState(() {
                       _emails.add({'address': '', 'type': 'Work', 'primary': false});
+                      _emailControllers.add(TextEditingController(text: ''));
                     });
                   },
                   icon: const Icon(Icons.add),
@@ -303,7 +323,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                         children: [
                           Expanded(
                             child: TextFormField(
-                              controller: TextEditingController(text: phone['number']),
+                              controller: _phoneControllers[idx],
                               decoration: InputDecoration(
                                 hintText: 'Phone ${idx + 1}',
                                 border: const OutlineInputBorder(
@@ -325,7 +345,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                                 phone['type'] = newValue!;
                               });
                             },
-                            items: ['Mobile', 'Home', 'Work'].map((type) {
+                            items: phoneTypes.map((type) {
                               return DropdownMenuItem(
                                 value: type,
                                 child: Text(type),
@@ -354,6 +374,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                   onPressed: () {
                     setState(() {
                       _phones.add({'number': '', 'type': 'Mobile', 'primary': false});
+                      _phoneControllers.add(TextEditingController(text: ''));
                     });
                   },
                   icon: const Icon(Icons.add),
