@@ -16,6 +16,10 @@ class _EditAccountPageState extends State<EditAccountPage> {
   late TextEditingController passwordController;
 
   bool _obscurePassword = true;
+  bool _has8Characters = false;
+  bool _hasNumber = false;
+  bool _hasSpecialCharacter = false;
+
   List<Map<String, dynamic>> _emails = [];
   List<Map<String, dynamic>> _phones = [];
   List<TextEditingController> _emailControllers = [];
@@ -48,6 +52,9 @@ class _EditAccountPageState extends State<EditAccountPage> {
     // Create controllers for emails and phones
     _emailControllers = _emails.map((email) => TextEditingController(text: email['address'])).toList();
     _phoneControllers = _phones.map((phone) => TextEditingController(text: phone['number'])).toList();
+
+    // Add listener to password controller for dynamic validation
+    passwordController.addListener(_validatePassword);
   }
 
   @override
@@ -57,6 +64,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
     firstNameController.dispose();
     lastNameController.dispose();
     usernameController.dispose();
+    passwordController.removeListener(_validatePassword);
     passwordController.dispose();
 
     for (var controller in _emailControllers) {
@@ -68,6 +76,38 @@ class _EditAccountPageState extends State<EditAccountPage> {
     }
 
     super.dispose();
+  }
+
+  // Function to validate password requirements
+  void _validatePassword() {
+    String password = passwordController.text;
+    setState(() {
+      _has8Characters = password.length >= 8;
+      _hasNumber = password.contains(RegExp(r'\d'));
+      _hasSpecialCharacter = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+    });
+  }
+
+  // Email validation function
+  String? _validateEmail(String email) {
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    if (email.isEmpty) {
+      return 'Email is required';
+    } else if (!emailRegex.hasMatch(email)) {
+      return 'Invalid email format.';
+    }
+    return null;
+  }
+
+  // Phone number validation function
+  String? _validatePhone(String phone) {
+    final phoneRegex = RegExp(r'^\d{10}$'); // Expecting 10 digits
+    if (phone.isEmpty) {
+      return 'Phone number is required';
+    } else if (!phoneRegex.hasMatch(phone)) {
+      return 'Phone number must be 10 digits long.';
+    }
+    return null;
   }
 
   void _removeEmailField(int index) {
@@ -224,7 +264,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Password Field with Eye Toggle
+                // Password Field with Eye Toggle and Validation
                 Row(
                   children: [
                     Expanded(
@@ -241,6 +281,15 @@ class _EditAccountPageState extends State<EditAccountPage> {
                           if (value == null || value.isEmpty) {
                             return 'Password is required';
                           }
+                          if (!_has8Characters) {
+                            return 'Password must be at least 8 characters';
+                          }
+                          if (!_hasNumber) {
+                            return 'Password must contain at least one number';
+                          }
+                          if (!_hasSpecialCharacter) {
+                            return 'Password must contain at least one special character';
+                          }
                           return null;
                         },
                       ),
@@ -254,6 +303,49 @@ class _EditAccountPageState extends State<EditAccountPage> {
                           _obscurePassword = !_obscurePassword;
                         });
                       },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+
+                // Password Requirements Display
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          _has8Characters ? Icons.check_circle : Icons.radio_button_unchecked,
+                          color: _has8Characters ? Colors.green : Colors.grey,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('At least 8 characters'),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          _hasNumber ? Icons.check_circle : Icons.radio_button_unchecked,
+                          color: _hasNumber ? Colors.green : Colors.grey,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Contains a number'),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          _hasSpecialCharacter ? Icons.check_circle : Icons.radio_button_unchecked,
+                          color: _hasSpecialCharacter ? Colors.green : Colors.grey,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        const Text('Contains a special character'),
+                      ],
                     ),
                   ],
                 ),
@@ -278,16 +370,17 @@ class _EditAccountPageState extends State<EditAccountPage> {
                               controller: _emailControllers[idx],
                               decoration: InputDecoration(
                                 hintText: 'Email ${idx + 1}',
-                                border: const OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                border: OutlineInputBorder(  // Remove the `const` keyword here
+                                  borderRadius: const BorderRadius.all(Radius.circular(10)),  // You can keep `const` here
+                                  borderSide: BorderSide(
+                                    color: _validateEmail(_emailControllers[idx].text) == null ? Colors.grey : Colors.red, // This is now dynamic
+                                  ),
                                 ),
                               ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Email is required';
-                                }
-                                return null;
+                              onChanged: (value) {
+                                setState(() {}); // This triggers re-validation on input changes
                               },
+                              validator: (value) => _validateEmail(value!),
                             ),
                           ),
                           DropdownButton<String>(
@@ -359,16 +452,20 @@ class _EditAccountPageState extends State<EditAccountPage> {
                               controller: _phoneControllers[idx],
                               decoration: InputDecoration(
                                 hintText: 'Phone ${idx + 1}',
-                                border: const OutlineInputBorder(
+                                border: OutlineInputBorder(
                                   borderRadius: BorderRadius.all(Radius.circular(10)),
+                                  borderSide: BorderSide(
+                                    color: _validatePhone(_phoneControllers[idx].text) == null
+                                        ? Colors.grey
+                                        : Colors.red, // Red border on error
+                                  ),
                                 ),
+                                errorMaxLines: 3, // Allows error message to span multiple lines
                               ),
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Phone number is required';
-                                }
-                                return null;
+                              onChanged: (value) {
+                                setState(() {});
                               },
+                              validator: (value) => _validatePhone(value!),
                             ),
                           ),
                           DropdownButton<String>(
