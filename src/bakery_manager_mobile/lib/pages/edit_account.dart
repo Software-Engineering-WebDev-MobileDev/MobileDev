@@ -70,6 +70,34 @@ class _EditAccountPageState extends State<EditAccountPage> {
     super.dispose();
   }
 
+  void _removeEmailField(int index) {
+    bool wasPrimary = _emails[index]['primary'];
+
+    setState(() {
+      _emails.removeAt(index);
+      _emailControllers.removeAt(index).dispose();
+
+      // If the primary email was deleted, make the first email the new primary
+      if (wasPrimary && _emails.isNotEmpty) {
+        _emails[0]['primary'] = true;
+      }
+    });
+  }
+
+  void _removePhoneField(int index) {
+    bool wasPrimary = _phones[index]['primary'];
+
+    setState(() {
+      _phones.removeAt(index);
+      _phoneControllers.removeAt(index).dispose();
+
+      // If the primary phone was deleted, make the first phone the new primary
+      if (wasPrimary && _phones.isNotEmpty) {
+        _phones[0]['primary'] = true;
+      }
+    });
+  }
+
   Future<void> _saveAccountChanges() async {
     if (_formKey.currentState!.validate()) {
       // Get user input from the text controllers
@@ -289,6 +317,11 @@ class _EditAccountPageState extends State<EditAccountPage> {
                             },
                           ),
                           const Text('Primary'),
+                          if (_emails.length > 1)
+                            IconButton(
+                              icon: const Icon(Icons.remove_circle, color: Colors.red),
+                              onPressed: () => _removeEmailField(idx),
+                            ),
                         ],
                       ),
                     );
@@ -365,6 +398,11 @@ class _EditAccountPageState extends State<EditAccountPage> {
                             },
                           ),
                           const Text('Primary'),
+                          if (_phones.length > 1)
+                            IconButton(
+                              icon: const Icon(Icons.remove_circle, color: Colors.red),
+                              onPressed: () => _removePhoneField(idx),
+                            ),
                         ],
                       ),
                     );
