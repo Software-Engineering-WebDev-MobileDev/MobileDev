@@ -14,8 +14,10 @@ class _EditAccountPageState extends State<EditAccountPage> {
   late TextEditingController lastNameController;
   late TextEditingController usernameController;
   late TextEditingController passwordController;
+  late TextEditingController confirmPasswordController;
 
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   bool _has8Characters = false;
   bool _hasNumber = false;
   bool _hasSpecialCharacter = false;
@@ -38,6 +40,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
     lastNameController = TextEditingController(text: 'Doe');
     usernameController = TextEditingController(text: 'johndoe');
     passwordController = TextEditingController(text: 'password123');
+    confirmPasswordController = TextEditingController();
 
     // Mock email and phone data (replace with API data in the future)
     _emails = [
@@ -66,7 +69,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
     usernameController.dispose();
     passwordController.removeListener(_validatePassword);
     passwordController.dispose();
-
+    confirmPasswordController.dispose();
     for (var controller in _emailControllers) {
       controller.dispose();
     }
@@ -346,6 +349,44 @@ class _EditAccountPageState extends State<EditAccountPage> {
                         const SizedBox(width: 8),
                         const Text('Contains a special character'),
                       ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Confirm Password Field with Eye Toggle
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: confirmPasswordController,
+                        obscureText: _obscureConfirmPassword,
+                        decoration: const InputDecoration(
+                          labelText: 'Confirm Password',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please confirm your password';
+                          }
+                          if (value != passwordController.text) {
+                            return 'Passwords do not match';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscureConfirmPassword = !_obscureConfirmPassword;
+                        });
+                      },
                     ),
                   ],
                 ),

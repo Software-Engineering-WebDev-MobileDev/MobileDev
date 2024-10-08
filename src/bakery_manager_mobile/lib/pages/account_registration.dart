@@ -16,9 +16,11 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   late TextEditingController lastNameController;
   late TextEditingController usernameController;
   late TextEditingController passwordController;
-  late TextEditingController emailController; // Single email controller
-  late TextEditingController phoneController; // Single phone controller
+  late TextEditingController confirmPasswordController;
+  late TextEditingController emailController;
+  late TextEditingController phoneController;
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
 
   String _emailType = 'Work'; // Single email type
   String _phoneType = 'Mobile'; // Single phone type
@@ -38,8 +40,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
     lastNameController = TextEditingController();
     usernameController = TextEditingController();
     passwordController = TextEditingController();
-    emailController = TextEditingController();
-    phoneController = TextEditingController();
+    confirmPasswordController = TextEditingController();
 
     // Add listener to password controller
     passwordController.addListener(_validatePassword);
@@ -155,6 +156,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
     lastNameController.dispose();
     usernameController.dispose();
     passwordController.dispose();
+    confirmPasswordController.dispose(); // Dispose confirm password controller
     emailController.dispose();
     phoneController.dispose();
     super.dispose();
@@ -337,6 +339,44 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                         const SizedBox(width: 8),
                         const Text('Contains a special character'),
                       ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Confirm Password Field with Eye Toggle
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: confirmPasswordController,
+                        obscureText: _obscureConfirmPassword,
+                        decoration: const InputDecoration(
+                          labelText: 'Confirm Password',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please confirm your password';
+                          }
+                          if (value != passwordController.text) {
+                            return 'Passwords do not match';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscureConfirmPassword = !_obscureConfirmPassword;
+                        });
+                      },
                     ),
                   ],
                 ),
