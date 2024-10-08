@@ -11,14 +11,14 @@ class CreateAccountPage extends StatefulWidget {
 
 class CreateAccountPageState extends State<CreateAccountPage> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController employeeIDController;
-  late TextEditingController firstNameController;
-  late TextEditingController lastNameController;
-  late TextEditingController usernameController;
-  late TextEditingController passwordController;
-  late TextEditingController confirmPasswordController;
-  late TextEditingController emailController;
-  late TextEditingController phoneController;
+  final TextEditingController employeeIDController = TextEditingController();
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
@@ -33,14 +33,6 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   @override
   void initState() {
     super.initState();
-
-    // Initialize controllers for new account creation
-    employeeIDController = TextEditingController();
-    firstNameController = TextEditingController();
-    lastNameController = TextEditingController();
-    usernameController = TextEditingController();
-    passwordController = TextEditingController();
-    confirmPasswordController = TextEditingController();
 
     // Add listener to password controller
     passwordController.addListener(_validatePassword);
