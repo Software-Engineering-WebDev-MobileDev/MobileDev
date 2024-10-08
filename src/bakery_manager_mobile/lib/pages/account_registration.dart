@@ -422,7 +422,9 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                           if (value == null || value.isEmpty) {
                             return 'Phone number is required';
                           }
-                          // Add phone number format validation if necessary
+                          if (!RegExp(r'^\d{10}$').hasMatch(value)) {
+                            return 'Phone number must be 10 digits';
+                          }
                           return null;
                         },
                       ),
