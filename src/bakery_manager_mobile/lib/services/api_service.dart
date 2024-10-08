@@ -250,9 +250,10 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> getInventory(String sessionId,
+  static Future<Map<String, dynamic>> getInventory(
       {int page = 1, int pageSize = 20}) async {
     final url = Uri.parse('$baseApiUrl/inventory');
+    String sessionId = await SessionManager().getSessionToken() ?? "";
     try {
       final response = await http.get(
         url,

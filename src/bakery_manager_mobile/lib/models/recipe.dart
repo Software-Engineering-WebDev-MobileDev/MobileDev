@@ -21,14 +21,13 @@ class Recipe {
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
     return Recipe(
-      recipeId: json['RecipeID'] ?? '',
-      recipeName: json['RecipeName'] ?? '',
-      instructions: json['Instructions'] ?? '',
-      description: json['Description'] ?? '',
-      category: json['Category'],
-      servings: json['Servings'] ?? 1,
-      cookTime: json['CookTime']?.toDouble() ?? 1.0,
-      prepTime: json['PrepTime']?.toDouble() ?? 1.0
-    );
+        recipeId: json['RecipeID'] ?? '',
+        recipeName: json['RecipeName'] ?? '',
+        instructions: json['Instructions'] ?? '',
+        description: json['Description'] ?? '',
+        category: json['Category'],
+        servings: json['Servings'] ?? 1,
+        cookTime: json['CookTime']?.toDouble() ?? 1.0,
+        prepTime: json['PrepTime']?.toDouble() ?? 1.0);
   }
 }

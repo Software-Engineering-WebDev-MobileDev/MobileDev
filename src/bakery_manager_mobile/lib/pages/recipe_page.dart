@@ -37,7 +37,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
     });
   }
 
-    // Fetch recipes function
+  // Fetch recipes function
   void _fetchRecipes() {
     _futureRecipes = ApiService.getRecipes().then((response) {
       if (response['status'] == 'success') {
@@ -55,13 +55,13 @@ class AllRecipesPageState extends State<AllRecipesPage> {
       return <Recipe>[]; // Return an empty list on error
     });
   }
-  
 
   // Filter recipes function by search query
   void _filterRecipes(String query) {
     setState(() {
       if (query.isEmpty) {
-        _filterByCategory(_currentCategoryFilter, _allRecipes); // Restore category filter
+        _filterByCategory(
+            _currentCategoryFilter, _allRecipes); // Restore category filter
       } else {
         _filteredRecipes = _filteredRecipes
             .where((recipe) =>
@@ -78,9 +78,8 @@ class AllRecipesPageState extends State<AllRecipesPage> {
       if (category == 'All') {
         _filteredRecipes = recipes;
       } else {
-        _filteredRecipes = recipes
-            .where((recipe) => recipe.category == category)
-            .toList();
+        _filteredRecipes =
+            recipes.where((recipe) => recipe.category == category).toList();
       }
     });
   }
@@ -119,7 +118,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
                 foreground: Paint()
                   ..style = PaintingStyle.stroke
                   ..strokeWidth = 6
-                  ..color = const Color.fromARGB(255, 140,72,27),
+                  ..color = const Color.fromARGB(255, 140, 72, 27),
               ),
             ),
             // Solid text as fill.
@@ -129,7 +128,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
                 fontFamily: 'Pacifico',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 246,235,216),
+                color: Color.fromARGB(255, 246, 235, 216),
               ),
             ),
           ],
@@ -140,16 +139,19 @@ class AllRecipesPageState extends State<AllRecipesPage> {
         backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         //changed the color for both icons in the app bar
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 140,72,27)),
+          icon: const Icon(Icons.arrow_back,
+              color: Color.fromARGB(255, 140, 72, 27)),
           onPressed: () {
             Navigator.pop(context); // Back navigation
           },
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.home, color: Color.fromARGB(255, 140,72,27)),
+            icon:
+                const Icon(Icons.home, color: Color.fromARGB(255, 140, 72, 27)),
             onPressed: () {
-              Navigator.popUntil(context, ModalRoute.withName('/')); // Home navigation
+              Navigator.popUntil(
+                  context, ModalRoute.withName('/')); // Home navigation
             },
           ),
         ],
@@ -219,8 +221,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
                     return ListView.builder(
                       itemCount: _filteredRecipes.length,
                       itemBuilder: (context, index) {
-                        return _RecipeItem(
-                            recipe: _filteredRecipes[index]);
+                        return _RecipeItem(recipe: _filteredRecipes[index]);
                       },
                     );
                   }
@@ -245,12 +246,12 @@ class AllRecipesPageState extends State<AllRecipesPage> {
               },
               icon: const Icon(
                 Icons.add,
-                color: Color.fromARGB(255, 246,235,216),
+                color: Color.fromARGB(255, 246, 235, 216),
               ),
               label: const Text(
                 'Add recipe',
                 style: TextStyle(
-                  color: Color.fromARGB(255, 246,235,216),
+                  color: Color.fromARGB(255, 246, 235, 216),
                 ),
               ),
             ),
@@ -274,20 +275,20 @@ class _RecipeItem extends StatelessWidget {
       },
       child: Container(
         decoration: const BoxDecoration(
-          // boxShadow: [
-          //   BoxShadow(
-          //     color: Colors.grey.withOpacity(0.5), // Shadow under items
-          //     spreadRadius: 2,
-          //     blurRadius: 8,
-          //     offset: const Offset(0, 4), // Shadow offset
-          //   ),
-          // ],
-        ),
+            // boxShadow: [
+            //   BoxShadow(
+            //     color: Colors.grey.withOpacity(0.5), // Shadow under items
+            //     spreadRadius: 2,
+            //     blurRadius: 8,
+            //     offset: const Offset(0, 4), // Shadow offset
+            //   ),
+            // ],
+            ),
         child: Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          color: const Color.fromARGB(255, 209,126,51),
+          color: const Color.fromARGB(255, 209, 126, 51),
           elevation: 4, // 3D effect
           margin: const EdgeInsets.symmetric(vertical: 8),
           child: Padding(
@@ -295,7 +296,7 @@ class _RecipeItem extends StatelessWidget {
             child: Text(
               recipe.recipeName,
               style: const TextStyle(
-                color: Color.fromARGB(255, 246,235,216),
+                color: Color.fromARGB(255, 246, 235, 216),
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),

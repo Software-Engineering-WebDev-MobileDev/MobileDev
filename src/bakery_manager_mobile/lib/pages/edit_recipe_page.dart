@@ -40,7 +40,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
     // Ensure that you check if the arguments are available
     final Recipe recipe = ModalRoute.of(context)!.settings.arguments as Recipe;
 
-if (!_hasLoadedInitialRecipeData) {
+    if (!_hasLoadedInitialRecipeData) {
       setState(() {
         recipeNameController.text = recipe.recipeName;
         instructionsController.text = recipe.instructions;
@@ -49,7 +49,7 @@ if (!_hasLoadedInitialRecipeData) {
         servingsController.text = recipe.servings.toString();
 
         // Only set this the first time
-        selectedCategory = recipe.category; 
+        selectedCategory = recipe.category;
         if (!categories.contains(selectedCategory)) {
           selectedCategory = "Other";
         }
@@ -59,7 +59,8 @@ if (!_hasLoadedInitialRecipeData) {
       });
       // Load ingredients (make sure to fetch from backend later)
       ingredients.clear();
-      for (var ing in []) { // TODO: Replace with actual ingredient data from backend
+      for (var ing in []) {
+        // TODO: Replace with actual ingredient data from backend
         ingredients.add(RecipeIngredient(
           recipeIngredientId: ing['id'],
           componentId: ing['componentId'],
@@ -98,7 +99,8 @@ if (!_hasLoadedInitialRecipeData) {
         title: const Text('Edit Recipe'),
         backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 140,72,27)),
+          icon: const Icon(Icons.arrow_back,
+              color: Color.fromARGB(255, 140, 72, 27)),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -116,7 +118,8 @@ if (!_hasLoadedInitialRecipeData) {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              const Text('Name:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text('Name:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               TextField(
                 controller: recipeNameController,
@@ -128,7 +131,8 @@ if (!_hasLoadedInitialRecipeData) {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Category:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text('Category:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 value: selectedCategory,
@@ -140,7 +144,7 @@ if (!_hasLoadedInitialRecipeData) {
                 }).toList(),
                 onChanged: (value) {
                   setState(() {
-                  selectedCategory = value;
+                    selectedCategory = value;
                   });
                 },
                 decoration: const InputDecoration(
@@ -151,7 +155,8 @@ if (!_hasLoadedInitialRecipeData) {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Prep Time (minutes):', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text('Prep Time (minutes):',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               TextField(
                 controller: prepTimeController,
@@ -164,7 +169,8 @@ if (!_hasLoadedInitialRecipeData) {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Cook Time (minutes):', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text('Cook Time (minutes):',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               TextField(
                 controller: cookTimeController,
@@ -177,7 +183,8 @@ if (!_hasLoadedInitialRecipeData) {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Servings:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text('Servings:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               TextField(
                 controller: servingsController,
@@ -190,7 +197,8 @@ if (!_hasLoadedInitialRecipeData) {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Instructions:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text('Instructions:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               TextField(
                 controller: instructionsController,
@@ -204,7 +212,8 @@ if (!_hasLoadedInitialRecipeData) {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('Ingredients:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text('Ingredients:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               ...ingredients.asMap().entries.map((entry) {
                 int idx = entry.key;
@@ -215,11 +224,13 @@ if (!_hasLoadedInitialRecipeData) {
                     children: [
                       Expanded(
                         child: TextField(
-                          onChanged: (value) => ingredient.ingredientDescription = value,
+                          onChanged: (value) =>
+                              ingredient.ingredientDescription = value,
                           decoration: InputDecoration(
                             hintText: 'Ingredient ${idx + 1}',
                             border: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
                             ),
                           ),
                         ),
@@ -227,12 +238,14 @@ if (!_hasLoadedInitialRecipeData) {
                       const SizedBox(width: 8),
                       Expanded(
                         child: TextField(
-                          onChanged: (value) => ingredient.quantity = double.tryParse(value) ?? 0.0,
+                          onChanged: (value) => ingredient.quantity =
+                              double.tryParse(value) ?? 0.0,
                           keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
                             hintText: 'Quantity',
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
                             ),
                           ),
                         ),
@@ -244,14 +257,16 @@ if (!_hasLoadedInitialRecipeData) {
                           decoration: const InputDecoration(
                             hintText: 'Measurement',
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
                             ),
                           ),
                         ),
                       ),
                       if (idx != 0)
                         IconButton(
-                          icon: const Icon(Icons.remove_circle, color: Colors.red),
+                          icon: const Icon(Icons.remove_circle,
+                              color: Colors.red),
                           onPressed: () => _removeIngredientField(idx),
                         ),
                     ],
@@ -285,15 +300,14 @@ if (!_hasLoadedInitialRecipeData) {
 
                   // Update recipe
                   Map<String, dynamic> response = await ApiService.updateRecipe(
-                    recipeId: recipe.recipeId,
-                    recipeName: recipeName,
-                    instructions: instructions,
-                    prepTime: double.tryParse(prepTime) ?? 0,
-                    cookTime: double.tryParse(cookTime) ?? 0,
-                    servings: int.tryParse(servings) ?? 1,
-                    category: newCategory,
-                    description: ""
-                  );
+                      recipeId: recipe.recipeId,
+                      recipeName: recipeName,
+                      instructions: instructions,
+                      prepTime: double.tryParse(prepTime) ?? 0,
+                      cookTime: double.tryParse(cookTime) ?? 0,
+                      servings: int.tryParse(servings) ?? 1,
+                      category: newCategory,
+                      description: "");
 
                   if (response['status'] == 'success') {
                     List<String> errors = []; //TODO Backend
@@ -311,18 +325,21 @@ if (!_hasLoadedInitialRecipeData) {
                     // }
                     if (context.mounted) {
                       if (errors.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Recipe and all ingredients updated successfully')));
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text(
+                                'Recipe and all ingredients updated successfully')));
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Recipe updated, but some ingredients failed to update.')));
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text(
+                                'Recipe updated, but some ingredients failed to update.')));
                       }
                       Navigator.pop(context);
                     }
                   } else {
                     if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Failed to update recipe: ${response['reason']}')));
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          content: Text(
+                              'Failed to update recipe: ${response['reason']}')));
                     }
                   }
                 },

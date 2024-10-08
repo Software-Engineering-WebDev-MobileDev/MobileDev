@@ -14,7 +14,6 @@ import 'package:bakery_manager_mobile/pages/edit_recipe_page.dart';
 import 'package:bakery_manager_mobile/pages/recipe_details_page.dart';
 import 'package:bakery_manager_mobile/pages/ingredient_detail_page.dart';
 
-
 Map<String, WidgetBuilder> appRoutes = {
   homePageRoute: (context) => const MyHomePage(),
   recipePageRoute: (context) => const AllRecipesPage(),

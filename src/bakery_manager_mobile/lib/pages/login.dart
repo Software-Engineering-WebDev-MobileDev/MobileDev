@@ -19,7 +19,7 @@ class LoginPageState extends State<LoginPage> {
   bool _isButtonDisabled = true;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     _usernameController.addListener(_updateButton);
     _passwordController.addListener(_updateButton);
@@ -27,9 +27,9 @@ class LoginPageState extends State<LoginPage> {
     _checkSession();
   }
 
-  void _checkSession() async{
+  void _checkSession() async {
     if (await SessionManager().isSessionValid()) {
-      if (mounted){
+      if (mounted) {
         Navigator.pushReplacementNamed(context, homePageRoute);
       }
     }
@@ -107,9 +107,7 @@ class LoginPageState extends State<LoginPage> {
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(10)
-          ),
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(10)),
         ),
         title: Stack(
           children: <Widget>[
@@ -122,7 +120,7 @@ class LoginPageState extends State<LoginPage> {
                 foreground: Paint()
                   ..style = PaintingStyle.stroke
                   ..strokeWidth = 6
-                  ..color = const Color.fromARGB(255, 140,72,27),
+                  ..color = const Color.fromARGB(255, 140, 72, 27),
               ),
             ),
             // Solid text as fill.
@@ -132,7 +130,7 @@ class LoginPageState extends State<LoginPage> {
                 fontFamily: 'Pacifico',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 246,235,216),
+                color: Color.fromARGB(255, 246, 235, 216),
               ),
             ),
           ],
@@ -152,7 +150,7 @@ class LoginPageState extends State<LoginPage> {
                     fontFamily: 'Pacifico',
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 209,126,51),
+                    color: Color.fromARGB(255, 209, 126, 51),
                   ),
                 ),
                 const SizedBox(height: 24),

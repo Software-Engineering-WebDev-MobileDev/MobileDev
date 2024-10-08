@@ -63,19 +63,23 @@ class RecipeDetailPageState extends State<RecipeDetailPage> {
                     const SizedBox(height: 16),
                     const Text(
                       'Ingredients:',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     FutureBuilder<List<Map<String, dynamic>>>(
                       future: _futureIngredients,
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return const CircularProgressIndicator();
                         } else if (snapshot.hasError) {
                           return Text('Error: ${snapshot.error}');
-                        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
                           return const Padding(
                             padding: EdgeInsets.symmetric(vertical: 8.0),
-                            child: Text('No ingredients found for this recipe.'),
+                            child:
+                                Text('No ingredients found for this recipe.'),
                           );
                         } else {
                           return Column(
@@ -96,7 +100,8 @@ class RecipeDetailPageState extends State<RecipeDetailPage> {
                     const SizedBox(height: 16),
                     const Text(
                       'Instructions:',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Text(
                       recipe.instructions.isNotEmpty
@@ -178,12 +183,13 @@ class RecipeDetailPageState extends State<RecipeDetailPage> {
                           );
                         },
                       );
-        
+
                       if (confirmed) {
                         // Call API to delete recipe and handle success/failure
                         try {
-                          await ApiService.deleteRecipe(recipeId: recipe.recipeId);
-                          if (mounted) { 
+                          await ApiService.deleteRecipe(
+                              recipeId: recipe.recipeId);
+                          if (mounted) {
                             Navigator.pop(context);
                           }
                         } catch (e) {

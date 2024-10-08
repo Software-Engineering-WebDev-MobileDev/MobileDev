@@ -141,7 +141,8 @@ class TaskPageState extends State<TaskPage> {
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -149,7 +150,9 @@ class TaskPageState extends State<TaskPage> {
               onPressed: () {
                 // TODO: Implement add task functionality
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Add task functionality not implemented yet')),
+                  const SnackBar(
+                      content:
+                          Text('Add task functionality not implemented yet')),
                 );
               },
               icon: const Icon(Icons.add),
@@ -208,7 +211,8 @@ class _TaskItem extends StatelessWidget {
           ),
           color: const Color(0xFFFDF1E0),
           elevation: 2, // Slight elevation for shadow effect
-          margin: const EdgeInsets.symmetric(vertical: 6), // Slightly reduced space
+          margin:
+              const EdgeInsets.symmetric(vertical: 6), // Slightly reduced space
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(

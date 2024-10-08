@@ -93,7 +93,8 @@ class MyAccountPageState extends State<MyAccountPage> {
           IconButton(
             icon: const Icon(Icons.home, color: Colors.white),
             onPressed: () {
-              Navigator.popUntil(context, ModalRoute.withName('/')); // Home navigation
+              Navigator.popUntil(
+                  context, ModalRoute.withName('/')); // Home navigation
             },
           ),
         ],

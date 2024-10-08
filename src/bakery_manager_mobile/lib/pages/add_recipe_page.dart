@@ -13,9 +13,12 @@ class AddRecipePage extends StatefulWidget {
 class _AddRecipePageState extends State<AddRecipePage> {
   final TextEditingController recipeNameController = TextEditingController();
   final TextEditingController instructionsController = TextEditingController();
-  final TextEditingController prepTimeController = TextEditingController();  // New field
-  final TextEditingController cookTimeController = TextEditingController();  // New field
-  final TextEditingController servingsController = TextEditingController();  // New field
+  final TextEditingController prepTimeController =
+      TextEditingController(); // New field
+  final TextEditingController cookTimeController =
+      TextEditingController(); // New field
+  final TextEditingController servingsController =
+      TextEditingController(); // New field
   final List<RecipeIngredient> ingredients = [];
 
   final List<String> categories = recipeCatagories;
@@ -55,7 +58,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 foreground: Paint()
                   ..style = PaintingStyle.stroke
                   ..strokeWidth = 6
-                  ..color = const Color.fromARGB(255, 140,72,27),
+                  ..color = const Color.fromARGB(255, 140, 72, 27),
               ),
             ),
             // Solid text as fill.
@@ -65,14 +68,15 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 fontFamily: 'Pacifico',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 246,235,216),
+                color: Color.fromARGB(255, 246, 235, 216),
               ),
             ),
           ],
         ),
         backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 140,72,27)),
+          icon: const Icon(Icons.arrow_back,
+              color: Color.fromARGB(255, 140, 72, 27)),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -132,7 +136,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
               ),
               const SizedBox(height: 16),
               const Text(
-                'Prep Time (minutes):',  // Label for prep time
+                'Prep Time (minutes):', // Label for prep time
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
@@ -148,7 +152,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
               ),
               const SizedBox(height: 16),
               const Text(
-                'Cook Time (minutes):',  // Label for cook time
+                'Cook Time (minutes):', // Label for cook time
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
@@ -164,7 +168,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
               ),
               const SizedBox(height: 16),
               const Text(
-                'Servings:',  // Label for servings
+                'Servings:', // Label for servings
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
@@ -210,11 +214,13 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     children: [
                       Expanded(
                         child: TextField(
-                          onChanged: (value) => ingredient.ingredientDescription = value,
+                          onChanged: (value) =>
+                              ingredient.ingredientDescription = value,
                           decoration: InputDecoration(
                             hintText: 'Ingredient ID ${idx + 1}',
                             border: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
                             ),
                           ),
                         ),
@@ -222,12 +228,14 @@ class _AddRecipePageState extends State<AddRecipePage> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: TextField(
-                          onChanged: (value) => ingredient.quantity = double.tryParse(value) ?? 0.0,
+                          onChanged: (value) => ingredient.quantity =
+                              double.tryParse(value) ?? 0.0,
                           keyboardType: TextInputType.number,
                           decoration: const InputDecoration(
                             hintText: 'Quantity',
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
                             ),
                           ),
                         ),
@@ -239,14 +247,16 @@ class _AddRecipePageState extends State<AddRecipePage> {
                           decoration: const InputDecoration(
                             hintText: 'Measurement',
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10)),
                             ),
                           ),
                         ),
                       ),
                       if (idx != 0)
                         IconButton(
-                          icon: const Icon(Icons.remove_circle, color: Colors.red),
+                          icon: const Icon(Icons.remove_circle,
+                              color: Colors.red),
                           onPressed: () => _removeIngredientField(idx),
                         ),
                     ],
@@ -280,36 +290,39 @@ class _AddRecipePageState extends State<AddRecipePage> {
 
                   // Save recipe
                   Map<String, dynamic> response = await ApiService.addRecipe(
-                    recipeName: recipeName,
-                    ingredients: instructions,
-                    prepTime: double.tryParse(prepTime) ?? 0,
-                    cookTime: double.tryParse(cookTime) ?? 0,
-                    servings: int.tryParse(servings) ?? 1,
-                    category: selectedCategory ?? "Bread"
-                  );
-                  
+                      recipeName: recipeName,
+                      ingredients: instructions,
+                      prepTime: double.tryParse(prepTime) ?? 0,
+                      cookTime: double.tryParse(cookTime) ?? 0,
+                      servings: int.tryParse(servings) ?? 1,
+                      category: selectedCategory ?? "Bread");
+
                   if (response['status'] == 'success') {
                     String recipeId = response['recipeID'];
                     List<String> errors = [];
                     for (var ingredient in ingredients) {
-                      Map<String, dynamic> ingredientResponse = await ApiService.addRecipeIngredient(
+                      Map<String, dynamic> ingredientResponse =
+                          await ApiService.addRecipeIngredient(
                         recipeID: recipeId,
                         ingredientDescription: ingredient.ingredientDescription,
                         quantity: ingredient.quantity,
                         unit: ingredient.measurement,
                       );
                       if (ingredientResponse['status'] != 'success') {
-                        errors.add('Failed to add ingredient ${ingredient.ingredientDescription}: ${ingredientResponse['reason']}');
+                        errors.add(
+                            'Failed to add ingredient ${ingredient.ingredientDescription}: ${ingredientResponse['reason']}');
                       }
                     }
                     if (context.mounted) {
                       if (errors.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Recipe and all ingredients added successfully')));
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text(
+                                'Recipe and all ingredients added successfully')));
                       } else {
                         // Show error if ingredients failed to add
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Recipe added, but some ingredients failed to add. Check recipe details.')));
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                            content: Text(
+                                'Recipe added, but some ingredients failed to add. Check recipe details.')));
                       }
                       // Pop context even if ingredients failed to add
                       Navigator.pop(context);
@@ -317,7 +330,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   } else {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text('Failed to add recipe: ${response['reason']}')));
+                          content: Text(
+                              'Failed to add recipe: ${response['reason']}')));
                       // Do not exit if recipe addition fails
                     }
                   }

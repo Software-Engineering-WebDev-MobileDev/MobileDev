@@ -20,7 +20,7 @@ class ProductPage extends StatelessWidget {
                 foreground: Paint()
                   ..style = PaintingStyle.stroke
                   ..strokeWidth = 6
-                  ..color = const Color.fromARGB(255, 140,72,27),
+                  ..color = const Color.fromARGB(255, 140, 72, 27),
               ),
             ),
             // Solid text as fill.
@@ -30,22 +30,25 @@ class ProductPage extends StatelessWidget {
                 fontFamily: 'Pacifico',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 246,235,216),
+                color: Color.fromARGB(255, 246, 235, 216),
               ),
             ),
           ],
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 140,72,27)),
+          icon: const Icon(Icons.arrow_back,
+              color: Color.fromARGB(255, 140, 72, 27)),
           onPressed: () {
             Navigator.pop(context); // Back navigation
           },
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.home, color: Color.fromARGB(255, 140,72,27)),
+            icon:
+                const Icon(Icons.home, color: Color.fromARGB(255, 140, 72, 27)),
             onPressed: () {
-              Navigator.popUntil(context, ModalRoute.withName('/')); // Home navigation
+              Navigator.popUntil(
+                  context, ModalRoute.withName('/')); // Home navigation
             },
           ),
         ],

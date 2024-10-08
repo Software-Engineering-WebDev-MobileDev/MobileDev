@@ -1,7 +1,6 @@
-import 'dart:async';  // Import to use Future and Timer
+import 'dart:async'; // Import to use Future and Timer
 import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:bakery_manager_mobile/services/api_service.dart';
-import 'package:bakery_manager_mobile/services/session_manager.dart';
 import 'package:flutter/material.dart';
 import '../models/ingredient.dart';
 
@@ -19,17 +18,13 @@ class IngredientPageState extends State<IngredientPage> {
   @override
   void initState() {
     super.initState();
-    _futureIngredients = _fetchIngredients(); // Fetch ingredients from API initially
+    _futureIngredients =
+        _fetchIngredients(); // Fetch ingredients from API initially
   }
 
   Future<List<Ingredient>> _fetchIngredients() async {
-    
-    String sessionId = await SessionManager().getSessionToken() ?? "";
-
-
-
     // Call getInventory function
-    final result = await ApiService.getInventory(sessionId);
+    final result = await ApiService.getInventory();
 
     if (result['status'] == 'success') {
       return result['inventory'];
@@ -68,7 +63,7 @@ class IngredientPageState extends State<IngredientPage> {
                 foreground: Paint()
                   ..style = PaintingStyle.stroke
                   ..strokeWidth = 6
-                  ..color = const Color.fromARGB(255, 140,72,27),
+                  ..color = const Color.fromARGB(255, 140, 72, 27),
               ),
             ),
             // Solid text as fill.
@@ -78,22 +73,25 @@ class IngredientPageState extends State<IngredientPage> {
                 fontFamily: 'Pacifico',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 246,235,216),
+                color: Color.fromARGB(255, 246, 235, 216),
               ),
             ),
           ],
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 140,72,27)),
+          icon: const Icon(Icons.arrow_back,
+              color: Color.fromARGB(255, 140, 72, 27)),
           onPressed: () {
             Navigator.pop(context); // Back navigation
           },
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.home, color: Color.fromARGB(255, 140,72,27)),
+            icon:
+                const Icon(Icons.home, color: Color.fromARGB(255, 140, 72, 27)),
             onPressed: () {
-              Navigator.popUntil(context, ModalRoute.withName('/')); // Home navigation
+              Navigator.popUntil(
+                  context, ModalRoute.withName('/')); // Home navigation
             },
           ),
         ],
@@ -138,11 +136,13 @@ class IngredientPageState extends State<IngredientPage> {
                     return ListView.builder(
                       itemCount: _filteredIngredients.length,
                       itemBuilder: (context, index) {
-                        return _IngredientItem(ingredient: _filteredIngredients[index]);
+                        return _IngredientItem(
+                            ingredient: _filteredIngredients[index]);
                       },
                     );
                   } else {
-                    return const Center(child: Text('No ingredients available'));
+                    return const Center(
+                        child: Text('No ingredients available'));
                   }
                 },
               ),
@@ -151,7 +151,8 @@ class IngredientPageState extends State<IngredientPage> {
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -159,7 +160,9 @@ class IngredientPageState extends State<IngredientPage> {
               onPressed: () {
                 // TODO: Implement add ingredient functionality
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Add ingredient functionality not implemented yet')),
+                  const SnackBar(
+                      content: Text(
+                          'Add ingredient functionality not implemented yet')),
                 );
               },
               icon: const Icon(Icons.add),
@@ -181,7 +184,8 @@ class _IngredientItem extends StatelessWidget {
     return InkWell(
       onTap: () {
         //Navigate to ingredient details page.
-        Navigator.pushNamed(context, ingredientDetailsPageRoute, arguments: ingredient);
+        Navigator.pushNamed(context, ingredientDetailsPageRoute,
+            arguments: ingredient);
       },
       child: Container(
         decoration: BoxDecoration(

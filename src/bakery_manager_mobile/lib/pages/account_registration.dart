@@ -73,9 +73,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
         backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         centerTitle: true,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(10)
-          ),
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(10)),
         ),
         title: Stack(
           children: <Widget>[
@@ -88,7 +86,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                 foreground: Paint()
                   ..style = PaintingStyle.stroke
                   ..strokeWidth = 6
-                  ..color = const Color.fromARGB(255, 140,72,27),
+                  ..color = const Color.fromARGB(255, 140, 72, 27),
               ),
             ),
             // Solid text as fill.
@@ -98,13 +96,14 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                 fontFamily: 'Pacifico',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 246,235,216),
+                color: Color.fromARGB(255, 246, 235, 216),
               ),
             ),
           ],
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 140,72,27)),
+          icon: const Icon(Icons.arrow_back,
+              color: Color.fromARGB(255, 140, 72, 27)),
           onPressed: () {
             Navigator.pop(context); // Back navigation
           },
