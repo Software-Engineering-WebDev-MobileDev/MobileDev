@@ -350,7 +350,8 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Expanded(
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width - 140,
                       child: TextFormField(
                         controller: emailController,
                         decoration: const InputDecoration(
@@ -371,19 +372,29 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    DropdownButton<String>(
-                      value: _emailType,
-                      onChanged: (newValue) {
-                        setState(() {
-                          _emailType = newValue!;
-                        });
-                      },
-                      items: ['Work', 'Home', 'Other'].map((type) {
-                        return DropdownMenuItem(
-                          value: type,
-                          child: Text(type),
-                        );
-                      }).toList(),
+                    SizedBox(
+                      width: 100,
+                      child: DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        value: _emailType,
+                        onChanged: (newValue) {
+                          setState(() {
+                            _emailType = newValue!;
+                          });
+                        },
+                        items: ['Personal', 'Work', 'Other'].map((type) {
+                          return DropdownMenuItem(
+                            value: type,
+                            child: Text(type),
+                          );
+                        }).toList(),
+                        decoration: const InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -397,7 +408,8 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Expanded(
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width - 140,
                       child: TextFormField(
                         controller: phoneController,
                         decoration: const InputDecoration(
@@ -416,19 +428,29 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    DropdownButton<String>(
-                      value: _phoneType,
-                      onChanged: (newValue) {
-                        setState(() {
-                          _phoneType = newValue!;
-                        });
-                      },
-                      items: ['Mobile', 'Home', 'Work'].map((type) {
-                        return DropdownMenuItem(
-                          value: type,
-                          child: Text(type),
-                        );
-                      }).toList(),
+                    SizedBox(
+                      width: 100,
+                      child: DropdownButtonFormField<String>(
+                        isExpanded: true,
+                        value: _phoneType,
+                        onChanged: (newValue) {
+                          setState(() {
+                            _phoneType = newValue!;
+                          });
+                        },
+                        items: ['Mobile', 'Home', 'Work', 'Fax'].map((type) {
+                          return DropdownMenuItem(
+                            value: type,
+                            child: Text(type),
+                          );
+                        }).toList(),
+                        decoration: const InputDecoration(
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
