@@ -1,0 +1,3 @@
+class EditTaskPage {
+  const EditTaskPage();
+}

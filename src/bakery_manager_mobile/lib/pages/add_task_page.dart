@@ -1,0 +1,3 @@
+class AddTaskPage {
+  const AddTaskPage();
+}
