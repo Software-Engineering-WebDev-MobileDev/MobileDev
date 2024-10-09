@@ -1,5 +1,6 @@
 import 'dart:async'; // Import to use Future and Timer
 import 'package:bakery_manager_mobile/assets/constants.dart';
+import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:flutter/material.dart';
 import '../models/task.dart';
 
@@ -13,56 +14,26 @@ class TaskPage extends StatefulWidget {
 class TaskPageState extends State<TaskPage> {
   // Simulate an asynchronous operation that fetches tasks
   Future<List<Task>> _fetchTasks() async {
-    // Simulate network delay
-    return await Future.delayed(const Duration(seconds: 1), () {
-      return [
-        Task(
-          taskID: '1',
-          recipeID: '101',
-          amountToBake: 10,
-          assignmentDate: DateTime.now().subtract(const Duration(days: 1)),
-          completionDate: DateTime.now().add(const Duration(hours: 2)),
-          employeeID: 'E001',
-          name: 'Banana Bread',
-          status: 'Pending',
-          dueDate: DateTime.now().add(const Duration(hours: 2)),
-        ),
-        Task(
-          taskID: '2',
-          recipeID: '102',
-          amountToBake: 5,
-          assignmentDate: DateTime.now().subtract(const Duration(days: 1)),
-          completionDate: DateTime.now().add(const Duration(hours: 1)),
-          employeeID: 'E002',
-          name: 'Chocolate Cake',
-          status: 'In Progress',
-          dueDate: DateTime.now().add(const Duration(hours: 1)),
-        ),
-        Task(
-          taskID: '3',
-          recipeID: '103',
-          amountToBake: 20,
-          assignmentDate: DateTime.now().subtract(const Duration(days: 2)),
-          completionDate: DateTime.now().subtract(const Duration(hours: 1)),
-          employeeID: 'E003',
-          name: 'Vanilla Cupcakes',
-          status: 'Completed',
-          dueDate: DateTime.now().subtract(const Duration(hours: 1)),
-        ),
-        Task(
-          taskID: '4',
-          recipeID: '104',
-          amountToBake: 8,
-          assignmentDate: DateTime.now().subtract(const Duration(days: 1)),
-          completionDate: DateTime.now().add(const Duration(hours: 3)),
-          employeeID: 'E004',
-          name: 'Scones',
-          status: 'Pending',
-          dueDate: DateTime.now().add(const Duration(hours: 3)),
-        ),
-      ];
-    });
+  // Call getTasks function
+  final result = await ApiService.getTasks();
+
+  if (result['status'] == 'success') {
+  List<Task> tasks = result['tasks']; // Assuming this returns a List<Task>
+
+    // Iterate through tasks and fetch recipe names
+    for (var task in tasks) {
+      final recipeNameResult = await ApiService.getRecipeName(task.recipeID);
+      if (recipeNameResult['status'] == 'success') {
+        task.name = recipeNameResult['recipeName']; // Store the recipe name in the task
+      } else {
+        task.name = 'Unknown Recipe'; // Handle errors by setting a default name
+      }
+    }
+    return tasks;
+  } else {
+    throw Exception(result['reason']); // Throw an exception with the error reason
   }
+}
 
   late Future<List<Task>> _futureTasks;
   List<Task> _filteredTasks = [];
@@ -219,7 +190,7 @@ class _TaskItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  task.name,
+                  task.name!,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,

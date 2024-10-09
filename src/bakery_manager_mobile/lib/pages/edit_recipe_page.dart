@@ -333,7 +333,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
                             content: Text(
                                 'Recipe updated, but some ingredients failed to update.')));
                       }
-                      Navigator.pop(context);
+                      Navigator.popUntil(context, ModalRoute.withName(recipePageRoute));
                     }
                   } else {
                     if (context.mounted) {
