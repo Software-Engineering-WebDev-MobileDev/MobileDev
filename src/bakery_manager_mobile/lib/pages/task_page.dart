@@ -36,32 +36,94 @@ class TaskPageState extends State<TaskPage> {
 }
 
   late Future<List<Task>> _futureTasks;
+  List<Task> _allTasks = [];
   List<Task> _filteredTasks = [];
   String _currentFilter = 'All';
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     _futureTasks = _fetchTasks(); // Fetch tasks initially
+    _futureTasks.then((tasks) {
+      setState(() {
+        _allTasks = tasks;
+        _filterTasks();
+      });
+    });
   }
 
-  void _filterTasks(String status, List<Task> tasks) {
+  void _filterTasks() {
     setState(() {
-      _currentFilter = status;
-      if (status == 'All') {
-        _filteredTasks = tasks;
-      } else {
-        _filteredTasks = tasks.where((task) => task.status == status).toList();
+      List<Task> tasks = _allTasks;
+      if (_currentFilter != 'All') {
+        tasks = tasks.where((task) => task.status == _currentFilter).toList();
       }
+      if (_searchQuery.isNotEmpty) {
+        tasks = tasks
+            .where((task) =>
+                (task.name ?? '')
+                    .toLowerCase()
+                    .contains(_searchQuery.toLowerCase()))
+            .toList();
+      }
+      _filteredTasks = tasks;
     });
+  }
+
+  void _onSearchChanged(String query) {
+    _searchQuery = query;
+    _filterTasks();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Daily Tasks', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.orange,
+        title: Stack(
+          children: <Widget>[
+            // Stroked text as border.
+            Text(
+              'Daily Tasks',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                foreground: Paint()
+                  ..style = PaintingStyle.stroke
+                  ..strokeWidth = 6
+                  ..color = const Color.fromARGB(255, 140, 72, 27),
+              ),
+            ),
+            // Solid text as fill.
+            const Text(
+              'Daily Tasks',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 246, 235, 216),
+              ),
+            ),
+          ],
+        ),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back,
+              color: Color.fromARGB(255, 140, 72, 27)),
+          onPressed: () {
+            Navigator.pop(context); // Back navigation
+          },
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home,
+                color: Color.fromARGB(255, 140, 72, 27)),
+            onPressed: () {
+              Navigator.popUntil(context, ModalRoute.withName('/')); // Home navigation
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -83,6 +145,23 @@ class TaskPageState extends State<TaskPage> {
               ),
             ),
             const SizedBox(height: 16),
+            // Search Bar
+            TextField(
+              onChanged: _onSearchChanged,
+              decoration: InputDecoration(
+                hintText: 'Search',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _onSearchChanged('');
+                  },
+                ),
+                border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             Expanded(
               child: FutureBuilder<List<Task>>(
                 future: _futureTasks,
@@ -91,11 +170,7 @@ class TaskPageState extends State<TaskPage> {
                     return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (snapshot.hasData) {
-                    // Populate the filtered tasks list on the first load
-                    if (_filteredTasks.isEmpty) {
-                      _filteredTasks = snapshot.data!;
-                    }
+                  } else if (_filteredTasks.isNotEmpty) {
                     return ListView.builder(
                       itemCount: _filteredTasks.length,
                       itemBuilder: (context, index) {
@@ -111,23 +186,27 @@ class TaskPageState extends State<TaskPage> {
             const SizedBox(height: 16),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+                padding: const EdgeInsets.symmetric(
+                    vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
               onPressed: () {
-                // TODO: Implement add task functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content:
-                          Text('Add task functionality not implemented yet')),
-                );
+                // Navigate to AddTaskPage
+                Navigator.pushNamed(context, addTaskPageRoute);
               },
-              icon: const Icon(Icons.add),
-              label: const Text('Add Task'),
+              icon: const Icon(
+                Icons.add,
+                color: Color.fromARGB(255, 246, 235, 216),
+              ),
+              label: const Text(
+                'Add Task',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 246, 235, 216),
+                ),
+              ),
             ),
           ],
         ),
@@ -135,21 +214,21 @@ class TaskPageState extends State<TaskPage> {
     );
   }
 
-  Widget _buildFilterButton(String filter) {
+  Widget _buildFilterButton(String status) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: _currentFilter == filter ? Colors.orange : Colors.grey,
+        backgroundColor: _currentFilter == status
+            ? Colors.orange
+            : Colors.grey,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
       ),
       onPressed: () {
-        // Call _filterTasks within the FutureBuilder context
-        _futureTasks.then((tasks) {
-          _filterTasks(filter, tasks);
-        });
+        _currentFilter = status;
+        _filterTasks();
       },
-      child: Text(filter),
+      child: Text(status),
     );
   }
 }
@@ -166,24 +245,24 @@ class _TaskItem extends StatelessWidget {
         Navigator.pushNamed(context, taskDetailsPageRoute, arguments: task);
       },
       child: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3), // Slight shadow
-              spreadRadius: 1,
-              blurRadius: 4,
-              offset: const Offset(0, 2), // Soft shadow
-            ),
-          ],
-        ),
+        // Uncomment the decoration below if you want to add a shadow effect
+        // decoration: const BoxDecoration(
+        //   boxShadow: [
+        //     BoxShadow(
+        //       color: Colors.grey.withOpacity(0.5),
+        //       spreadRadius: 2,
+        //       blurRadius: 8,
+        //       offset: Offset(0, 4),
+        //     ),
+        //   ],
+        // ),
         child: Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          color: const Color(0xFFFDF1E0),
-          elevation: 2, // Slight elevation for shadow effect
-          margin:
-              const EdgeInsets.symmetric(vertical: 6), // Slightly reduced space
+          color: const Color.fromARGB(255, 209, 126, 51),
+          elevation: 4, // 3D effect
+          margin: const EdgeInsets.symmetric(vertical: 8),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -192,6 +271,7 @@ class _TaskItem extends StatelessWidget {
                 Text(
                   task.name!,
                   style: const TextStyle(
+                    color: Color.fromARGB(255, 246, 235, 216),
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -210,6 +290,7 @@ class _TaskItem extends StatelessWidget {
                     Text(
                       'Due: ${_formatDate(task.dueDate)}',
                       style: const TextStyle(
+                        color: Color.fromARGB(255, 246, 235, 216),
                         fontStyle: FontStyle.italic,
                       ),
                     ),
