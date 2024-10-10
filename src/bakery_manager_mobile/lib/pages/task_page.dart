@@ -23,14 +23,13 @@ class TaskPageState extends State<TaskPage> {
   @override
   void initState() {
     super.initState();
-    _fetchTasks(); // Fetch tasks initially
+    _futureTasks = _fetchTasks();
   }
 
-  // Fetch tasks function (with sample tasks)
-  void _fetchTasks() {
-    // Commenting out API call for now and using static tasks
-    /*
-    _futureTasks = ApiService.getTasks().then((response) {
+  // Fetch tasks function (corrected)
+  Future<List<Task>> _fetchTasks() async {
+    try {
+      var response = await ApiService.getTasks();
       if (response['status'] == 'success') {
         List<Task> tasks = response['tasks'];
         setState(() {
@@ -42,51 +41,11 @@ class TaskPageState extends State<TaskPage> {
         throw Exception(
             'Failed to fetch tasks: ${response['message'] ?? 'Unknown error'}');
       }
-    }).catchError((error) {
-      return <Task>[]; // Return an empty list on error
-    });
-    */
-    
-    // Sample tasks for display
-    List<Task> sampleTasks = [
-      Task(
-        name: 'Chocolate Cake', // Recipe name
-        status: 'In Progress',
-        dueDate: DateTime.now().add(const Duration(hours: 5)),
-        taskID: 'task1',
-        recipeID: 'recipe1',
-        amountToBake: 2, // Example amount to bake
-        assignmentDate: DateTime.now().subtract(const Duration(days: 1)),
-        employeeID: 'emp001'
-      ),
-      Task(
-        name: 'Blueberry Muffins', // Recipe name
-        status: 'Pending',
-        dueDate: DateTime.now().add(const Duration(hours: 2)),
-        taskID: 'task2',
-        recipeID: 'recipe2',
-        amountToBake: 12, // Example quantity to bake
-        assignmentDate: DateTime.now().subtract(const Duration(days: 2)),
-        employeeID: 'emp002'
-      ),
-      Task(
-        name: 'Apple Pie', // Recipe name
-        status: 'Completed',
-        dueDate: DateTime.now().subtract(const Duration(days: 1)),
-        taskID: 'task3',
-        recipeID: 'recipe3',
-        amountToBake: 1, // Example quantity
-        assignmentDate: DateTime.now().subtract(const Duration(days: 3)),
-        employeeID: 'emp003'
-      ),
-    ];
-    
-    setState(() {
-      _filteredTasks = sampleTasks;
-      _allTasks = sampleTasks;
-    });
-    
-    _futureTasks = Future.value(sampleTasks); // Returning sample tasks
+    } catch (error) {
+      // Handle error appropriately
+      print('Error fetching tasks: $error');
+      return [];
+    }
   }
 
   // Filtering tasks based on status and search query
@@ -109,7 +68,7 @@ class TaskPageState extends State<TaskPage> {
   }
 
   // Filter by status function
-  void _filterByStatus(String status, List<Task> tasks) {
+  void _filterByStatus(String status) {
     setState(() {
       _currentFilter = status;
       _filterTasks();
@@ -117,7 +76,7 @@ class TaskPageState extends State<TaskPage> {
   }
 
   // Build status filter button
-  Widget _buildStatusFilterButton(String status, List<Task> tasks) {
+  Widget _buildStatusFilterButton(String status) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         backgroundColor: _currentFilter == status ? Colors.orange : Colors.grey,
@@ -126,7 +85,7 @@ class TaskPageState extends State<TaskPage> {
         ),
       ),
       onPressed: () {
-        _filterByStatus(status, tasks);
+        _filterByStatus(status);
       },
       child: Text(status),
     );
@@ -166,14 +125,16 @@ class TaskPageState extends State<TaskPage> {
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 140, 72, 27)),
+          icon: const Icon(Icons.arrow_back,
+              color: Color.fromARGB(255, 140, 72, 27)),
           onPressed: () {
             Navigator.pop(context); // Back navigation
           },
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.home, color: Color.fromARGB(255, 140, 72, 27)),
+            icon: const Icon(Icons.home,
+                color: Color.fromARGB(255, 140, 72, 27)),
             onPressed: () {
               Navigator.popUntil(context, ModalRoute.withName('/')); // Home navigation
             },
@@ -189,13 +150,13 @@ class TaskPageState extends State<TaskPage> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildStatusFilterButton('All', _allTasks),
+                  _buildStatusFilterButton('All'),
                   const SizedBox(width: 8),
-                  _buildStatusFilterButton('Pending', _allTasks),
+                  _buildStatusFilterButton('Pending'),
                   const SizedBox(width: 8),
-                  _buildStatusFilterButton('In Progress', _allTasks),
+                  _buildStatusFilterButton('In Progress'),
                   const SizedBox(width: 8),
-                  _buildStatusFilterButton('Completed', _allTasks),
+                  _buildStatusFilterButton('Completed'),
                 ],
               ),
             ),
@@ -229,10 +190,10 @@ class TaskPageState extends State<TaskPage> {
                 future: _futureTasks,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
+                    return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  } else if (_filteredTasks.isEmpty) {
                     return const Text('No tasks found');
                   } else {
                     return ListView.builder(
@@ -251,7 +212,8 @@ class TaskPageState extends State<TaskPage> {
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 209, 125, 51),
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -262,7 +224,7 @@ class TaskPageState extends State<TaskPage> {
               },
               icon: const Icon(
                 Icons.add,
-                  color: Color.fromARGB(255, 246, 235, 216),
+                color: Color.fromARGB(255, 246, 235, 216),
               ),
               label: const Text(
                 'Add Task',
@@ -352,10 +314,5 @@ class _TaskItem extends StatelessWidget {
       default:
         return Colors.black;
     }
-  }
-
-  // Function to format due date
-  String _formatDate(DateTime date) {
-    return '${date.hour}:${date.minute.toString().padLeft(2, '0')}';
   }
 }
