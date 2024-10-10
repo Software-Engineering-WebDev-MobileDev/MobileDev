@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bakery_manager_mobile/pages/home_page.dart';
 import 'package:bakery_manager_mobile/pages/ingredient_page.dart';
-import 'package:bakery_manager_mobile/pages/product_page.dart';
 import 'package:bakery_manager_mobile/pages/recipe_page.dart';
 import 'package:bakery_manager_mobile/pages/task_details_page.dart';
 import 'package:bakery_manager_mobile/pages/task_page.dart';
@@ -19,7 +18,6 @@ Map<String, WidgetBuilder> appRoutes = {
   homePageRoute: (context) => const MyHomePage(),
   recipePageRoute: (context) => const AllRecipesPage(),
   ingredientPageRoute: (context) => const IngredientPage(),
-  productPageRoute: (context) => const ProductPage(),
   taskPageRoute: (context) => const TaskPage(),
   taskDetailsPageRoute: (context) => const TaskDetailPage(),
   loginPageRoute: (context) => const LoginPage(),
