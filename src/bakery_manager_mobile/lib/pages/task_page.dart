@@ -28,23 +28,24 @@ class TaskPageState extends State<TaskPage> {
 
   // Fetch tasks function (corrected)
   Future<List<Task>> _fetchTasks() async {
-    try {
-      var response = await ApiService.getTasks();
-      if (response['status'] == 'success') {
-        List<Task> tasks = response['tasks'];
-        setState(() {
-          _filteredTasks = tasks;
-          _allTasks = tasks;
-        });
-        return tasks;
-      } else {
-        throw Exception(
-            'Failed to fetch tasks: ${response['message'] ?? 'Unknown error'}');
+  // Call getTasks function
+    final result = await ApiService.getTasks();
+
+    if (result['status'] == 'success') {
+    List<Task> tasks = result['tasks']; // Assuming this returns a List<Task>
+
+      // Iterate through tasks and fetch recipe names
+      for (var task in tasks) {
+        final recipeNameResult = await ApiService.getRecipeName(task.recipeID);
+        if (recipeNameResult['status'] == 'success') {
+          task.name = recipeNameResult['recipeName']; // Store the recipe name in the task
+        } else {
+          task.name = 'Unknown Recipe'; // Handle errors by setting a default name
+        }
       }
-    } catch (error) {
-      // Handle error appropriately
-      print('Error fetching tasks: $error');
-      return [];
+      return tasks;
+    } else {
+      throw Exception(result['reason']); // Throw an exception with the error reason
     }
   }
 
