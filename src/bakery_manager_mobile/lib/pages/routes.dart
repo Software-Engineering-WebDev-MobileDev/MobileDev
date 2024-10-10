@@ -4,6 +4,8 @@ import 'package:bakery_manager_mobile/pages/ingredient_page.dart';
 import 'package:bakery_manager_mobile/pages/recipe_page.dart';
 import 'package:bakery_manager_mobile/pages/task_details_page.dart';
 import 'package:bakery_manager_mobile/pages/task_page.dart';
+import 'package:bakery_manager_mobile/pages/add_task_page.dart';
+import 'package:bakery_manager_mobile/pages/edit_task_page.dart';
 import 'package:bakery_manager_mobile/pages/login.dart';
 import 'package:bakery_manager_mobile/pages/account_registration.dart';
 import 'package:bakery_manager_mobile/pages/my_account.dart';
@@ -20,6 +22,8 @@ Map<String, WidgetBuilder> appRoutes = {
   ingredientPageRoute: (context) => const IngredientPage(),
   taskPageRoute: (context) => const TaskPage(),
   taskDetailsPageRoute: (context) => const TaskDetailPage(),
+  addTaskPageRoute: (context) => const AddTaskPage(),
+  editTaskPageRoute: (context) => const EditTaskPage(),
   loginPageRoute: (context) => const LoginPage(),
   registrationPageRoute: (context) => const CreateAccountPage(),
   addRecipePageRoute: (context) => const AddRecipePage(),
@@ -29,3 +33,5 @@ Map<String, WidgetBuilder> appRoutes = {
   ingredientDetailsPageRoute: (context) => const IngredientDetailPage(),
   editAccountPageRoute: (context) => const EditAccountPage(),
 };
+
+

@@ -3,6 +3,7 @@ import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:flutter/material.dart';
 import '../models/task.dart';
+import 'package:intl/intl.dart';
 
 class TaskPage extends StatefulWidget {
   const TaskPage({super.key});
@@ -12,77 +13,178 @@ class TaskPage extends StatefulWidget {
 }
 
 class TaskPageState extends State<TaskPage> {
-  // Simulate an asynchronous operation that fetches tasks
-  Future<List<Task>> _fetchTasks() async {
-  // Call getTasks function
-  final result = await ApiService.getTasks();
-
-  if (result['status'] == 'success') {
-  List<Task> tasks = result['tasks']; // Assuming this returns a List<Task>
-
-    // Iterate through tasks and fetch recipe names
-    for (var task in tasks) {
-      final recipeNameResult = await ApiService.getRecipeName(task.recipeID);
-      if (recipeNameResult['status'] == 'success') {
-        task.name = recipeNameResult['recipeName']; // Store the recipe name in the task
-      } else {
-        task.name = 'Unknown Recipe'; // Handle errors by setting a default name
-      }
-    }
-    return tasks;
-  } else {
-    throw Exception(result['reason']); // Throw an exception with the error reason
-  }
-}
-
   late Future<List<Task>> _futureTasks;
+  List<Task> _allTasks = [];
   List<Task> _filteredTasks = [];
   String _currentFilter = 'All';
+  String _searchQuery = '';
 
+  // Page Initialization Function
   @override
   void initState() {
     super.initState();
-    _futureTasks = _fetchTasks(); // Fetch tasks initially
+    _futureTasks = _fetchTasks();
   }
 
-  void _filterTasks(String status, List<Task> tasks) {
-    setState(() {
-      _currentFilter = status;
-      if (status == 'All') {
-        _filteredTasks = tasks;
+  // Fetch tasks function (corrected)
+  Future<List<Task>> _fetchTasks() async {
+    try {
+      var response = await ApiService.getTasks();
+      if (response['status'] == 'success') {
+        List<Task> tasks = response['tasks'];
+        setState(() {
+          _filteredTasks = tasks;
+          _allTasks = tasks;
+        });
+        return tasks;
       } else {
-        _filteredTasks = tasks.where((task) => task.status == status).toList();
+        throw Exception(
+            'Failed to fetch tasks: ${response['message'] ?? 'Unknown error'}');
       }
+    } catch (error) {
+      // Handle error appropriately
+      print('Error fetching tasks: $error');
+      return [];
+    }
+  }
+
+  // Filtering tasks based on status and search query
+  void _filterTasks() {
+    setState(() {
+      List<Task> tasks = _allTasks;
+      if (_currentFilter != 'All') {
+        tasks = tasks.where((task) => task.status == _currentFilter).toList();
+      }
+      if (_searchQuery.isNotEmpty) {
+        tasks = tasks
+            .where((task) =>
+                (task.name ?? '')
+                    .toLowerCase()
+                    .contains(_searchQuery.toLowerCase()))
+            .toList();
+      }
+      _filteredTasks = tasks;
     });
   }
 
+  // Filter by status function
+  void _filterByStatus(String status) {
+    setState(() {
+      _currentFilter = status;
+      _filterTasks();
+    });
+  }
+
+  // Build status filter button
+  Widget _buildStatusFilterButton(String status) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _currentFilter == status ? Colors.orange : Colors.grey,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+      onPressed: () {
+        _filterByStatus(status);
+      },
+      child: Text(status),
+    );
+  }
+
+  // Page Content Build Function
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Daily Tasks', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.orange,
+        title: Stack(
+          children: <Widget>[
+            // Stroked text as border.
+            Text(
+              'Daily Tasks',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                foreground: Paint()
+                  ..style = PaintingStyle.stroke
+                  ..strokeWidth = 6
+                  ..color = const Color.fromARGB(255, 140, 72, 27),
+              ),
+            ),
+            // Solid text as fill.
+            const Text(
+              'Daily Tasks',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 246, 235, 216),
+              ),
+            ),
+          ],
+        ),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back,
+              color: Color.fromARGB(255, 140, 72, 27)),
+          onPressed: () {
+            Navigator.pop(context); // Back navigation
+          },
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home,
+                color: Color.fromARGB(255, 140, 72, 27)),
+            onPressed: () {
+              Navigator.popUntil(context, ModalRoute.withName('/')); // Home navigation
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Horizontal filter bar
+            // Horizontal status filter bar
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildFilterButton('All'),
+                  _buildStatusFilterButton('All'),
                   const SizedBox(width: 8),
-                  _buildFilterButton('Pending'),
+                  _buildStatusFilterButton('Pending'),
                   const SizedBox(width: 8),
-                  _buildFilterButton('In Progress'),
+                  _buildStatusFilterButton('In Progress'),
                   const SizedBox(width: 8),
-                  _buildFilterButton('Completed'),
+                  _buildStatusFilterButton('Completed'),
                 ],
               ),
             ),
             const SizedBox(height: 16),
+
+            // Search Bar
+            TextField(
+              onChanged: (value) {
+                _searchQuery = value;
+                _filterTasks();
+              }, // Search feature
+              decoration: InputDecoration(
+                hintText: 'Search',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchQuery = '';
+                    _filterTasks();
+                  },
+                ),
+                border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // List of tasks
             Expanded(
               child: FutureBuilder<List<Task>>(
                 future: _futureTasks,
@@ -90,28 +192,26 @@ class TaskPageState extends State<TaskPage> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (snapshot.hasData) {
-                    // Populate the filtered tasks list on the first load
-                    if (_filteredTasks.isEmpty) {
-                      _filteredTasks = snapshot.data!;
-                    }
+                    return Text('Error: ${snapshot.error}');
+                  } else if (_filteredTasks.isEmpty) {
+                    return const Text('No tasks found');
+                  } else {
                     return ListView.builder(
                       itemCount: _filteredTasks.length,
                       itemBuilder: (context, index) {
                         return _TaskItem(task: _filteredTasks[index]);
                       },
                     );
-                  } else {
-                    return const Center(child: Text('No tasks available'));
                   }
                 },
               ),
             ),
             const SizedBox(height: 16),
+
+            // Add Task Button
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+                backgroundColor: const Color.fromARGB(255, 209, 125, 51),
                 padding:
                     const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
@@ -119,41 +219,28 @@ class TaskPageState extends State<TaskPage> {
                 ),
               ),
               onPressed: () {
-                // TODO: Implement add task functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content:
-                          Text('Add task functionality not implemented yet')),
-                );
+                // Navigate to AddTaskPage
+                Navigator.pushNamed(context, addTaskPageRoute);
               },
-              icon: const Icon(Icons.add),
-              label: const Text('Add Task'),
+              icon: const Icon(
+                Icons.add,
+                color: Color.fromARGB(255, 246, 235, 216),
+              ),
+              label: const Text(
+                'Add Task',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 246, 235, 216),
+                ),
+              ),
             ),
           ],
         ),
       ),
     );
   }
-
-  Widget _buildFilterButton(String filter) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: _currentFilter == filter ? Colors.orange : Colors.grey,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-      ),
-      onPressed: () {
-        // Call _filterTasks within the FutureBuilder context
-        _futureTasks.then((tasks) {
-          _filterTasks(filter, tasks);
-        });
-      },
-      child: Text(filter),
-    );
-  }
 }
 
+// Task Item Widget for the List of Tasks
 class _TaskItem extends StatelessWidget {
   final Task task;
   const _TaskItem({required this.task});
@@ -162,28 +249,18 @@ class _TaskItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        // Navigate to task details page
+        // Navigate to the task details page when tapped
         Navigator.pushNamed(context, taskDetailsPageRoute, arguments: task);
       },
       child: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3), // Slight shadow
-              spreadRadius: 1,
-              blurRadius: 4,
-              offset: const Offset(0, 2), // Soft shadow
-            ),
-          ],
-        ),
+        decoration: const BoxDecoration(),
         child: Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          color: const Color(0xFFFDF1E0),
-          elevation: 2, // Slight elevation for shadow effect
-          margin:
-              const EdgeInsets.symmetric(vertical: 6), // Slightly reduced space
+          color: const Color.fromARGB(255, 209, 126, 51),
+          elevation: 4, // 3D effect
+          margin: const EdgeInsets.symmetric(vertical: 8),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -192,6 +269,7 @@ class _TaskItem extends StatelessWidget {
                 Text(
                   task.name!,
                   style: const TextStyle(
+                    color: Color.fromARGB(255, 251, 250, 248),
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -208,8 +286,9 @@ class _TaskItem extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Due: ${_formatDate(task.dueDate)}',
+                      'Due: ${DateFormat('MM/dd HH:mm').format(task.dueDate)}',
                       style: const TextStyle(
+                        color: Color.fromARGB(255, 246, 235, 216),
                         fontStyle: FontStyle.italic,
                       ),
                     ),
@@ -227,18 +306,13 @@ class _TaskItem extends StatelessWidget {
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Pending':
-        return Colors.orange;
+        return const Color.fromARGB(255, 233, 255, 66);
       case 'In Progress':
-        return Colors.blue;
+        return const Color.fromARGB(255, 77, 255, 255);
       case 'Completed':
-        return Colors.green;
+        return const Color.fromARGB(255, 75, 253, 102);
       default:
         return Colors.black;
     }
-  }
-
-  // Function to format due date
-  String _formatDate(DateTime date) {
-    return '${date.hour}:${date.minute.toString().padLeft(2, '0')}';
   }
 }
