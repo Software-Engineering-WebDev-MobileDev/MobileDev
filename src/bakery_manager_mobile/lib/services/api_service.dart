@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:bakery_manager_mobile/models/ingredient.dart';
+import 'package:bakery_manager_mobile/models/task.dart';
 import 'package:http/http.dart' as http;
 import '../models/recipe.dart';
 import '../models/account.dart';
@@ -7,7 +9,7 @@ import 'session_manager.dart';
 
 // API Service Class
 class ApiService {
-  static final baseApiUrl = dotenv.env['BASE_URL']; 
+  static final baseApiUrl = dotenv.env['BASE_URL'];
 
   // Get Recipes Function
   static Future<Map<String, dynamic>> getRecipes() async {
@@ -45,26 +47,31 @@ class ApiService {
   static Future<Map<String, dynamic>> addRecipe(
       {String recipeName = "",
       String ingredients = "",
-      int scalingFactor = 1}) async {
+      int servings = 1,
+      String description = "",
+      String category = "",
+      double prepTime = 0,
+      double cookTime = 0}) async {
     final url = Uri.parse('$baseApiUrl/add_recipe');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({
       "RecipeName": recipeName,
-      "Instructions" : ingredients,
-      "Servings": scalingFactor.toString(),
+      "Instructions": ingredients,
+      "Servings": servings.toString(),
+      "Category": category,
+      "PrepTime": prepTime,
+      "CookTime": cookTime,
+      "Description": description
     });
 
     try {
       final response = await http.post(url, headers: headers, body: body);
 
       // Successful response
-      
+
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
-        return {'status': 'success',
-                'recipeID': responseBody['recipeID']
-
-                };
+        return {'status': 'success', 'recipeID': responseBody['recipeID']};
       }
       // Failed response
       else {
@@ -82,7 +89,92 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> addRecipeIngredient({String recipeID = "", String ingredientDescription = "", double quantity = 0, String unit = "", int stockQuantity = 0, int reorderFlag = 0}) async {
+  static Future<Map<String, dynamic>> updateRecipe({
+    required String recipeId,
+    required String recipeName,
+    required String instructions,
+    required int servings,
+    required String category,
+    required double prepTime,
+    required double cookTime,
+    required String description,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/update_recipe/$recipeId');
+    final headers = {'Content-Type': 'application/json'};
+    final now = DateTime.now();
+    final formattedDate =
+        now.toIso8601String().split('T').join(' ').split('.').first;
+
+    final body = jsonEncode({
+      "RecipeName": recipeName,
+      "Instructions": instructions,
+      "Servings": servings.toString(),
+      "Category": category,
+      "PrepTime": prepTime,
+      "CookTime": cookTime,
+      "Description": description,
+      "UpdatedAt": formattedDate,
+    });
+
+    try {
+      final response = await http.put(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'success',
+          'updatedAt': responseBody['updatedAt'],
+        };
+      } else {
+        return {
+          'status': 'error',
+          'reason': 'Failed to update recipe: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> deleteRecipe({
+    required String recipeId,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/delete_recipe/$recipeId');
+    final headers = {'Content-Type': 'application/json'};
+
+    try {
+      final response = await http.delete(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'success',
+          'message': responseBody['message'] ?? 'Recipe deleted successfully',
+        };
+      } else {
+        return {
+          'status': 'error',
+          'reason': 'Failed to delete recipe: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> addRecipeIngredient(
+      {String recipeID = "",
+      String ingredientDescription = "",
+      double quantity = 0,
+      String unit = "",
+      int stockQuantity = 0,
+      int reorderFlag = 0}) async {
     final url = Uri.parse('$baseApiUrl/add_recipe_ingredient');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({
@@ -117,7 +209,8 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> getRecipeIngredients(String recipeID) async {
+  static Future<Map<String, dynamic>> getRecipeIngredients(
+      String recipeID) async {
     final url = Uri.parse('$baseApiUrl/recipe/$recipeID');
     final headers = {'Content-Type': 'application/json'};
 
@@ -126,9 +219,9 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        
+
         // Filter ingredients from the full recipe response
-        final ingredients = data['recipe'] 
+        final ingredients = data['recipe']
             .map((item) => {
                   'RecipeIngredientID': item['RecipeIngredientID'],
                   'IngredientDescription': item['IngredientDescription'],
@@ -143,7 +236,7 @@ class ApiService {
 
         return {
           'status': 'success',
-          'ingredients': ingredients,  // Only return the ingredients
+          'ingredients': ingredients, // Only return the ingredients
         };
       } else {
         return {
@@ -152,6 +245,81 @@ class ApiService {
         };
       }
     } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> getRecipeName(String recipeID) async {
+    final url = Uri.parse('$baseApiUrl/recipe/$recipeID');
+    final headers = {'Content-Type': 'application/json'};
+
+      try {
+        final response = await http.get(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // Extract the recipe name from the response
+        final String recipeName = data['recipe'][0]['RecipeName'];
+        return {
+          'status': 'success',
+          'recipeName': recipeName,
+        };
+      } else {
+        return {
+          'status': 'error',
+          'reason': 'Failed to fetch recipe name: ${response.statusCode}',
+        };
+      }
+    }
+    catch(e){
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+
+  static Future<Map<String, dynamic>> getInventory(
+      {int page = 1, int pageSize = 20}) async {
+    final url = Uri.parse('$baseApiUrl/inventory');
+    String sessionId = await SessionManager().getSessionToken() ?? "";
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'session_id': sessionId,
+          'page': page.toString(),
+          'page_size': pageSize.toString(),
+        },
+      );
+
+      // Successful response
+      if (response.statusCode == 200) {
+        Map<String, dynamic> body = json.decode(response.body);
+        List<dynamic> inventoryList = body['content'];
+        return {
+          'status': 'success',
+          'inventory': inventoryList
+              .map((dynamic item) => Ingredient.fromJson(item))
+              .toList(),
+          'page': body['page'],
+          'page_count': body['page_count'],
+        };
+      }
+      // Failed response
+      else {
+        return {
+          'status': 'error',
+          'reason': 'Failed to load inventory: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      // Network error
       return {
         'status': 'error',
         'reason': 'Network error: $e',
@@ -198,6 +366,42 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> getTasks() async {
+    final url = Uri.parse('$baseApiUrl/tasks');
+    String sessionId = await SessionManager().getSessionToken() ?? "";
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'session_id': sessionId,
+        },
+      );
+
+      // Successful response
+      if (response.statusCode == 200) {
+        Map<String, dynamic> body = json.decode(response.body);
+        List<dynamic> taskList = body['recipes']; // Assuming 'tasks' as key
+        return {
+          'status': 'success',
+          'tasks': taskList.map((dynamic item) => Task.fromJson(item)).toList(),
+        };
+      }
+      // Failed response
+      else {
+        return {
+          'status': 'error',
+          'reason': 'Failed to load tasks: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+  
   // Add User Email Function
   static Future<Map<String, dynamic>> addUserEmail({
     required String sessionID,
@@ -247,11 +451,9 @@ class ApiService {
       };
     }
   }
-
-
   // Login Function
   static Future<Map<String, dynamic>> login(
-    String username, String password) async {
+      String username, String password) async {
     final url = Uri.parse('$baseApiUrl/login');
     final headers = <String, String>{
       'username': username,
@@ -306,12 +508,10 @@ class ApiService {
       final response = await http.post(url, headers: headers);
       if (response.statusCode == 200) {
         return true;
-      }
-      else {
+      } else {
         return false;
       }
-    }
-    catch(e){
+    } catch (e) {
       return false;
     }
   }
@@ -324,20 +524,17 @@ class ApiService {
       final headers = <String, String>{
         'session_id': sessionID!,
       };
-    
+
       final response = await http.post(url, headers: headers);
       if (response.statusCode == 200) {
         return true;
-      }
-      else {
+      } else {
         return false;
       }
-    }
-    catch(e){
+    } catch (e) {
       return false;
     }
   }
-
   // Get Account Function
   static Future<Map<String, dynamic>> getAccount(String userID) async {
     final url = Uri.parse('$baseApiUrl/account/$userID');

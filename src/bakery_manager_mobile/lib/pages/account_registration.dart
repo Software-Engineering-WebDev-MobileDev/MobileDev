@@ -92,13 +92,13 @@ class CreateAccountPageState extends State<CreateAccountPage> {
 
         if (accountResponse['status'] == 'success') {
           // Step 2: Add email from account creation response
-          Map<String, dynamic> emailResponse = await ApiService.addUserEmail(
-            sessionID: '',
-            emailAddress: email,
-            emailType: _emailType, 
-          );
+          // Map<String, dynamic> emailResponse = await ApiService.addUserEmail(
+          //   sessionID: '',
+          //   emailAddress: email,
+          //   emailType: _emailType, 
+          // );
 
-          if (emailResponse['status'] == 'success') {
+          //if (emailResponse['status'] == 'success') {
             // Step 3: Add email from account creation response
             
             /*
@@ -131,11 +131,11 @@ class CreateAccountPageState extends State<CreateAccountPage> {
             }
             */
 
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('${emailResponse['reason']}')),
-            );
-          }
+    //       } else {
+    //         ScaffoldMessenger.of(context).showSnackBar(
+    //           SnackBar(content: Text('${emailResponse['reason']}')),
+    //         );
+    //       }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Account creation failed: ${accountResponse['reason']}')),
@@ -171,12 +171,42 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Account', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.orange,
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        centerTitle: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(10)),
+        ),
+        title: Stack(
+          children: <Widget>[
+            // Stroked text as border.
+            Text(
+              'Registration',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                foreground: Paint()
+                  ..style = PaintingStyle.stroke
+                  ..strokeWidth = 6
+                  ..color = const Color.fromARGB(255, 140, 72, 27),
+              ),
+            ),
+            // Solid text as fill.
+            const Text(
+              'Registration',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 246, 235, 216),
+              ),
+            ),
+          ],
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back,
+              color: Color.fromARGB(255, 140, 72, 27)),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pop(context); // Back navigation
           },
         ),
       ),

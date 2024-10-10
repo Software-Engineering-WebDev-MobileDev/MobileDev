@@ -15,7 +15,8 @@ class TaskDetailPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Task Details', style: TextStyle(color: Colors.white)),
+        title:
+            const Text('Task Details', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.orange,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -40,7 +41,8 @@ class TaskDetailPage extends StatelessWidget {
             children: [
               Text(
                 'Task: ${task.name}',
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               const Text(
@@ -64,7 +66,7 @@ class TaskDetailPage extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                '• Completion Date: ${_formatDate(task.completionDate.toLocal())}',
+                '• Completion Date: ${task.completionDate != null ? _formatDate(task.completionDate!.toLocal()) : 'No completion date'}',
                 style: const TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 8),

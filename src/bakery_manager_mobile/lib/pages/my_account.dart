@@ -15,7 +15,7 @@ class MyAccountPageState extends State<MyAccountPage> {
   bool _obscureEmployeeID = true;
 
   // TODO: replace mock data with real data
-  Map<String, dynamic> _accountPlaceholder = {
+  final Map<String, dynamic> _accountPlaceholder = {
     'FirstName': 'John', 
     'LastName': 'Doe',
     'EmployeeID': '12345',
@@ -68,7 +68,8 @@ class MyAccountPageState extends State<MyAccountPage> {
           IconButton(
             icon: const Icon(Icons.home, color: Colors.white),
             onPressed: () {
-              Navigator.popUntil(context, ModalRoute.withName('/'));
+              Navigator.popUntil(
+                  context, ModalRoute.withName('/')); // Home navigation
             },
           ),
         ],

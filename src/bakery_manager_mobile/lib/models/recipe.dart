@@ -2,21 +2,32 @@
 class Recipe {
   final String recipeId;
   final String recipeName;
+  final String description;
   final String instructions;
-  final int scalingFactor;
+  final String category;
+  final int servings;
+  final double prepTime;
+  final double cookTime;
 
   Recipe(
       {required this.recipeId,
       required this.recipeName,
       required this.instructions,
-      required this.scalingFactor});
+      required this.description,
+      required this.category,
+      required this.servings,
+      required this.cookTime,
+      required this.prepTime});
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
     return Recipe(
-      recipeId: json['RecipeID'] ?? '',
-      recipeName: json['RecipeName'] ?? '',
-      instructions: json['Instructions'] ?? '',
-      scalingFactor: json['ScalingFactor'] ?? 1,
-    );
+        recipeId: json['RecipeID'] ?? '',
+        recipeName: json['RecipeName'] ?? '',
+        instructions: json['Instructions'] ?? '',
+        description: json['Description'] ?? '',
+        category: json['Category'],
+        servings: json['Servings'] ?? 1,
+        cookTime: json['CookTime']?.toDouble() ?? 1.0,
+        prepTime: json['PrepTime']?.toDouble() ?? 1.0);
   }
 }

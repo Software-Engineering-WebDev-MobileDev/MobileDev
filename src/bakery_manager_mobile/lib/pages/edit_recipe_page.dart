@@ -1,28 +1,76 @@
 import 'package:bakery_manager_mobile/assets/constants.dart';
+import 'package:bakery_manager_mobile/models/recipe.dart';
 import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:flutter/material.dart';
 import '../models/recipe_ingredients.dart';
 
-class AddRecipePage extends StatefulWidget {
-  const AddRecipePage({super.key});
+class EditRecipePage extends StatefulWidget {
+  const EditRecipePage({super.key});
 
   @override
-  State<AddRecipePage> createState() => _AddRecipePageState();
+  State<EditRecipePage> createState() => _EditRecipePageState();
 }
 
-class _AddRecipePageState extends State<AddRecipePage> {
+class _EditRecipePageState extends State<EditRecipePage> {
   final TextEditingController recipeNameController = TextEditingController();
   final TextEditingController instructionsController = TextEditingController();
-  final TextEditingController prepTimeController =
-      TextEditingController(); // New field
-  final TextEditingController cookTimeController =
-      TextEditingController(); // New field
-  final TextEditingController servingsController =
-      TextEditingController(); // New field
+  final TextEditingController prepTimeController = TextEditingController();
+  final TextEditingController cookTimeController = TextEditingController();
+  final TextEditingController servingsController = TextEditingController();
   final List<RecipeIngredient> ingredients = [];
 
   final List<String> categories = recipeCatagories;
   String? selectedCategory;
+
+  // This flag ensures recipe details are only loaded once
+  bool _hasLoadedInitialRecipeData = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadRecipeDetails();
+  }
+
+  void _loadRecipeDetails() {
+    // Ensure that you check if the arguments are available
+    final Recipe recipe = ModalRoute.of(context)!.settings.arguments as Recipe;
+
+    if (!_hasLoadedInitialRecipeData) {
+      setState(() {
+        recipeNameController.text = recipe.recipeName;
+        instructionsController.text = recipe.instructions;
+        prepTimeController.text = recipe.prepTime.toString();
+        cookTimeController.text = recipe.cookTime.toString();
+        servingsController.text = recipe.servings.toString();
+
+        // Only set this the first time
+        selectedCategory = recipe.category;
+        if (!categories.contains(selectedCategory)) {
+          selectedCategory = "Other";
+        }
+
+        // Mark that the initial recipe data has been loaded
+        _hasLoadedInitialRecipeData = true;
+      });
+      // Load ingredients (make sure to fetch from backend later)
+      ingredients.clear();
+      for (var ing in []) {
+        // TODO: Replace with actual ingredient data from backend
+        ingredients.add(RecipeIngredient(
+          recipeIngredientId: ing['id'],
+          componentId: ing['componentId'],
+          ingredientDescription: ing['ingredientDescription'],
+          quantity: double.tryParse(ing['quantity'].toString()) ?? 0.0,
+          measurement: ing['unit'],
+        ));
+      }
+    }
+  }
 
   void _addIngredientField() {
     setState(() {
@@ -44,35 +92,11 @@ class _AddRecipePageState extends State<AddRecipePage> {
 
   @override
   Widget build(BuildContext context) {
+    final Recipe recipe = ModalRoute.of(context)!.settings.arguments as Recipe;
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Stack(
-          children: <Widget>[
-            // Stroked text as border.
-            Text(
-              'The Rolling Scones',
-              style: TextStyle(
-                fontFamily: 'Pacifico',
-                fontSize: 30,
-                foreground: Paint()
-                  ..style = PaintingStyle.stroke
-                  ..strokeWidth = 6
-                  ..color = const Color.fromARGB(255, 140, 72, 27),
-              ),
-            ),
-            // Solid text as fill.
-            const Text(
-              'The Rolling Scones',
-              style: TextStyle(
-                fontFamily: 'Pacifico',
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 246, 235, 216),
-              ),
-            ),
-          ],
-        ),
+        title: const Text('Edit Recipe'),
         backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back,
@@ -89,15 +113,13 @@ class _AddRecipePageState extends State<AddRecipePage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text(
-                'Add a New Recipe',
+                'Edit Recipe',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Name:',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              const Text('Name:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               TextField(
                 controller: recipeNameController,
@@ -109,10 +131,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Category:',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              const Text('Category:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 value: selectedCategory,
@@ -135,10 +155,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Prep Time (minutes):', // Label for prep time
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              const Text('Prep Time (minutes):',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               TextField(
                 controller: prepTimeController,
@@ -151,10 +169,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Cook Time (minutes):', // Label for cook time
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              const Text('Cook Time (minutes):',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               TextField(
                 controller: cookTimeController,
@@ -167,10 +183,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Servings:', // Label for servings
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              const Text('Servings:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               TextField(
                 controller: servingsController,
@@ -183,10 +197,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Instructions:',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              const Text('Instructions:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               TextField(
                 controller: instructionsController,
@@ -200,10 +212,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Ingredients:',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              const Text('Ingredients:',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               ...ingredients.asMap().entries.map((entry) {
                 int idx = entry.key;
@@ -217,7 +227,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                           onChanged: (value) =>
                               ingredient.ingredientDescription = value,
                           decoration: InputDecoration(
-                            hintText: 'Ingredient ID ${idx + 1}',
+                            hintText: 'Ingredient ${idx + 1}',
                             border: const OutlineInputBorder(
                               borderRadius:
                                   BorderRadius.all(Radius.circular(10)),
@@ -281,62 +291,59 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   ),
                 ),
                 onPressed: () async {
-                  // Functionality to handle form submission here (without API calls)
                   String recipeName = recipeNameController.text;
                   String instructions = instructionsController.text;
                   String prepTime = prepTimeController.text;
                   String cookTime = cookTimeController.text;
                   String servings = servingsController.text;
+                  String newCategory = selectedCategory ?? "Other";
 
-                  // Save recipe
-                  Map<String, dynamic> response = await ApiService.addRecipe(
+                  // Update recipe
+                  Map<String, dynamic> response = await ApiService.updateRecipe(
+                      recipeId: recipe.recipeId,
                       recipeName: recipeName,
-                      ingredients: instructions,
+                      instructions: instructions,
                       prepTime: double.tryParse(prepTime) ?? 0,
                       cookTime: double.tryParse(cookTime) ?? 0,
                       servings: int.tryParse(servings) ?? 1,
-                      category: selectedCategory ?? "Bread");
+                      category: newCategory,
+                      description: "");
 
                   if (response['status'] == 'success') {
-                    String recipeId = response['recipeID'];
-                    List<String> errors = [];
-                    for (var ingredient in ingredients) {
-                      Map<String, dynamic> ingredientResponse =
-                          await ApiService.addRecipeIngredient(
-                        recipeID: recipeId,
-                        ingredientDescription: ingredient.ingredientDescription,
-                        quantity: ingredient.quantity,
-                        unit: ingredient.measurement,
-                      );
-                      if (ingredientResponse['status'] != 'success') {
-                        errors.add(
-                            'Failed to add ingredient ${ingredient.ingredientDescription}: ${ingredientResponse['reason']}');
-                      }
-                    }
+                    List<String> errors = []; //TODO Backend
+                    // for (var ingredient in ingredients) {
+                    //   Map<String, dynamic> ingredientResponse = await ApiService.updateRecipeIngredient(
+                    //     recipeIngredientId: ingredient.recipeIngredientId,
+                    //     recipeID: widget.recipeId,
+                    //     ingredientDescription: ingredient.ingredientDescription,
+                    //     quantity: ingredient.quantity,
+                    //     unit: ingredient.measurement,
+                    //   );
+                    //   if (ingredientResponse['status'] != 'success') {
+                    //     errors.add('Failed to update ingredient ${ingredient.ingredientDescription}: ${ingredientResponse['reason']}');
+                    //   }
+                    // }
                     if (context.mounted) {
                       if (errors.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                             content: Text(
-                                'Recipe and all ingredients added successfully')));
+                                'Recipe and all ingredients updated successfully')));
                       } else {
-                        // Show error if ingredients failed to add
                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                             content: Text(
-                                'Recipe added, but some ingredients failed to add. Check recipe details.')));
+                                'Recipe updated, but some ingredients failed to update.')));
                       }
-                      // Pop context even if ingredients failed to add
-                      Navigator.pop(context);
+                      Navigator.popUntil(context, ModalRoute.withName(recipePageRoute));
                     }
                   } else {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: Text(
-                              'Failed to add recipe: ${response['reason']}')));
-                      // Do not exit if recipe addition fails
+                              'Failed to update recipe: ${response['reason']}')));
                     }
                   }
                 },
-                child: const Text('Save Recipe'),
+                child: const Text('Update Recipe'),
               ),
             ],
           ),

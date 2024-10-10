@@ -1,5 +1,6 @@
-import 'dart:async';  // Import to use Future and Timer
+import 'dart:async'; // Import to use Future and Timer
 import 'package:bakery_manager_mobile/assets/constants.dart';
+import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:flutter/material.dart';
 import '../models/ingredient.dart';
 
@@ -11,26 +12,25 @@ class IngredientPage extends StatefulWidget {
 }
 
 class IngredientPageState extends State<IngredientPage> {
-  // Simulate an asynchronous operation that fetches ingredients to mock api return.
-  Future<List<Ingredient>> _fetchIngredients() async {
-    // Simulate network delay
-    return await Future.delayed(const Duration(seconds: 1), () {
-      return [
-        Ingredient(ingredientID: "12345", name: 'Flour', quantity: 5.0, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
-        Ingredient(ingredientID: "12346", name: 'Sugar', quantity: 3.0, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
-        Ingredient(ingredientID: "12347", name: 'Eggs', quantity: 24, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
-        Ingredient(ingredientID: "12348", name: 'Milk', quantity: 2.5, quantityUnit: 'kg', shelfLife: 10, shelfLifeUnit: "Weeks"),
-      ];
-    });
-  }
-
   late Future<List<Ingredient>> _futureIngredients;
   List<Ingredient> _filteredIngredients = [];
 
   @override
   void initState() {
     super.initState();
-    _futureIngredients = _fetchIngredients(); // Fetch ingredients initially
+    _futureIngredients =
+        _fetchIngredients(); // Fetch ingredients from API initially
+  }
+
+  Future<List<Ingredient>> _fetchIngredients() async {
+    // Call getInventory function
+    final result = await ApiService.getInventory();
+
+    if (result['status'] == 'success') {
+      return result['inventory'];
+    } else {
+      throw Exception(result['reason']);
+    }
   }
 
   void _filterIngredients(String query, List<Ingredient> ingredients) {
@@ -50,8 +50,51 @@ class IngredientPageState extends State<IngredientPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Ingredient Inventory', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.orange,
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        centerTitle: true,
+        title: Stack(
+          children: <Widget>[
+            // Stroked text as border.
+            Text(
+              'Inventory',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                foreground: Paint()
+                  ..style = PaintingStyle.stroke
+                  ..strokeWidth = 6
+                  ..color = const Color.fromARGB(255, 140, 72, 27),
+              ),
+            ),
+            // Solid text as fill.
+            const Text(
+              'Inventory',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 246, 235, 216),
+              ),
+            ),
+          ],
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back,
+              color: Color.fromARGB(255, 140, 72, 27)),
+          onPressed: () {
+            Navigator.pop(context); // Back navigation
+          },
+        ),
+        actions: [
+          IconButton(
+            icon:
+                const Icon(Icons.home, color: Color.fromARGB(255, 140, 72, 27)),
+            onPressed: () {
+              Navigator.popUntil(
+                  context, ModalRoute.withName('/')); // Home navigation
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -59,7 +102,6 @@ class IngredientPageState extends State<IngredientPage> {
           children: [
             TextField(
               onChanged: (query) {
-                // Call _filterIngredients within the FutureBuilder context
                 _futureIngredients.then((ingredients) {
                   _filterIngredients(query, ingredients);
                 });
@@ -94,11 +136,13 @@ class IngredientPageState extends State<IngredientPage> {
                     return ListView.builder(
                       itemCount: _filteredIngredients.length,
                       itemBuilder: (context, index) {
-                        return _IngredientItem(ingredient: _filteredIngredients[index]);
+                        return _IngredientItem(
+                            ingredient: _filteredIngredients[index]);
                       },
                     );
                   } else {
-                    return const Center(child: Text('No ingredients available'));
+                    return const Center(
+                        child: Text('No ingredients available'));
                   }
                 },
               ),
@@ -107,7 +151,8 @@ class IngredientPageState extends State<IngredientPage> {
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -115,7 +160,9 @@ class IngredientPageState extends State<IngredientPage> {
               onPressed: () {
                 // TODO: Implement add ingredient functionality
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Add ingredient functionality not implemented yet')),
+                  const SnackBar(
+                      content: Text(
+                          'Add ingredient functionality not implemented yet')),
                 );
               },
               icon: const Icon(Icons.add),
@@ -137,7 +184,8 @@ class _IngredientItem extends StatelessWidget {
     return InkWell(
       onTap: () {
         //Navigate to ingredient details page.
-        Navigator.pushNamed(context, ingredientDetailsPageRoute, arguments: ingredient);
+        Navigator.pushNamed(context, ingredientDetailsPageRoute,
+            arguments: ingredient);
       },
       child: Container(
         decoration: BoxDecoration(
@@ -183,4 +231,3 @@ class _IngredientItem extends StatelessWidget {
     );
   }
 }
-

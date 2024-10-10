@@ -12,7 +12,7 @@ class MyNavigatorObserver extends NavigatorObserver {
   }
 
   @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) async{
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) async {
     super.didPop(route, previousRoute);
     _onReturned?.call();
     await _checkSession(route);

@@ -13,8 +13,9 @@ class SessionManager {
 
   Future<void> saveSession(String sessionId) async {
     await _storage.write(key: 'session_token', value: sessionId);
-    await _storage.write(key: 'session_start_time', value: DateTime.now().toIso8601String());
-  } 
+    await _storage.write(
+        key: 'session_start_time', value: DateTime.now().toIso8601String());
+  }
 
   Future<String?> getSessionToken() async {
     return await _storage.read(key: 'session_token');
@@ -38,9 +39,9 @@ class SessionManager {
   Future<bool> isSessionValid() async {
     final sessionID = await getSessionToken();
     final sessionStartTime = await getSessionStartTime();
-    
+
     if (sessionID == null || sessionStartTime == null) {
-      return false;  // No token or session start time, session is invalid
+      return false; // No token or session start time, session is invalid
     }
 
     // Check if the current time exceeds the session timeout duration
@@ -48,30 +49,30 @@ class SessionManager {
     final sessionTotalDuration = now.difference(sessionStartTime);
 
     if (sessionTotalDuration > sessionTimeout) {
-      return false;  // Session has expired
+      return false; // Session has expired
     }
 
     //SessionID is not vaild on backend
     if (await ApiService.sessionValidate(sessionID) == true) {
       return true;
+    } else {
+      return false;
     }
-    else {
-     return false;
-    }
-     // Session is still valid
+    // Session is still valid
   }
-    // --- Idle Timeout Management ---
+  // --- Idle Timeout Management ---
 
   // Reset the idle timeout timer
   void resetIdleTimer() {
     _idleTimer?.cancel(); // Cancel any existing idle timer
-    _idleTimer = Timer(idleTimeout, _handleIdleTimeout); // Start a new idle timer
+    _idleTimer =
+        Timer(idleTimeout, _handleIdleTimeout); // Start a new idle timer
   }
 
   // Handle session timeout due to inactivity
   void _handleIdleTimeout() {
     if (onIdleTimeout != null) {
-      onIdleTimeout!();  // Trigger the idle timeout callback
+      onIdleTimeout!(); // Trigger the idle timeout callback
     }
     clearSession(); // Clear session due to inactivity
   }
@@ -80,5 +81,4 @@ class SessionManager {
   void stopIdleTimer() {
     _idleTimer?.cancel();
   }
-
 }
