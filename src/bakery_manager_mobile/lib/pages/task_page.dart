@@ -12,47 +12,83 @@ class TaskPage extends StatefulWidget {
 }
 
 class TaskPageState extends State<TaskPage> {
-  // Simulate an asynchronous operation that fetches tasks
-  Future<List<Task>> _fetchTasks() async {
-  // Call getTasks function
-  final result = await ApiService.getTasks();
-
-  if (result['status'] == 'success') {
-  List<Task> tasks = result['tasks']; // Assuming this returns a List<Task>
-
-    // Iterate through tasks and fetch recipe names
-    for (var task in tasks) {
-      final recipeNameResult = await ApiService.getRecipeName(task.recipeID);
-      if (recipeNameResult['status'] == 'success') {
-        task.name = recipeNameResult['recipeName']; // Store the recipe name in the task
-      } else {
-        task.name = 'Unknown Recipe'; // Handle errors by setting a default name
-      }
-    }
-    return tasks;
-  } else {
-    throw Exception(result['reason']); // Throw an exception with the error reason
-  }
-}
-
   late Future<List<Task>> _futureTasks;
   List<Task> _allTasks = [];
   List<Task> _filteredTasks = [];
   String _currentFilter = 'All';
   String _searchQuery = '';
 
+  // Page Initialization Function
   @override
   void initState() {
     super.initState();
-    _futureTasks = _fetchTasks(); // Fetch tasks initially
-    _futureTasks.then((tasks) {
-      setState(() {
-        _allTasks = tasks;
-        _filterTasks();
-      });
-    });
+    _fetchTasks(); // Fetch tasks initially
   }
 
+  // Fetch tasks function (with sample tasks)
+  void _fetchTasks() {
+    // Commenting out API call for now and using static tasks
+    /*
+    _futureTasks = ApiService.getTasks().then((response) {
+      if (response['status'] == 'success') {
+        List<Task> tasks = response['tasks'];
+        setState(() {
+          _filteredTasks = tasks;
+          _allTasks = tasks;
+        });
+        return tasks;
+      } else {
+        throw Exception(
+            'Failed to fetch tasks: ${response['message'] ?? 'Unknown error'}');
+      }
+    }).catchError((error) {
+      return <Task>[]; // Return an empty list on error
+    });
+    */
+    
+    // Sample tasks for display
+    List<Task> sampleTasks = [
+      Task(
+        name: 'Chocolate Cake', // Recipe name
+        status: 'In Progress',
+        dueDate: DateTime.now().add(const Duration(hours: 5)),
+        taskID: 'task1',
+        recipeID: 'recipe1',
+        amountToBake: 2, // Example amount to bake
+        assignmentDate: DateTime.now().subtract(const Duration(days: 1)),
+        employeeID: 'emp001'
+      ),
+      Task(
+        name: 'Blueberry Muffins', // Recipe name
+        status: 'Pending',
+        dueDate: DateTime.now().add(const Duration(hours: 2)),
+        taskID: 'task2',
+        recipeID: 'recipe2',
+        amountToBake: 12, // Example quantity to bake
+        assignmentDate: DateTime.now().subtract(const Duration(days: 2)),
+        employeeID: 'emp002'
+      ),
+      Task(
+        name: 'Apple Pie', // Recipe name
+        status: 'Completed',
+        dueDate: DateTime.now().subtract(const Duration(days: 1)),
+        taskID: 'task3',
+        recipeID: 'recipe3',
+        amountToBake: 1, // Example quantity
+        assignmentDate: DateTime.now().subtract(const Duration(days: 3)),
+        employeeID: 'emp003'
+      ),
+    ];
+    
+    setState(() {
+      _filteredTasks = sampleTasks;
+      _allTasks = sampleTasks;
+    });
+    
+    _futureTasks = Future.value(sampleTasks); // Returning sample tasks
+  }
+
+  // Filtering tasks based on status and search query
   void _filterTasks() {
     setState(() {
       List<Task> tasks = _allTasks;
@@ -71,11 +107,31 @@ class TaskPageState extends State<TaskPage> {
     });
   }
 
-  void _onSearchChanged(String query) {
-    _searchQuery = query;
-    _filterTasks();
+  // Filter by status function
+  void _filterByStatus(String status, List<Task> tasks) {
+    setState(() {
+      _currentFilter = status;
+      _filterTasks();
+    });
   }
 
+  // Build status filter button
+  Widget _buildStatusFilterButton(String status, List<Task> tasks) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _currentFilter == status ? Colors.orange : Colors.grey,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+      onPressed: () {
+        _filterByStatus(status, tasks);
+      },
+      child: Text(status),
+    );
+  }
+
+  // Page Content Build Function
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,16 +165,14 @@ class TaskPageState extends State<TaskPage> {
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back,
-              color: Color.fromARGB(255, 140, 72, 27)),
+          icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 140, 72, 27)),
           onPressed: () {
             Navigator.pop(context); // Back navigation
           },
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.home,
-                color: Color.fromARGB(255, 140, 72, 27)),
+            icon: const Icon(Icons.home, color: Color.fromARGB(255, 140, 72, 27)),
             onPressed: () {
               Navigator.popUntil(context, ModalRoute.withName('/')); // Home navigation
             },
@@ -129,31 +183,36 @@ class TaskPageState extends State<TaskPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Horizontal filter bar
+            // Horizontal status filter bar
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildFilterButton('All'),
+                  _buildStatusFilterButton('All', _allTasks),
                   const SizedBox(width: 8),
-                  _buildFilterButton('Pending'),
+                  _buildStatusFilterButton('Pending', _allTasks),
                   const SizedBox(width: 8),
-                  _buildFilterButton('In Progress'),
+                  _buildStatusFilterButton('In Progress', _allTasks),
                   const SizedBox(width: 8),
-                  _buildFilterButton('Completed'),
+                  _buildStatusFilterButton('Completed', _allTasks),
                 ],
               ),
             ),
             const SizedBox(height: 16),
+
             // Search Bar
             TextField(
-              onChanged: _onSearchChanged,
+              onChanged: (value) {
+                _searchQuery = value;
+                _filterTasks();
+              }, // Search feature
               decoration: InputDecoration(
                 hintText: 'Search',
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
                   onPressed: () {
-                    _onSearchChanged('');
+                    _searchQuery = '';
+                    _filterTasks();
                   },
                 ),
                 border: const OutlineInputBorder(
@@ -162,33 +221,36 @@ class TaskPageState extends State<TaskPage> {
               ),
             ),
             const SizedBox(height: 16),
+
+            // List of tasks
             Expanded(
               child: FutureBuilder<List<Task>>(
                 future: _futureTasks,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const CircularProgressIndicator();
                   } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (_filteredTasks.isNotEmpty) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Text('No tasks found');
+                  } else {
                     return ListView.builder(
                       itemCount: _filteredTasks.length,
                       itemBuilder: (context, index) {
                         return _TaskItem(task: _filteredTasks[index]);
                       },
                     );
-                  } else {
-                    return const Center(child: Text('No tasks available'));
                   }
                 },
               ),
             ),
             const SizedBox(height: 16),
+
+            // Add Task Button
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 209, 125, 51),
-                padding: const EdgeInsets.symmetric(
-                    vertical: 16, horizontal: 32),
+                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -213,26 +275,9 @@ class TaskPageState extends State<TaskPage> {
       ),
     );
   }
-
-  Widget _buildFilterButton(String status) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: _currentFilter == status
-            ? Colors.orange
-            : Colors.grey,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-      ),
-      onPressed: () {
-        _currentFilter = status;
-        _filterTasks();
-      },
-      child: Text(status),
-    );
-  }
 }
 
+// Task Item Widget for the List of Tasks
 class _TaskItem extends StatelessWidget {
   final Task task;
   const _TaskItem({required this.task});
@@ -241,21 +286,11 @@ class _TaskItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        // Navigate to task details page
+        // Navigate to the task details page when tapped
         Navigator.pushNamed(context, taskDetailsPageRoute, arguments: task);
       },
       child: Container(
-        // Uncomment the decoration below if you want to add a shadow effect
-        // decoration: const BoxDecoration(
-        //   boxShadow: [
-        //     BoxShadow(
-        //       color: Colors.grey.withOpacity(0.5),
-        //       spreadRadius: 2,
-        //       blurRadius: 8,
-        //       offset: Offset(0, 4),
-        //     ),
-        //   ],
-        // ),
+        decoration: const BoxDecoration(),
         child: Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
