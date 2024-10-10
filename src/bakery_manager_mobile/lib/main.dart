@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'pages/routes.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'services/navigator_observer.dart';
-import 'services/session_manager.dart';  // Import your SessionManager class
+import 'services/session_manager.dart'; // Import your SessionManager class
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +27,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _sessionManager.onIdleTimeout = () =>_handleIdleTimeout(context);
+    _sessionManager.onIdleTimeout = () => _handleIdleTimeout(context);
   }
 
   void _handleIdleTimeout(BuildContext context) {
@@ -40,8 +40,9 @@ class _MyAppState extends State<MyApp> {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: GestureDetector(
-        onTap: () =>_sessionManager.resetIdleTimer,  // Reset idle timer on tap
-        onPanDown: (details) => _sessionManager.resetIdleTimer(),  // Reset idle timer on drag
+        onTap: () => _sessionManager.resetIdleTimer, // Reset idle timer on tap
+        onPanDown: (details) =>
+            _sessionManager.resetIdleTimer(), // Reset idle timer on drag
         child: MaterialApp(
           title: 'Bakery Manager Mobile',
           debugShowCheckedModeBanner: false,
