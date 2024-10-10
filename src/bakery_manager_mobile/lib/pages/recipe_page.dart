@@ -273,17 +273,6 @@ class _RecipeItem extends StatelessWidget {
         // Navigate to the target page when tapped
         Navigator.pushNamed(context, recipeDetailsPageRoute, arguments: recipe);
       },
-      child: Container(
-        decoration: const BoxDecoration(
-            // boxShadow: [
-            //   BoxShadow(
-            //     color: Colors.grey.withOpacity(0.5), // Shadow under items
-            //     spreadRadius: 2,
-            //     blurRadius: 8,
-            //     offset: const Offset(0, 4), // Shadow offset
-            //   ),
-            // ],
-            ),
         child: Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -303,7 +292,6 @@ class _RecipeItem extends StatelessWidget {
             ),
           ),
         ),
-      ),
     );
   }
 }
