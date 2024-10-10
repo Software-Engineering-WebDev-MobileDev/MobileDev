@@ -265,7 +265,7 @@ class AddTaskPageState extends State<AddTaskPage> {
                   return null;
                 },
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 16),  
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 209, 125, 51),
@@ -278,8 +278,7 @@ class AddTaskPageState extends State<AddTaskPage> {
                   if (_formKey.currentState!.validate()) {
                     // Prepare data for submission
                     String recipeID = selectedRecipe!.recipeId;
-                    int amountToBake =
-                        int.tryParse(amountToBakeController.text) ?? 0;
+                    int amountToBake = int.tryParse(amountToBakeController.text) ?? 0;
                     DateTime dueDate = DateTime(
                       selectedDueDate!.year,
                       selectedDueDate!.month,
@@ -291,15 +290,58 @@ class AddTaskPageState extends State<AddTaskPage> {
                     taskName = selectedRecipe!.recipeName;
                     completionDate = null;
 
-                    // Perform the API call to add task here
+                    try {
+                      // Simulating API Call for Adding Task (Commented Out)
+                      /*
+                      Map<String, dynamic> response = await ApiService.addTask(
+                        recipeId: recipeID,
+                        employeeId: employeeID,
+                        amountToBake: amountToBake,
+                        status: status,
+                        assignmentDate: assignmentDate!,
+                        dueDate: dueDate,
+                        taskName: taskName!,
+                      );
 
-                    // Show success or error message based on the response
+                      if (response['status'] == 'success') {
+                        // Task successfully added
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Task added successfully')));
+
+                          // Pop the current page (go back to the previous screen)
+                          Navigator.pop(context);
+                        }
+                      } else {
+                        // Show error message if the task creation failed
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                            content: Text('Failed to add task: ${response['reason']}'),
+                          ));
+                        }
+                      }
+                      */
+
+                      // Simulate success for now
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Task added successfully')));
+
+                        // Pop the current page (go back to the previous screen)
+                        Navigator.pop(context);
+                      }
+                    } catch (error) {
+                      // Show error message if API call fails
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Failed to add task: $error')),
+                        );
+                      }
+                    }
                   } else {
                     // Validation failed
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content:
-                              Text('Please fill out all fields correctly')),
+                      const SnackBar(content: Text('Please fill out all fields correctly')),
                     );
                   }
                 },
