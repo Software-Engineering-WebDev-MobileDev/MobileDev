@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/task.dart';
-import '../services/api_service.dart'; // Assuming this contains API service for status updates
-import '../assets/constants.dart'; // Assuming this contains the route constants
+import '../services/api_service.dart';
+import '../assets/constants.dart';
 
 class TaskDetailPage extends StatefulWidget {
   const TaskDetailPage({super.key});
@@ -20,52 +20,40 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     task = ModalRoute.of(context)!.settings.arguments as Task;
   }
 
-  // Function to display feedback message and navigate back to the task page
-  void _showMessageAndNavigate(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(message),
-    ));
-
-    // Navigate back to the task page after the message is shown
-    Future.delayed(const Duration(seconds: 2), () {
-      Navigator.pop(context); // Pop the detail page
+  // Function to update task status and provide an undo button
+  Future<void> _updateTaskStatus(String newStatus) async {
+    setState(() {
+      task = Task(
+        taskID: task.taskID,
+        recipeID: task.recipeID,
+        amountToBake: task.amountToBake,
+        assignmentDate: task.assignmentDate,
+        completionDate: task.completionDate,
+        employeeID: task.employeeID,
+        name: task.name,
+        status: newStatus,
+        dueDate: task.dueDate,
+      );
     });
+
+    // Uncomment the API call when integrating
+    // await ApiService.updateTaskStatus(task.taskID, newStatus);
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Task marked as $newStatus'),
+    ));
   }
 
-  // Function to update task status and provide an undo button
-  Future<void> _updateTaskStatus(String newStatus, String undoStatus) async {
-    try {
-      // Assuming an API call to update the task status
-      // await ApiService.updateTaskStatus(task.taskID, newStatus);
-
-      setState(() {
-        task = Task(
-          taskID: task.taskID,
-          recipeID: task.recipeID,
-          amountToBake: task.amountToBake,
-          assignmentDate: task.assignmentDate,
-          completionDate: task.completionDate,
-          employeeID: task.employeeID,
-          name: task.name,
-          status: newStatus,
-          dueDate: task.dueDate,
-        );
-      });
-
-      // Show a message with an Undo option
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Task marked as $newStatus'),
-        action: SnackBarAction(
-          label: 'Undo',
-          onPressed: () {
-            _updateTaskStatus(undoStatus, newStatus); // Undo status change
-          },
-        ),
-      ));
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update status: $e')),
-      );
+  // Function to reverse task status (go back one step)
+  void _undoTaskStatus() {
+    String? undoStatus;
+    if (task.status == 'In Progress') {
+      undoStatus = 'Pending'; // Revert to 'Pending' from 'In Progress'
+    } else if (task.status == 'Completed') {
+      undoStatus = 'In Progress'; // Revert to 'In Progress' from 'Completed'
+    }
+    if (undoStatus != null) {
+      _updateTaskStatus(undoStatus);
     }
   }
 
@@ -73,12 +61,38 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(task.name ?? 'Task Details', style: const TextStyle(color: Colors.white)),
-        backgroundColor: Colors.orange,
+        title: Stack(
+          children: <Widget>[
+            // Stroked text as border.
+            Text(
+              'View Task',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                foreground: Paint()
+                  ..style = PaintingStyle.stroke
+                  ..strokeWidth = 6
+                  ..color = const Color.fromARGB(255, 140, 72, 27),
+              ),
+            ),
+            // Solid text as fill.
+            const Text(
+              'View Task',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 246, 235, 216),
+              ),
+            ),
+          ],
+        ),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 140, 72, 27)),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pop(context); // Back navigation
           },
         ),
       ),
@@ -181,7 +195,6 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                 ),
               ),
 
-              // Completion Date (if applicable)
               if (task.status == 'Completed')
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -201,7 +214,6 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
               const SizedBox(height: 32),
 
-              // Center the action buttons
               Center(
                 child: Column(
                   children: [
@@ -216,12 +228,12 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                           ),
                         ),
                         onPressed: () {
-                          _updateTaskStatus('In Progress', 'Pending'); // Change status to 'In Progress'
+                          _updateTaskStatus('In Progress');
                         },
                         child: const Text('Mark In Progress', style: TextStyle(color: Colors.white)),
                       ),
 
-                    if (task.status == 'In Progress')
+                    if (task.status == 'In Progress') ...[
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
@@ -231,12 +243,61 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                           ),
                         ),
                         onPressed: () {
-                          _updateTaskStatus('Completed', 'In Progress'); // Change status to 'Completed'
+                          _updateTaskStatus('Completed');
                         },
                         child: const Text('Mark Completed', style: TextStyle(color: Colors.white)),
                       ),
+                      const SizedBox(height: 16), // Space between the buttons
 
-                    const SizedBox(height: 16), // Space between the buttons
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () {
+                          _undoTaskStatus();
+                        },
+                        icon: const Icon(
+                          Icons.undo,
+                          color: Colors.white,
+                        ),
+                        label: const Text(
+                          'Undo Status Change',
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+
+                    if (task.status == 'Completed')
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () {
+                          _undoTaskStatus();
+                        },
+                        icon: const Icon(
+                          Icons.undo,
+                          color: Colors.white,
+                        ),
+                        label: const Text(
+                          'Undo Status Change',
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+
+                    const SizedBox(height: 16),
 
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
@@ -251,7 +312,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         Navigator.pushNamed(
                           context,
                           editTaskPageRoute,
-                          arguments: task, // Pass the Task object directly
+                          arguments: task
                         );
                       },
                       icon: const Icon(
@@ -265,8 +326,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         ),
                       ),
                     ),
-
-                    const SizedBox(height: 16), // Space between the buttons
+                    const SizedBox(height: 16),
 
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
@@ -349,7 +409,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
       case 'Pending':
         return Colors.orange;
       case 'In Progress':
-        return Colors.blue;
+        return const Color.fromARGB(255, 71, 172, 255);
       case 'Completed':
         return Colors.green;
       default:
