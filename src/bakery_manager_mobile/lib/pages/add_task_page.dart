@@ -8,17 +8,19 @@ class AddTaskPage extends StatefulWidget {
   const AddTaskPage({super.key});
 
   @override
-  State<AddTaskPage> createState() => _AddTaskPageState();
+  State<AddTaskPage> createState() => AddTaskPageState();
 }
 
-class _AddTaskPageState extends State<AddTaskPage> {
+class AddTaskPageState extends State<AddTaskPage> {
+  final _formKey = GlobalKey<FormState>(); // Added form key
+
   // Controllers for form fields
   final TextEditingController amountToBakeController = TextEditingController();
   final TextEditingController dueDateController = TextEditingController();
-  final TextEditingController dueTimeController = TextEditingController(); // New controller
+  final TextEditingController dueTimeController = TextEditingController();
 
   DateTime? selectedDueDate;
-  TimeOfDay? selectedDueTime; // New variable
+  TimeOfDay? selectedDueTime;
 
   // EmployeeID is '0'
   final String employeeID = '0';
@@ -132,13 +134,12 @@ class _AddTaskPageState extends State<AddTaskPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // Styling similar to AddRecipePage
         centerTitle: true,
         title: Stack(
           children: <Widget>[
-            // Stroked text as border.
+            // Stroked text as border
             Text(
-              'The Rolling Scones',
+              'Add Task',
               style: TextStyle(
                 fontFamily: 'Pacifico',
                 fontSize: 30,
@@ -148,7 +149,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
                   ..color = const Color.fromARGB(255, 140, 72, 27),
               ),
             ),
-            // Solid text as fill.
+            // Solid text as fill
             const Text(
               'Add Task',
               style: TextStyle(
@@ -174,214 +175,216 @@ class _AddTaskPageState extends State<AddTaskPage> {
           : SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Text(
-                      'Add a New Task',
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Recipe:',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    DropdownButtonFormField<Recipe>(
-                      value: selectedRecipe,
-                      items: recipes.map((recipe) {
-                        return DropdownMenuItem(
-                          value: recipe,
-                          child: Text(recipe.recipeName),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedRecipe = value;
-                        });
-                      },
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(10)),
-                        ),
-                        hintText: 'Select Recipe',
+                child: Form(
+                  key: _formKey, // Added form key
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text(
+                        'Recipe:',
+                        style:
+                            TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Batches to Make:',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: amountToBakeController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        hintText: 'Enter amount',
-                        border: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(10)),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Due Date:',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: dueDateController,
-                      readOnly: true,
-                      onTap: () => _selectDueDate(context),
-                      decoration: const InputDecoration(
-                        hintText: 'Select Due Date',
-                        border: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(10)),
-                        ),
-                        suffixIcon: Icon(Icons.calendar_today),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Due Time:',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    TextField(
-                      controller: dueTimeController,
-                      readOnly: true,
-                      onTap: () => _selectDueTime(context),
-                      decoration: const InputDecoration(
-                        hintText: 'Select Due Time',
-                        border: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.all(Radius.circular(10)),
-                        ),
-                        suffixIcon: Icon(Icons.access_time),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            const Color.fromARGB(255, 209, 125, 51),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      onPressed: () async {
-                        // Handle form submission
-                        if (selectedRecipe == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Please select a recipe')),
+                      const SizedBox(height: 8),
+                      DropdownButtonFormField<Recipe>(
+                        value: selectedRecipe,
+                        items: recipes.map((recipe) {
+                          return DropdownMenuItem(
+                            value: recipe,
+                            child: Text(recipe.recipeName),
                           );
-                          return;
-                        }
-                        if (amountToBakeController.text.isEmpty) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Please enter amount to bake')),
-                          );
-                          return;
-                        }
-                        if (selectedDueDate == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Please select a due date')),
-                          );
-                          return;
-                        }
-                        if (selectedDueTime == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Please select a due time')),
-                          );
-                          return;
-                        }
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedRecipe = value;
+                          });
+                        },
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10)),
+                          ),
+                          hintText: 'Select Recipe',
+                        ),
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Please select a recipe';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Batches to Make:',
+                        style:
+                            TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: amountToBakeController,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          hintText: 'Enter amount',
+                          border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10)),
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter amount to bake';
+                          }
+                          int? amount = int.tryParse(value);
+                          if (amount == null) {
+                            return 'Please enter a valid integer amount';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Due Date:',
+                        style:
+                            TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: dueDateController,
+                        readOnly: true,
+                        onTap: () => _selectDueDate(context),
+                        decoration: const InputDecoration(
+                          hintText: 'Select Due Date',
+                          border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10)),
+                          ),
+                          suffixIcon: Icon(Icons.calendar_today),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please select a due date';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Due Time:',
+                        style:
+                            TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: dueTimeController,
+                        readOnly: true,
+                        onTap: () => _selectDueTime(context),
+                        decoration: const InputDecoration(
+                          hintText: 'Select Due Time',
+                          border: OutlineInputBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(10)),
+                          ),
+                          suffixIcon: Icon(Icons.access_time),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please select a due time';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              const Color.fromARGB(255, 209, 125, 51),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            // Prepare data
+                            String recipeID = selectedRecipe!.recipeId;
+                            int amountToBake =
+                                int.tryParse(amountToBakeController.text) ?? 0;
+                            DateTime dueDate = DateTime(
+                              selectedDueDate!.year,
+                              selectedDueDate!.month,
+                              selectedDueDate!.day,
+                              selectedDueTime!.hour,
+                              selectedDueTime!.minute,
+                            );
+                            assignmentDate = DateTime.now();
+                            taskName = selectedRecipe!.recipeName;
+                            completionDate = null;
 
-                        // Prepare data
-                        String recipeID = selectedRecipe!.recipeId;
-                        int amountToBake =
-                            int.tryParse(amountToBakeController.text) ?? 0;
-                        DateTime dueDate = DateTime(
-                          selectedDueDate!.year,
-                          selectedDueDate!.month,
-                          selectedDueDate!.day,
-                          selectedDueTime!.hour,
-                          selectedDueTime!.minute,
-                        );
-                        assignmentDate = DateTime.now();
-                        taskName = selectedRecipe!.recipeName;
-                        completionDate = null;
+                            // Uncomment the code below when API is operational
+                            /*
+                            Map<String, dynamic> response = await ApiService.addTask(
+                              recipeID: recipeID,
+                              amountToBake: amountToBake,
+                              assignmentDate: assignmentDate!,
+                              dueDate: dueDate,
+                              employeeID: employeeID,
+                              status: status,
+                              // Include other required fields as needed
+                            );
 
-                        // Uncomment the code below when API is operational
-                        /*
-                        Map<String, dynamic> response = await ApiService.addTask(
-                          recipeID: recipeID,
-                          amountToBake: amountToBake,
-                          assignmentDate: assignmentDate!,
-                          dueDate: dueDate,
-                          employeeID: employeeID,
-                          status: status,
-                          // Include other required fields as needed
-                        );
+                            if (response['status'] == 'success') {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Task added successfully')),
+                                );
+                                Navigator.pop(context);
+                              }
+                            } else {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          'Failed to add task: ${response['reason']}')),
+                                );
+                              }
+                            }
+                            */
 
-                        if (response['status'] == 'success') {
-                          if (context.mounted) {
+                            // Simulate adding a task
+                            await Future.delayed(const Duration(seconds: 1));
+
+                            // Simulate success
+                            bool success = true;
+
+                            if (success) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Task added successfully')),
+                                );
+                                Navigator.pop(context);
+                              }
+                            } else {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text('Failed to add task')),
+                                );
+                              }
+                            }
+                          } else {
+                            // Validation failed
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                  content: Text('Task added successfully')),
-                            );
-                            Navigator.pop(context);
-                          }
-                        } else {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text(
-                                      'Failed to add task: ${response['reason']}')),
+                                  content: Text('Please fill out all fields correctly')),
                             );
                           }
-                        }
-                        */
-
-                        // Simulate adding a task
-                        await Future.delayed(const Duration(seconds: 1));
-
-                        // Simulate success
-                        bool success = true;
-
-                        if (success) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Task added successfully')),
-                            );
-                            Navigator.pop(context);
-                          }
-                        } else {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Failed to add task')),
-                            );
-                          }
-                        }
-                      },
-                      child: const Text('Add Task'),
-                    ),
-                  ],
+                        },
+                        child: const Text('Add Task'),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -392,7 +395,7 @@ class _AddTaskPageState extends State<AddTaskPage> {
   void dispose() {
     amountToBakeController.dispose();
     dueDateController.dispose();
-    dueTimeController.dispose(); // Dispose the new controller
+    dueTimeController.dispose(); // Dispose the controller
     super.dispose();
   }
 }
