@@ -92,13 +92,13 @@ class CreateAccountPageState extends State<CreateAccountPage> {
 
         if (accountResponse['status'] == 'success') {
           // Step 2: Add email from account creation response
-          Map<String, dynamic> emailResponse = await ApiService.addUserEmail(
-            sessionID: '',
-            emailAddress: email,
-            emailType: _emailType, 
-          );
+          // Map<String, dynamic> emailResponse = await ApiService.addUserEmail(
+          //   sessionID: '',
+          //   emailAddress: email,
+          //   emailType: _emailType, 
+          // );
 
-          if (emailResponse['status'] == 'success') {
+          //if (emailResponse['status'] == 'success') {
             // Step 3: Add email from account creation response
             
             /*
@@ -131,11 +131,11 @@ class CreateAccountPageState extends State<CreateAccountPage> {
             }
             */
 
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('${emailResponse['reason']}')),
-            );
-          }
+    //       } else {
+    //         ScaffoldMessenger.of(context).showSnackBar(
+    //           SnackBar(content: Text('${emailResponse['reason']}')),
+    //         );
+    //       }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Account creation failed: ${accountResponse['reason']}')),
