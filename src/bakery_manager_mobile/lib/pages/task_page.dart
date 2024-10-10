@@ -3,6 +3,7 @@ import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:flutter/material.dart';
 import '../models/task.dart';
+import 'package:intl/intl.dart';
 
 class TaskPage extends StatefulWidget {
   const TaskPage({super.key});
@@ -261,7 +262,7 @@ class TaskPageState extends State<TaskPage> {
               },
               icon: const Icon(
                 Icons.add,
-                color: Color.fromARGB(255, 246, 235, 216),
+                  color: Color.fromARGB(255, 246, 235, 216),
               ),
               label: const Text(
                 'Add Task',
@@ -306,7 +307,7 @@ class _TaskItem extends StatelessWidget {
                 Text(
                   task.name!,
                   style: const TextStyle(
-                    color: Color.fromARGB(255, 246, 235, 216),
+                    color: Color.fromARGB(255, 251, 250, 248),
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -323,7 +324,7 @@ class _TaskItem extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Due: ${_formatDate(task.dueDate)}',
+                      'Due: ${DateFormat('MM/dd HH:mm').format(task.dueDate)}',
                       style: const TextStyle(
                         color: Color.fromARGB(255, 246, 235, 216),
                         fontStyle: FontStyle.italic,
@@ -343,11 +344,11 @@ class _TaskItem extends StatelessWidget {
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Pending':
-        return Colors.orange;
+        return const Color.fromARGB(255, 233, 255, 66);
       case 'In Progress':
-        return Colors.blue;
+        return const Color.fromARGB(255, 77, 255, 255);
       case 'Completed':
-        return Colors.green;
+        return const Color.fromARGB(255, 75, 253, 102);
       default:
         return Colors.black;
     }

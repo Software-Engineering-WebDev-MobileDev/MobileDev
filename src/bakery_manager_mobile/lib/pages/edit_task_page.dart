@@ -145,7 +145,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
                 fontFamily: 'Pacifico',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 246, 235, 216),
+                color: Color.fromARGB(255, 248, 248, 248),
               ),
             ),
           ],
@@ -288,7 +288,10 @@ class _EditTaskPageState extends State<EditTaskPage> {
                     );
                   }
                 },
-                child: const Text('Update Task'),
+                child: const Text(
+                  'Update Task',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),
