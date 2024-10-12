@@ -155,7 +155,9 @@ class TaskPageState extends State<TaskPage> {
             // Search Bar
             TextField(
               controller: _searchController,
-              onChanged: _filterTasks,
+              onChanged: (query) {
+                _filterTasks(_currentFilter, query: query); // Filter by current status and query
+              },
               decoration: InputDecoration(
                 hintText: 'Search tasks',
                 suffixIcon: IconButton(
