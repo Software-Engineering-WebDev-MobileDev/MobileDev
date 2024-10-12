@@ -55,31 +55,15 @@ class TaskPageState extends State<TaskPage> {
     }
   }
 
-  // Filtering tasks by status and query
-  void _filterTasks(String status) {
+  void _filterTasks(String status, {String query = ''}) {
     setState(() {
       _currentFilter = status;
       _filteredTasks = _allTasks.where((task) {
-        if (status == 'All') {
-          return true;
-        }
-        return task.status == status;
+        final matchesStatus = status == 'All' || task.status == status;
+        final matchesQuery =
+            task.name!.toLowerCase().contains(query.toLowerCase());
+        return matchesStatus && matchesQuery; // Filter by both status and query
       }).toList();
-      _filterTasksByQuery(
-          _searchController.text); // Apply search filter as well
-    });
-  }
-
-  // Filtering tasks by search query
-  void _filterTasksByQuery(String query) {
-    setState(() {
-      if (query.isEmpty) {
-        _filterTasks(_currentFilter); // Restore status filter if query is empty
-      } else {
-        _filteredTasks = _filteredTasks.where((task) {
-          return task.name!.toLowerCase().contains(query.toLowerCase());
-        }).toList();
-      }
     });
   }
 
@@ -171,14 +155,14 @@ class TaskPageState extends State<TaskPage> {
             // Search Bar
             TextField(
               controller: _searchController,
-              onChanged: _filterTasksByQuery,
+              onChanged: _filterTasks,
               decoration: InputDecoration(
                 hintText: 'Search tasks',
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
                   onPressed: () {
                     _searchController.clear();
-                    _filterTasksByQuery(''); // Clear search field
+                    _filterTasks(''); // Clear search field
                   },
                 ),
                 border: const OutlineInputBorder(
@@ -271,8 +255,9 @@ class _TaskItem extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Text('${task.name} x${task.amountToBake}',
-                        style: const TextStyle(
+                    child: Text(
+                      '${task.name} x${task.amountToBake}',
+                      style: const TextStyle(
                         color: Color.fromARGB(255, 251, 250, 248),
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -315,6 +300,7 @@ class _TaskItem extends StatelessWidget {
       ),
     );
   }
+
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Pending':
