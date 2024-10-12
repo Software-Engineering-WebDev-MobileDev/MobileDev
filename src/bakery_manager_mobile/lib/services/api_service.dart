@@ -466,6 +466,95 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> deleteTask(String taskID) async {
+    final url = Uri.parse('$baseApiUrl/delete_task/$taskID');
+    final sessionId = await SessionManager().getSessionToken();
+    
+    // Set headers including session_id
+    final headers = <String, String>{
+      'session_id': sessionId!,
+    };
+
+    try {
+      final response = await http.delete(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        return {'status': 'success'};
+      } else if (response.statusCode == 403) {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'error',
+          'reason': responseBody['reason'] ?? 'Forbidden access',
+        };
+      } else {
+        return {
+          'status': 'error',
+          'reason': 'Failed to delete task: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> updateTask({
+  required String taskID,
+  required String recipeID,
+  required int amountToBake,
+  required String assignedEmployeeID,
+  String? comments,
+  String? commentID,
+  required String dueDate,
+  required String status,
+}) async {
+  final url = Uri.parse('$baseApiUrl/update_task/$taskID');
+  final sessionId = await SessionManager().getSessionToken();
+  
+  // Set headers including session_id
+  final headers = <String, String>{
+    'session_id': sessionId!,
+    'Content-Type': 'application/json', // Specify that we are sending JSON
+  };
+
+  // Prepare the body for the request
+  final body = jsonEncode({
+    'RecipeID': recipeID,
+    'AmountToBake': amountToBake,
+    'AssignedEmployeeID': assignedEmployeeID,
+    'Comments': comments,
+    'CommentID': commentID,
+    'DueDate': dueDate,
+    'Status': status,
+  });
+
+  try {
+    final response = await http.put(url, headers: headers, body: body);
+
+    if (response.statusCode == 200) {
+      return {'status': 'success'};
+    } else if (response.statusCode == 400) {
+      final responseBody = jsonDecode(response.body);
+      return {
+        'status': 'error',
+        'reason': responseBody['reason'] ?? 'Bad request',
+      };
+    } else {
+      return {
+        'status': 'error',
+        'reason': 'Failed to update task: ${response.statusCode}',
+      };
+    }
+  } catch (e) {
+    return {
+      'status': 'error',
+      'reason': 'Network error: $e',
+    };
+  }
+}
+
   static Future<Map<String, dynamic>> addUserEmail({
     required String emailAddress,
     required String type,

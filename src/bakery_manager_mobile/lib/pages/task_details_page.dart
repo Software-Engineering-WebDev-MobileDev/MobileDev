@@ -133,7 +133,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       TextSpan(
-                        text: task.status ?? 'N/A',
+                        text: task.status,
                         style: TextStyle(
                           color: _getStatusColor(task.status),
                           fontWeight: FontWeight.bold,
@@ -172,7 +172,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         text: 'Amount to Bake: ',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      TextSpan(text: task.amountToBake != null ? '${task.amountToBake}' : 'N/A'),
+                      TextSpan(text:'${task.amountToBake}'),
                     ],
                   ),
                 ),
@@ -367,7 +367,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         if (confirmed) {
                           // Call API to delete task and handle success/failure
                           try {
-                            // await ApiService.deleteTask(task.taskID ?? '');
+                            await ApiService.deleteTask(task.taskID);
                             Navigator.pop(context); // Navigate back after deletion
                           } catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(
