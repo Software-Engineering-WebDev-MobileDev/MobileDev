@@ -407,10 +407,10 @@ class ApiService {
     final url = Uri.parse('$baseApiUrl/add_user_email');
     final sessionId = await SessionManager().getSessionToken();
     final headers = <String, String>{
-        'session_id': sessionId!,
-        'email_address': emailAddress,
-        'type': type
-      };
+      'session_id': sessionId!,
+      'email_address': emailAddress,
+      'type': type
+    };
 
     try {
       final response = await http.post(url, headers: headers);
@@ -437,10 +437,10 @@ class ApiService {
   }) async {
     final url = Uri.parse('$baseApiUrl/user_email');
     final sessionId = await SessionManager().getSessionToken();
-  final headers = <String, String>{
-    'session_id': sessionId!,
-    'email_address': emailAddress
-  };
+    final headers = <String, String>{
+      'session_id': sessionId!,
+      'email_address': emailAddress
+    };
 
     try {
       final response = await http.delete(url, headers: headers);
@@ -457,6 +457,73 @@ class ApiService {
         return {
           'status': 'error',
           'reason': 'Failed to delete email: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> addUserPhone({
+    required String phoneNumber,
+    required String type,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/add_user_phone');
+    final sessionId = await SessionManager().getSessionToken();
+    final headers = <String, String>{
+      'session_id': sessionId!,
+      'phone_number': phoneNumber,
+      'type': type,
+    };
+
+    try {
+      final response = await http.post(url, headers: headers);
+
+      if (response.statusCode == 201) {
+        return {'status': 'success'};
+      } else {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'error',
+          'reason': responseBody['reason'] ?? 'Failed to add phone number',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> deleteUserPhone({
+    required String phoneNumber,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/user_phone');
+    final sessionId = await SessionManager().getSessionToken();
+    final headers = <String, String>{
+      'session_id': sessionId!,
+      'phone_number': phoneNumber,
+    };
+
+    try {
+      final response = await http.delete(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        return {'status': 'success'};
+      } else if (response.statusCode == 409) {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'error',
+          'reason': responseBody['reason'] ?? 'Phone number does not exist',
+        };
+      } else {
+        return {
+          'status': 'error',
+          'reason': 'Failed to delete phone number: ${response.statusCode}',
         };
       }
     } catch (e) {

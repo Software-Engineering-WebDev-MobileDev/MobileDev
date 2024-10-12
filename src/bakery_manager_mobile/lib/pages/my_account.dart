@@ -44,7 +44,7 @@ class MyAccountPageState extends State<MyAccountPage> {
         observer.onReturned = () async {
           // Refetch account details when returning from another page
           _futureAccountDetails = _fetchAccountDetails();
-          setState(() {}); // Trigger rebuild
+          if(mounted) setState(() {}); // Trigger rebuild
         };
       }
     });
@@ -96,11 +96,13 @@ class MyAccountPageState extends State<MyAccountPage> {
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: RichText(
                           text: TextSpan(
-                            style: const TextStyle(fontSize: 18, color: Colors.black),
+                            style: const TextStyle(
+                                fontSize: 18, color: Colors.black),
                             children: [
                               const TextSpan(
                                   text: 'First Name: ',
-                                  style: TextStyle(fontWeight: FontWeight.bold)),
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
                               TextSpan(text: account['FirstName'] ?? ''),
                             ],
                           ),
@@ -112,11 +114,13 @@ class MyAccountPageState extends State<MyAccountPage> {
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: RichText(
                           text: TextSpan(
-                            style: const TextStyle(fontSize: 18, color: Colors.black),
+                            style: const TextStyle(
+                                fontSize: 18, color: Colors.black),
                             children: [
                               const TextSpan(
                                   text: 'Last Name: ',
-                                  style: TextStyle(fontWeight: FontWeight.bold)),
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
                               TextSpan(text: account['LastName'] ?? ''),
                             ],
                           ),
@@ -131,11 +135,13 @@ class MyAccountPageState extends State<MyAccountPage> {
                             Expanded(
                               child: RichText(
                                 text: TextSpan(
-                                  style: const TextStyle(fontSize: 18, color: Colors.black),
+                                  style: const TextStyle(
+                                      fontSize: 18, color: Colors.black),
                                   children: [
                                     const TextSpan(
                                         text: 'Employee ID: ',
-                                        style: TextStyle(fontWeight: FontWeight.bold)),
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
                                     TextSpan(
                                         text: _obscureEmployeeID
                                             ? '••••••••'
@@ -146,7 +152,9 @@ class MyAccountPageState extends State<MyAccountPage> {
                             ),
                             IconButton(
                               icon: Icon(
-                                _obscureEmployeeID ? Icons.visibility_off : Icons.visibility,
+                                _obscureEmployeeID
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
                                 color: Colors.grey,
                               ),
                               onPressed: () {
@@ -164,11 +172,13 @@ class MyAccountPageState extends State<MyAccountPage> {
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: RichText(
                           text: TextSpan(
-                            style: const TextStyle(fontSize: 18, color: Colors.black),
+                            style: const TextStyle(
+                                fontSize: 18, color: Colors.black),
                             children: [
                               const TextSpan(
                                   text: 'Username: ',
-                                  style: TextStyle(fontWeight: FontWeight.bold)),
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
                               TextSpan(text: account['Username'] ?? ''),
                             ],
                           ),
@@ -183,11 +193,13 @@ class MyAccountPageState extends State<MyAccountPage> {
                             Expanded(
                               child: RichText(
                                 text: TextSpan(
-                                  style: const TextStyle(fontSize: 18, color: Colors.black),
+                                  style: const TextStyle(
+                                      fontSize: 18, color: Colors.black),
                                   children: [
                                     const TextSpan(
                                         text: 'Password: ',
-                                        style: TextStyle(fontWeight: FontWeight.bold)),
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
                                     TextSpan(
                                         text: _obscurePassword
                                             ? '••••••••'
@@ -198,7 +210,9 @@ class MyAccountPageState extends State<MyAccountPage> {
                             ),
                             IconButton(
                               icon: Icon(
-                                _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                _obscurePassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
                                 color: Colors.grey,
                               ),
                               onPressed: () {
@@ -215,12 +229,15 @@ class MyAccountPageState extends State<MyAccountPage> {
                       // Emails
                       const Text(
                         'Emails:',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: (account['Emails'] as List<dynamic>? ?? []).map((emailMap) {
-                          String email = emailMap['EmailAddress'] as String; // Extract the email address
+                        children: (account['Emails'] as List<dynamic>? ?? [])
+                            .map((emailMap) {
+                          String email = emailMap['EmailAddress']
+                              as String; // Extract the email address
                           return Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
@@ -235,17 +252,21 @@ class MyAccountPageState extends State<MyAccountPage> {
                       // Phone Numbers
                       const Text(
                         'Phone Numbers:',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: (account['PhoneNumbers'] as List<dynamic>? ?? [])
-                            .cast<String>()
-                            .map((phone) {
+                        children:
+                            (account['PhoneNumbers'] as List<dynamic>? ?? [])
+                                .map((phone) {
+                          // Assuming the phone map has a field named 'number' for the phone number
+                          String phoneNumber = phone["PhoneNumber"]
+                              as String; // Change 'number' to your actual key
                           return Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
-                              '• $phone',
+                              '• $phoneNumber',
                               style: const TextStyle(fontSize: 16),
                             ),
                           );

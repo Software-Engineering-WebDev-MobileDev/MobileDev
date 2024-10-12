@@ -27,12 +27,13 @@ class _EditAccountPageState extends State<EditAccountPage> {
   List<Map<String, dynamic>> _phones = [];
   List<String> emailsToDelete = [];
   List<String> originalEmails = [];
+  List<String> phonesToDelete = [];
+  List<String> originalPhones = [];
   List<TextEditingController> _emailControllers = [];
   List<TextEditingController> _phoneControllers = [];
 
   final List<String> emailTypes = ["personal", "work", "other", "primary"];
   final List<String> phoneTypes = ["mobile", "home", "work", "fax", "primary"];
-  
 
   @override
   void initState() {
@@ -64,11 +65,9 @@ class _EditAccountPageState extends State<EditAccountPage> {
     for (var controller in _emailControllers) {
       controller.dispose();
     }
-
     for (var controller in _phoneControllers) {
       controller.dispose();
     }
-
     super.dispose();
   }
 
@@ -77,15 +76,13 @@ class _EditAccountPageState extends State<EditAccountPage> {
     setState(() {
       _has8Characters = password.length >= 8;
       _hasNumber = password.contains(RegExp(r'\d'));
-      _hasSpecialCharacter =
-          password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+      _hasSpecialCharacter = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
     });
   }
 
   // Email validation function
   String? _validateEmail(String email) {
-    final emailRegex =
-        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     if (email.isEmpty) {
       return 'Email is required';
     } else if (!emailRegex.hasMatch(email)) {
@@ -105,30 +102,26 @@ class _EditAccountPageState extends State<EditAccountPage> {
     return null;
   }
 
+  // Remove email field
   void _removeEmailField(int index) {
     bool wasPrimary = _emails[index]['primary'];
-
     setState(() {
       emailsToDelete.add(_emails[index]['address']);
       _emails.removeAt(index);
-
       _emailControllers.removeAt(index).dispose();
-
-      // If the primary email was deleted, make the first email the new primary
       if (wasPrimary && _emails.isNotEmpty) {
         _emails[0]['primary'] = true;
       }
     });
   }
 
+  // Remove phone field
   void _removePhoneField(int index) {
     bool wasPrimary = _phones[index]['primary'];
-
     setState(() {
+      phonesToDelete.add(_phones[index]['number']);
       _phones.removeAt(index);
       _phoneControllers.removeAt(index).dispose();
-
-      // If the primary phone was deleted, make the first phone the new primary
       if (wasPrimary && _phones.isNotEmpty) {
         _phones[0]['primary'] = true;
       }
@@ -150,13 +143,11 @@ class _EditAccountPageState extends State<EditAccountPage> {
       for (var email in originalEmails) {
         await ApiService.deleteUserEmail(emailAddress: email);
       }
-
-      // Check for emails that need to be deleted
-      for (var email in _emails) {
-        if (!_emailControllers[_emails.indexOf(email)].text.isNotEmpty) {
-          emailsToDelete.add(email['address']);
-        }
+            // Delete old phone numbers
+      for (var phone in originalPhones) {
+        await ApiService.deleteUserPhone(phoneNumber: phone);
       }
+
 
       // Check for new emails to add
       for (var i = 0; i < _emailControllers.length; i++) {
@@ -165,8 +156,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
           emailsToAdd.add({
             'address': emailAddress,
             'type': emailTypes[i],
-            'isPrimary': _emails[i]
-                ['primary'],
+            'isPrimary': _emails[i]['primary'],
           });
         }
       }
@@ -179,11 +169,39 @@ class _EditAccountPageState extends State<EditAccountPage> {
       // Add new emails
       for (var emailData in emailsToAdd) {
         await ApiService.addUserEmail(
-            emailAddress: emailData['address'], type: emailData['type']);
+          emailAddress: emailData['address'],
+          type: emailData['type'],
+        );
       }
 
-      Map<String, dynamic> response =
-          await Future.delayed(const Duration(seconds: 0), () {
+      List<Map<String, dynamic>> phonesToAdd = [];
+
+      // Check for new phone numbers to add
+      for (var i = 0; i < _phoneControllers.length; i++) {
+        String phoneNumber = _phoneControllers[i].text;
+        if (phoneNumber.isNotEmpty) {
+          phonesToAdd.add({
+            'number': phoneNumber,
+            'type': phoneTypes[i],
+            'isPrimary': _phones[i]['primary'],
+          });
+        }
+      }
+
+      // Delete old phone numbers
+      for (var phone in phonesToDelete) {
+        await ApiService.deleteUserPhone(phoneNumber: phone);
+      }
+
+      // Add new phone numbers
+      for (var phoneData in phonesToAdd) {
+        await ApiService.addUserPhone(
+          phoneNumber: phoneData['number'],
+          type: phoneData['type'],
+        );
+      }
+
+      Map<String, dynamic> response = await Future.delayed(const Duration(seconds: 0), () {
         return {'status': 'success'};
       });
 
@@ -199,7 +217,8 @@ class _EditAccountPageState extends State<EditAccountPage> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('Account update failed: ${response['reason']}')),
+            content: Text('Account update failed: ${response['reason']}'),
+          ),
         );
       }
     }
@@ -217,24 +236,27 @@ class _EditAccountPageState extends State<EditAccountPage> {
         lastNameController.text = userInfo['LastName'];
         usernameController.text = userInfo['Username'];
 
-        // Populate emails and phones
-        _emails = userInfo['Emails'].map<Map<String, dynamic>>((email) {
+        // Populate emails
+        _emails = (userInfo['Emails'] as List<dynamic>).map<Map<String, dynamic>>((email) {
           return {
             'address': email['EmailAddress'],
             'type': email['EmailTypeID'],
-            'primary': email['Valid'], // Assuming 'Valid' indicates primary
+            'primary': false, // Assuming 'Valid' indicates primary
           };
         }).toList();
 
         originalEmails = _emails.map((emailMap) => emailMap['address'] as String).toList();
 
-        _phones = userInfo['PhoneNumbers'].map<Map<String, dynamic>>((phone) {
+        // Populate phones
+        _phones = (userInfo['PhoneNumbers'] as List<dynamic>).map<Map<String, dynamic>>((phone) {
           return {
             'number': phone['PhoneNumber'],
-            'type': phone['PhoneTypeDescription'],
-            'primary': phone['Valid'], // Assuming 'Valid' indicates primary
+            'type': phone['PhoneTypeID'],
+            'primary': false, // Assuming 'Valid' indicates primary
           };
         }).toList();
+
+        originalPhones = _phones.map((phoneMap) => phoneMap['number'] as String).toList();
 
         // Create controllers for each email/phone
         _emailControllers = _emails
@@ -654,7 +676,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                   onPressed: () {
                     setState(() {
                       _phones.add(
-                          {'number': '', 'type': 'Mobile', 'primary': false});
+                          {'number': '', 'type': 'mobile', 'primary': false});
                       _phoneControllers.add(TextEditingController(text: ''));
                     });
                   },
