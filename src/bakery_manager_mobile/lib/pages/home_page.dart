@@ -1,7 +1,6 @@
 import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:bakery_manager_mobile/services/session_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bakery_manager_mobile/assets/constants.dart';
 
 /*
@@ -20,6 +19,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String _firstName = '';
   String _lastName = '';
+  String _roleName = '';
 
   @override
   void initState() {
@@ -28,11 +28,24 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _loadUserData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _firstName = prefs.getString('first_name') ?? 'John';
-      _lastName = prefs.getString('last_name') ?? 'Doe';
-    });
+    // Call the API to get user info
+    Map<String, dynamic> userInfo = await ApiService.getUserInfo();
+
+    // Check if the response was successful
+    if (userInfo['status'] == 'success') {
+      setState(() {
+        // Assuming userInfo['content'] contains a map with first and last name
+        _firstName = userInfo['content']['FirstName'] ?? 'John';
+        _lastName = userInfo['content']['LastName'] ?? 'Doe';
+        _roleName = userInfo['content']['RoleName'] ?? 'Employee';
+      });
+    } else {
+      // Handle the error case, maybe show a message or set default names
+      setState(() {
+        _firstName = 'John';
+        _lastName = 'Doe';
+      });
+    }
   }
 
   void _logout() async {
@@ -117,9 +130,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   color: Color.fromARGB(255, 209, 125, 51),
                 ),
               ),
-              const Text(
-                'Owner',
-                style: TextStyle(
+              Text(
+                _roleName,
+                style: const TextStyle(
                   fontSize: 16,
                   color: Colors.black54,
                 ),
