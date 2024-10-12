@@ -3,7 +3,7 @@ import 'package:bakery_manager_mobile/models/ingredient.dart';
 import 'package:bakery_manager_mobile/models/task.dart';
 import 'package:http/http.dart' as http;
 import '../models/recipe.dart';
-import '../models/account.dart';
+//import '../models/account.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'session_manager.dart';
 
@@ -256,8 +256,8 @@ class ApiService {
     final url = Uri.parse('$baseApiUrl/recipe/$recipeID');
     final headers = {'Content-Type': 'application/json'};
 
-      try {
-        final response = await http.get(url, headers: headers);
+    try {
+      final response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -274,15 +274,13 @@ class ApiService {
           'reason': 'Failed to fetch recipe name: ${response.statusCode}',
         };
       }
-    }
-    catch(e){
+    } catch (e) {
       return {
         'status': 'error',
         'reason': 'Network error: $e',
       };
     }
   }
-
 
   static Future<Map<String, dynamic>> getInventory(
       {int page = 1, int pageSize = 20}) async {
@@ -401,14 +399,14 @@ class ApiService {
       };
     }
   }
-  
+
   // Add User Email Function
   static Future<Map<String, dynamic>> addUserEmail({
     required String sessionID,
     required String emailAddress,
     required String emailType,
   }) async {
-    final url = Uri.parse('$baseApiUrl/api/add_user_email');  // API endpoint URL
+    final url = Uri.parse('$baseApiUrl/api/add_user_email'); // API endpoint URL
 
     try {
       // Perform the POST request
@@ -417,7 +415,7 @@ class ApiService {
         headers: {
           'session_id': sessionID,
           'email_address': emailAddress,
-          'type': emailType,  // <personal|work|other>
+          'type': emailType, // <personal|work|other>
         },
       );
 
@@ -427,7 +425,7 @@ class ApiService {
         return {
           'status': responseBody['status'],
         };
-      } 
+      }
       // If the session is invalid or expired, handle 498 error
       else if (response.statusCode == 498) {
         Map<String, dynamic> responseBody = json.decode(response.body);
@@ -435,7 +433,7 @@ class ApiService {
           'status': 'error',
           'reason': responseBody['reason'],
         };
-      } 
+      }
       // Other errors
       else {
         return {
@@ -451,6 +449,7 @@ class ApiService {
       };
     }
   }
+
   // Login Function
   static Future<Map<String, dynamic>> login(
       String username, String password) async {
@@ -535,29 +534,43 @@ class ApiService {
       return false;
     }
   }
+
   // Get Account Function
-  static Future<Map<String, dynamic>> getAccount(String userID) async {
-    final url = Uri.parse('$baseApiUrl/account/$userID');
+  static Future<Map<String, dynamic>> getUserInfo() async {
+    final url = Uri.parse('$baseApiUrl/my_info');
+    String sessionId = await SessionManager().getSessionToken() ?? "";
+
     try {
-      final response = await http.get(url);
+      // Make the HTTP GET request
+      final response = await http.get(
+        url,
+        headers: {
+          'session_id': sessionId,
+        },
+      );
 
       // Successful response
       if (response.statusCode == 200) {
         Map<String, dynamic> body = json.decode(response.body);
-        return {
-          'status': 'success',
-          'accountDetails': Account.fromJson(body),
-        };
-      }
-      // Failed response
-      else {
+
+        if (body['status'] == 'success') {
+          return {
+            'status': 'success',
+            'content': body['content'], // Includes all user information
+          };
+        } else {
+          return {
+            'status': 'error',
+            'reason': body['reason'],
+          };
+        }
+      } else {
         return {
           'status': 'error',
-          'reason': 'Failed to load account details: ${response.statusCode}',
+          'reason': 'Failed to load user info: ${response.statusCode}',
         };
       }
     } catch (e) {
-      // Network error
       return {
         'status': 'error',
         'reason': 'Network error: $e',
@@ -565,7 +578,8 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> checkEmployeeIDExists(String employeeID) async {
+  static Future<Map<String, dynamic>> checkEmployeeIDExists(
+      String employeeID) async {
     final url = Uri.parse('$baseApiUrl/check_employee_id');
     final headers = {
       'Content-Type': 'application/json',
@@ -609,7 +623,8 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> checkUsernameExists(String username) async {
+  static Future<Map<String, dynamic>> checkUsernameExists(
+      String username) async {
     final url = Uri.parse('$baseApiUrl/check_username');
     final headers = {
       'Content-Type': 'application/json',
@@ -630,5 +645,4 @@ class ApiService {
       return {'status': 'error', 'reason': 'Network error: $e'};
     }
   }
-
 }

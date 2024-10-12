@@ -1,6 +1,8 @@
 import 'package:bakery_manager_mobile/assets/constants.dart';
+import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:flutter/material.dart';
-//import '../services/api_service.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class MyAccountPage extends StatefulWidget {
   const MyAccountPage({super.key});
@@ -14,35 +16,16 @@ class MyAccountPageState extends State<MyAccountPage> {
   bool _obscurePassword = true;
   bool _obscureEmployeeID = true;
 
-  // TODO: replace mock data with real data
-  final Map<String, dynamic> _accountPlaceholder = {
-    'FirstName': 'John', 
-    'LastName': 'Doe',
-    'EmployeeID': '12345',
-    'RoleID': 'Manager',
-    'Username': 'johndoe',
-    'Password': 'password123',
-    'Emails': ['johndoe@example.com', 'john.doe@home.com'], 
-    'PhoneNumbers': ['+1234567890', '+0987654321'],
-  };
-
   // Fetch account details from the API
   Future<Map<String, dynamic>> _fetchAccountDetails() async {
-    try {
-      /*
-      final response = await ApiService.getAccount(userID);
-      if (response['status'] == 'success') {
-        return response['accountDetails'];
-      } else {
-        debugPrint('Error: ${response['reason']}');
-        throw Exception('Failed to load account details: ${response['reason']}');
-      }
-      */
-      
-      return _accountPlaceholder;
-    } catch (error) {
-      debugPrint('Fetch account error: $error');
-      return _accountPlaceholder;
+    final response = await ApiService.getUserInfo(); // Call the API function
+
+    if (response['status'] == 'success') {
+      return response['content']; // Get the actual account details from the response
+    } else {
+      debugPrint('Error: ${response['reason']}');
+      // Return empty data or handle the error scenario accordingly
+      return {};
     }
   }
 
@@ -77,7 +60,13 @@ class MyAccountPageState extends State<MyAccountPage> {
       body: FutureBuilder<Map<String, dynamic>>(
         future: _futureAccountDetails,
         builder: (context, snapshot) {
-          final account = snapshot.data ?? _accountPlaceholder;
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          final account = snapshot.data ?? {};
 
           return Column(
             children: [
@@ -217,7 +206,9 @@ class MyAccountPageState extends State<MyAccountPage> {
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: (account['Emails'] as List<dynamic>).cast<String>().map((email) {
+                        children: (account['Emails'] as List<dynamic>? ?? [])
+                            .cast<String>()
+                            .map((email) {
                           return Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
@@ -236,7 +227,9 @@ class MyAccountPageState extends State<MyAccountPage> {
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: (account['PhoneNumbers'] as List<dynamic>).cast<String>().map((phone) {
+                        children: (account['PhoneNumbers'] as List<dynamic>? ?? [])
+                            .cast<String>()
+                            .map((phone) {
                           return Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
@@ -294,3 +287,4 @@ class MyAccountPageState extends State<MyAccountPage> {
     );
   }
 }
+

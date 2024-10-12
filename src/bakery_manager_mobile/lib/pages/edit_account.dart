@@ -1,3 +1,4 @@
+import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:flutter/material.dart';
 
 class EditAccountPage extends StatefulWidget {
@@ -34,25 +35,16 @@ class _EditAccountPageState extends State<EditAccountPage> {
   void initState() {
     super.initState();
 
-    // TODO: replace mock data with real data
-    employeeIDController = TextEditingController(text: '12345-ABCDE');
-    firstNameController = TextEditingController(text: 'John');
-    lastNameController = TextEditingController(text: 'Doe');
-    usernameController = TextEditingController(text: 'johndoe');
-    passwordController = TextEditingController(text: 'password123');
+    // Set up controllers with default values (or empty)
+    employeeIDController = TextEditingController();
+    firstNameController = TextEditingController();
+    lastNameController = TextEditingController();
+    usernameController = TextEditingController();
+    passwordController = TextEditingController();
     confirmPasswordController = TextEditingController();
 
-    _emails = [
-      {'address': 'johndoe@example.com', 'type': 'Work', 'primary': true},
-      {'address': 'john.doe@home.com', 'type': 'Home', 'primary': false},
-    ];
-    _phones = [
-      {'number': '+1234567890', 'type': 'Mobile', 'primary': true},
-      {'number': '+0987654321', 'type': 'Home', 'primary': false},
-    ];
-
-    _emailControllers = _emails.map((email) => TextEditingController(text: email['address'])).toList();
-    _phoneControllers = _phones.map((phone) => TextEditingController(text: phone['number'])).toList();
+    // Fetch user data when the page loads
+    _fetchUserData();
 
     passwordController.addListener(_validatePassword);
   }
@@ -77,7 +69,6 @@ class _EditAccountPageState extends State<EditAccountPage> {
     super.dispose();
   }
 
-  // Function to validate password requirements
   void _validatePassword() {
     String password = passwordController.text;
     setState(() {
@@ -86,8 +77,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
       _hasSpecialCharacter = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
     });
   }
-
-  // Email validation function
+   // Email validation function
   String? _validateEmail(String email) {
     final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     if (email.isEmpty) {
@@ -167,11 +157,57 @@ class _EditAccountPageState extends State<EditAccountPage> {
     }
   }
 
+  void _fetchUserData() async {
+    Map<String, dynamic> result = await ApiService.getUserInfo();
+
+    if (result['status'] == 'success') {
+      Map<String, dynamic> userInfo = result['content'];
+
+      setState(() {
+        employeeIDController.text = userInfo['EmployeeID'];
+        firstNameController.text = userInfo['FirstName'];
+        lastNameController.text = userInfo['LastName'];
+        usernameController.text = userInfo['Username'];
+
+        // Populate emails and phones
+        _emails = userInfo['Emails'].map<Map<String, dynamic>>((email) {
+          return {
+            'address': email['EmailAddress'],
+            'type': email['EmailTypeDescription'],
+            'primary': email['Valid'], // Assuming 'Valid' indicates primary
+          };
+        }).toList();
+
+        _phones = userInfo['PhoneNumbers'].map<Map<String, dynamic>>((phone) {
+          return {
+            'number': phone['PhoneNumber'],
+            'type': phone['PhoneTypeDescription'],
+            'primary': phone['Valid'], // Assuming 'Valid' indicates primary
+          };
+        }).toList();
+
+        // Create controllers for each email/phone
+        _emailControllers = _emails
+            .map((email) => TextEditingController(text: email['address']))
+            .toList();
+        _phoneControllers = _phones
+            .map((phone) => TextEditingController(text: phone['number']))
+            .toList();
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Error fetching user data: ${result['reason']}')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Account', style: TextStyle(color: Colors.white)),
+        title:
+            const Text('Edit Account', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.orange,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -294,7 +330,9 @@ class _EditAccountPageState extends State<EditAccountPage> {
                     ),
                     IconButton(
                       icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                       ),
                       onPressed: () {
                         setState(() {
@@ -313,7 +351,9 @@ class _EditAccountPageState extends State<EditAccountPage> {
                     Row(
                       children: [
                         Icon(
-                          _has8Characters ? Icons.check_circle : Icons.radio_button_unchecked,
+                          _has8Characters
+                              ? Icons.check_circle
+                              : Icons.radio_button_unchecked,
                           color: _has8Characters ? Colors.green : Colors.grey,
                           size: 20,
                         ),
@@ -325,7 +365,9 @@ class _EditAccountPageState extends State<EditAccountPage> {
                     Row(
                       children: [
                         Icon(
-                          _hasNumber ? Icons.check_circle : Icons.radio_button_unchecked,
+                          _hasNumber
+                              ? Icons.check_circle
+                              : Icons.radio_button_unchecked,
                           color: _hasNumber ? Colors.green : Colors.grey,
                           size: 20,
                         ),
@@ -337,8 +379,11 @@ class _EditAccountPageState extends State<EditAccountPage> {
                     Row(
                       children: [
                         Icon(
-                          _hasSpecialCharacter ? Icons.check_circle : Icons.radio_button_unchecked,
-                          color: _hasSpecialCharacter ? Colors.green : Colors.grey,
+                          _hasSpecialCharacter
+                              ? Icons.check_circle
+                              : Icons.radio_button_unchecked,
+                          color:
+                              _hasSpecialCharacter ? Colors.green : Colors.grey,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
@@ -375,7 +420,9 @@ class _EditAccountPageState extends State<EditAccountPage> {
                     ),
                     IconButton(
                       icon: Icon(
-                        _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                        _obscureConfirmPassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                       ),
                       onPressed: () {
                         setState(() {
@@ -407,9 +454,14 @@ class _EditAccountPageState extends State<EditAccountPage> {
                               decoration: InputDecoration(
                                 hintText: 'Email ${idx + 1}',
                                 border: OutlineInputBorder(
-                                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(10)),
                                   borderSide: BorderSide(
-                                    color: _validateEmail(_emailControllers[idx].text) == null ? Colors.grey : Colors.red,
+                                    color: _validateEmail(
+                                                _emailControllers[idx].text) ==
+                                            null
+                                        ? Colors.grey
+                                        : Colors.red,
                                   ),
                                 ),
                               ),
@@ -448,7 +500,8 @@ class _EditAccountPageState extends State<EditAccountPage> {
                           const Text('Primary'),
                           if (_emails.length > 1)
                             IconButton(
-                              icon: const Icon(Icons.remove_circle, color: Colors.red),
+                              icon: const Icon(Icons.remove_circle,
+                                  color: Colors.red),
                               onPressed: () => _removeEmailField(idx),
                             ),
                         ],
@@ -459,13 +512,15 @@ class _EditAccountPageState extends State<EditAccountPage> {
                 ElevatedButton.icon(
                   onPressed: () {
                     setState(() {
-                      _emails.add({'address': '', 'type': 'Work', 'primary': false});
+                      _emails.add(
+                          {'address': '', 'type': 'Work', 'primary': false});
                       _emailControllers.add(TextEditingController(text: ''));
                     });
                   },
                   icon: const Icon(Icons.add),
                   label: const Text('Add Email'),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.green),
                 ),
                 const SizedBox(height: 16),
 
@@ -489,9 +544,12 @@ class _EditAccountPageState extends State<EditAccountPage> {
                               decoration: InputDecoration(
                                 hintText: 'Phone ${idx + 1}',
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(10)),
                                   borderSide: BorderSide(
-                                    color: _validatePhone(_phoneControllers[idx].text) == null
+                                    color: _validatePhone(
+                                                _phoneControllers[idx].text) ==
+                                            null
                                         ? Colors.grey
                                         : Colors.red,
                                   ),
@@ -533,7 +591,8 @@ class _EditAccountPageState extends State<EditAccountPage> {
                           const Text('Primary'),
                           if (_phones.length > 1)
                             IconButton(
-                              icon: const Icon(Icons.remove_circle, color: Colors.red),
+                              icon: const Icon(Icons.remove_circle,
+                                  color: Colors.red),
                               onPressed: () => _removePhoneField(idx),
                             ),
                         ],
@@ -544,13 +603,15 @@ class _EditAccountPageState extends State<EditAccountPage> {
                 ElevatedButton.icon(
                   onPressed: () {
                     setState(() {
-                      _phones.add({'number': '', 'type': 'Mobile', 'primary': false});
+                      _phones.add(
+                          {'number': '', 'type': 'Mobile', 'primary': false});
                       _phoneControllers.add(TextEditingController(text: ''));
                     });
                   },
                   icon: const Icon(Icons.add),
                   label: const Text('Add Phone'),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.green),
                 ),
                 const SizedBox(height: 32),
 
