@@ -1,6 +1,7 @@
 import 'dart:async'; // Import to use Future and Timer
 import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:bakery_manager_mobile/services/api_service.dart';
+import 'package:bakery_manager_mobile/services/navigator_observer.dart';
 import 'package:flutter/material.dart';
 import '../models/task.dart';
 import 'package:intl/intl.dart';
@@ -24,6 +25,16 @@ class TaskPageState extends State<TaskPage> {
   void initState() {
     super.initState();
     _futureTasks = _fetchTasks();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final NavigatorState navigator = Navigator.of(context);
+      final MyNavigatorObserver? observer =
+          navigator.widget.observers.firstWhere(
+        (observer) => observer is MyNavigatorObserver,
+      ) as MyNavigatorObserver?;
+      if (observer != null) {
+        observer.onReturned = _fetchTasks;
+      }
+    });
   }
 
   // Fetch tasks function
@@ -32,14 +43,6 @@ class TaskPageState extends State<TaskPage> {
 
     if (result['status'] == 'success') {
       List<Task> tasks = result['tasks'];
-
-      // Fetch recipe names
-      for (var task in tasks) {
-        final recipeNameResult = await ApiService.getRecipeName(task.recipeID);
-        task.name = recipeNameResult['status'] == 'success'
-            ? recipeNameResult['recipeName']
-            : 'Unknown Recipe';
-      }
 
       setState(() {
         _allTasks = tasks;
@@ -240,6 +243,7 @@ class TaskPageState extends State<TaskPage> {
 }
 
 // Task Item Widget
+// Task Item Widget
 class _TaskItem extends StatelessWidget {
   final Task task;
   const _TaskItem({required this.task});
@@ -262,13 +266,28 @@ class _TaskItem extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                task.name!,
-                style: const TextStyle(
-                  color: Color.fromARGB(255, 251, 250, 248),
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+              // Row to include employee ID and task name
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text('${task.name} x${task.amountToBake}',
+                        style: const TextStyle(
+                        color: Color.fromARGB(255, 251, 250, 248),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  // Employee ID displayed on the top right
+                  Text(
+                    'Assigned Employee ID: ${task.employeeID}', // Assuming task has employeeID field
+                    style: const TextStyle(
+                      color: Color.fromARGB(255, 246, 235, 216),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               Row(
@@ -296,7 +315,6 @@ class _TaskItem extends StatelessWidget {
       ),
     );
   }
-
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Pending':

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:bakery_manager_mobile/models/account.dart';
 import 'package:bakery_manager_mobile/models/ingredient.dart';
 import 'package:bakery_manager_mobile/models/task.dart';
 import 'package:http/http.dart' as http;
@@ -404,6 +405,67 @@ class ApiService {
     }
   }
 
+   static Future<Map<String, dynamic>> addTask({
+    required String recipeID,
+    required int amountToBake,
+    required String assignedEmployeeID,
+    required String dueDate,
+    String? comments,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/add_task');
+    final sessionId = await SessionManager().getSessionToken(); // Assuming session manager gives you session token
+
+    // Set headers, including session_id
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+      'session_id': sessionId!,
+    };
+
+    // Prepare the request body
+    final Map<String, dynamic> body = {
+      'RecipeID': recipeID,
+      'AmountToBake': amountToBake,
+      'AssignedEmployeeID': assignedEmployeeID,
+      'DueDate': dueDate,
+    };
+
+    // Add comments if provided
+    if (comments != null && comments.isNotEmpty) {
+      body['Comments'] = comments;
+    }
+
+    try {
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 201) {
+        // Success response, parse response if needed
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'success',
+          'taskID': responseBody['taskID'],
+          if (responseBody['commentID'] != null) 'commentID': responseBody['commentID'],
+        };
+      } else {
+        // Handle error responses
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'error',
+          'reason': responseBody['reason'] ?? 'Failed to add task',
+        };
+      }
+    } catch (e) {
+      // Handle network or parsing errors
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
   static Future<Map<String, dynamic>> addUserEmail({
     required String emailAddress,
     required String type,
@@ -666,71 +728,50 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> checkEmployeeIDExists(
-      String employeeID) async {
-    final url = Uri.parse('$baseApiUrl/check_employee_id');
-    final headers = {
-      'Content-Type': 'application/json',
-    };
-    final body = json.encode({'employee_id': employeeID});
+  static Future<Map<String, dynamic>> getUserList(
+      {int page = 1, int pageSize = 20}) async {
+    final url = Uri.parse('$baseApiUrl/user_list');
+    String sessionId = await SessionManager().getSessionToken() ?? "";
 
     try {
-      final response = await http.post(url, headers: headers, body: body);
+      // Make the HTTP GET request
+      final response = await http.get(
+        url,
+        headers: {
+          'session_id': sessionId,
+          'page': page.toString(),
+          'page_size': pageSize.toString(),
+        },
+      );
+
+      // Successful response
       if (response.statusCode == 200) {
-        Map<String, dynamic> responseData = json.decode(response.body);
-        return {
-          'status': responseData['exists'] ? 'exists' : 'not_exists',
-        };
+        Map<String, dynamic> body = json.decode(response.body);
+
+        if (body['status'] == 'success') {
+          return {
+            'status': 'success',
+            'page': body['page'],
+            'page_count': body['page_count'],
+            'content': (body['content'] as List<dynamic>).map((user) => Account.fromJson(user)).toList(),// Includes list of users
+          };
+        } else {
+          return {
+            'status': 'error',
+            'reason': body['reason'],
+          };
+        }
       } else {
-        return {'status': 'error', 'reason': 'Failed to check Employee ID'};
+        return {
+          'status': 'error',
+          'reason': 'Failed to load user list: ${response.statusCode}',
+        };
       }
     } catch (e) {
-      return {'status': 'error', 'reason': 'Network error: $e'};
-    }
-  }
-
-  static Future<Map<String, dynamic>> checkEmailExists(String email) async {
-    final url = Uri.parse('$baseApiUrl/check_email');
-    final headers = {
-      'Content-Type': 'application/json',
-    };
-    final body = json.encode({'email': email});
-
-    try {
-      final response = await http.post(url, headers: headers, body: body);
-      if (response.statusCode == 200) {
-        Map<String, dynamic> responseData = json.decode(response.body);
-        return {
-          'status': responseData['exists'] ? 'exists' : 'not_exists',
-        };
-      } else {
-        return {'status': 'error', 'reason': 'Failed to check Email'};
-      }
-    } catch (e) {
-      return {'status': 'error', 'reason': 'Network error: $e'};
-    }
-  }
-
-  static Future<Map<String, dynamic>> checkUsernameExists(
-      String username) async {
-    final url = Uri.parse('$baseApiUrl/check_username');
-    final headers = {
-      'Content-Type': 'application/json',
-    };
-    final body = json.encode({'username': username});
-
-    try {
-      final response = await http.post(url, headers: headers, body: body);
-      if (response.statusCode == 200) {
-        Map<String, dynamic> responseData = json.decode(response.body);
-        return {
-          'status': responseData['exists'] ? 'exists' : 'not_exists',
-        };
-      } else {
-        return {'status': 'error', 'reason': 'Failed to check Username'};
-      }
-    } catch (e) {
-      return {'status': 'error', 'reason': 'Network error: $e'};
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
     }
   }
 }

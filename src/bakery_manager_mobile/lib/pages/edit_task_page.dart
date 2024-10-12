@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For date and time formatting
 import '../models/recipe.dart';
 import '../models/task.dart'; // Import Task model
+import '../models/account.dart'; // Import Account model
 import '../services/api_service.dart'; // Import API service
 
 class EditTaskPage extends StatefulWidget {
@@ -24,39 +25,35 @@ class _EditTaskPageState extends State<EditTaskPage> {
 
   Task? task; // Variable to store the Task object
   Recipe? selectedRecipe;
+  Account? selectedAccount; // Variable to store selected Account
 
   // Recipe list for dropdown
   List<Recipe> _allRecipes = [];
-  List<Recipe> _filteredRecipes = [];
+  
+  // Account list for dropdown
+  List<Account> _allAccounts = [];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Retrieve the Task object passed from the previous screen
+    task = ModalRoute.of(context)!.settings.arguments as Task;
+
+    // Prepopulate form fields with task data
+    amountToBakeController.text = task!.amountToBake.toString();
+    dueDateController.text = DateFormat('yyyy-MM-dd').format(task!.dueDate);
+    selectedDueDate = task!.dueDate;
+    selectedDueTime = TimeOfDay.fromDateTime(task!.dueDate);
+    dueTimeController.text = selectedDueTime!.format(context);
+  }
 
   @override
   void initState() {
     super.initState();
-
-    // Fetch recipes and simulate fetching the task object
+    // Fetch recipes and accounts
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _fetchRecipes();
-
-      // Prepopulate with hard-coded task data
-      Task fakeTask = Task(
-        taskID: '123',
-        recipeID: '1', // This should match one of the recipeIDs in _allRecipes
-        amountToBake: 10,
-        assignmentDate: DateTime.now().subtract(const Duration(days: 1)),
-        dueDate: DateTime.now().add(const Duration(days: 1)),
-        status: 'Pending',
-        employeeID: 'emp001',
-        name: 'Bake Chocolate Cake',
-      );
-
-      setState(() {
-        task = fakeTask;
-        amountToBakeController.text = task!.amountToBake.toString();
-        dueDateController.text = DateFormat('yyyy-MM-dd').format(task!.dueDate);
-        selectedDueDate = task!.dueDate;
-        selectedDueTime = TimeOfDay.fromDateTime(task!.dueDate);
-        dueTimeController.text = selectedDueTime!.format(context);
-      });
+      _fetchAccounts();
     });
   }
 
@@ -66,16 +63,13 @@ class _EditTaskPageState extends State<EditTaskPage> {
       if (response['status'] == 'success') {
         List<Recipe> recipes = response['recipes'];
         setState(() {
-          _filteredRecipes = recipes;
           _allRecipes = recipes;
 
-          // Update selected recipe if task exists and matches
-          if (task != null) {
-            selectedRecipe = recipes.firstWhere(
-              (recipe) => recipe.recipeId == task!.recipeID,
-              orElse: () => recipes.first,
-            );
-          }
+          // Set the selected recipe based on the task
+          selectedRecipe = _allRecipes.firstWhere(
+            (recipe) => recipe.recipeId == task!.recipeID,
+            orElse: () => _allRecipes.first
+          );
         });
         return recipes;
       } else {
@@ -83,8 +77,31 @@ class _EditTaskPageState extends State<EditTaskPage> {
             'Failed to fetch recipes: ${response['message'] ?? 'Unknown error'}');
       }
     }).catchError((error) {
-      print('Error fetching recipes: $error');
       return <Recipe>[]; // Return an empty list on error
+    });
+  }
+
+  // Fetch accounts function
+  Future<List<Account>> _fetchAccounts() {
+    return ApiService.getUserList().then((response) {
+      if (response['status'] == 'success') {
+        List<Account> accounts = response['content'];
+        setState(() {
+          _allAccounts = accounts;
+
+          // Set the selected account based on the task
+          selectedAccount = _allAccounts.firstWhere(
+            (account) => account.employeeId == task!.employeeID,
+            orElse: () => _allAccounts.first,
+          );
+        });
+        return accounts;
+      } else {
+        throw Exception(
+            'Failed to fetch accounts: ${response['message'] ?? 'Unknown error'}');
+      }
+    }).catchError((error) {
+      return <Account>[]; // Return an empty list on error
     });
   }
 
@@ -205,6 +222,35 @@ class _EditTaskPageState extends State<EditTaskPage> {
                 validator: (value) {
                   if (value == null) {
                     return 'Please select a recipe';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Assign User dropdown
+              const Text('Assign User:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<Account>(
+                value: selectedAccount,
+                items: _allAccounts.map((account) {
+                  return DropdownMenuItem(
+                    value: account,
+                    child: Text('${account.firstName} ${account.lastName} (${account.username})'),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedAccount = value;
+                  });
+                },
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
+                  hintText: 'Select User',
+                ),
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please select an user';
                   }
                   return null;
                 },
