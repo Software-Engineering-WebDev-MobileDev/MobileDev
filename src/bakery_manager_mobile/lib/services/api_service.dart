@@ -331,7 +331,9 @@ class ApiService {
       String lastName,
       String employeeID,
       String username,
-      String password) async {
+      String password,
+      String email,
+      String phoneNumber) async {
     final url = Uri.parse('$baseApiUrl/create_account');
     final headers = {
       'employee_id': employeeID,
@@ -339,6 +341,8 @@ class ApiService {
       'last_name': lastName,
       'username': username,
       'password': password,
+      'email_address': email,
+      'phone_number': phoneNumber
     };
 
     try {
