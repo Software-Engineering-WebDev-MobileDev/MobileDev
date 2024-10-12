@@ -524,8 +524,6 @@ class ApiService {
     'RecipeID': recipeID,
     'AmountToBake': amountToBake,
     'AssignedEmployeeID': assignedEmployeeID,
-    'Comments': comments,
-    'CommentID': commentID,
     'DueDate': dueDate,
     'Status': status,
   });
