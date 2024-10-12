@@ -1,8 +1,7 @@
 import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:bakery_manager_mobile/services/api_service.dart';
+import 'package:bakery_manager_mobile/services/navigator_observer.dart';
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
 
 class MyAccountPage extends StatefulWidget {
   const MyAccountPage({super.key});
@@ -24,7 +23,6 @@ class MyAccountPageState extends State<MyAccountPage> {
       return response['content']; // Get the actual account details from the response
     } else {
       debugPrint('Error: ${response['reason']}');
-      // Return empty data or handle the error scenario accordingly
       return {};
     }
   }
@@ -32,7 +30,24 @@ class MyAccountPageState extends State<MyAccountPage> {
   @override
   void initState() {
     super.initState();
+    // Initial fetch of account details
     _futureAccountDetails = _fetchAccountDetails();
+
+    // Set up the NavigatorObserver
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final NavigatorState navigator = Navigator.of(context);
+      final MyNavigatorObserver? observer =
+          navigator.widget.observers.firstWhere(
+        (observer) => observer is MyNavigatorObserver,
+      ) as MyNavigatorObserver?;
+      if (observer != null) {
+        observer.onReturned = () async {
+          // Refetch account details when returning from another page
+          _futureAccountDetails = _fetchAccountDetails();
+          setState(() {}); // Trigger rebuild
+        };
+      }
+    });
   }
 
   @override
@@ -51,8 +66,7 @@ class MyAccountPageState extends State<MyAccountPage> {
           IconButton(
             icon: const Icon(Icons.home, color: Colors.white),
             onPressed: () {
-              Navigator.popUntil(
-                  context, ModalRoute.withName('/')); // Home navigation
+              Navigator.popUntil(context, ModalRoute.withName('/'));
             },
           ),
         ],
@@ -77,7 +91,6 @@ class MyAccountPageState extends State<MyAccountPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 16),
-
                       // First Name
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -118,22 +131,22 @@ class MyAccountPageState extends State<MyAccountPage> {
                             Expanded(
                               child: RichText(
                                 text: TextSpan(
-                                  style: const TextStyle(
-                                      fontSize: 18, color: Colors.black),
+                                  style: const TextStyle(fontSize: 18, color: Colors.black),
                                   children: [
                                     const TextSpan(
                                         text: 'Employee ID: ',
                                         style: TextStyle(fontWeight: FontWeight.bold)),
-                                    TextSpan(text: _obscureEmployeeID ? '••••••••' : account['EmployeeID'] ?? ''),
+                                    TextSpan(
+                                        text: _obscureEmployeeID
+                                            ? '••••••••'
+                                            : account['EmployeeID'] ?? ''),
                                   ],
                                 ),
                               ),
                             ),
                             IconButton(
                               icon: Icon(
-                                _obscureEmployeeID
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
+                                _obscureEmployeeID ? Icons.visibility_off : Icons.visibility,
                                 color: Colors.grey,
                               ),
                               onPressed: () {
@@ -170,22 +183,22 @@ class MyAccountPageState extends State<MyAccountPage> {
                             Expanded(
                               child: RichText(
                                 text: TextSpan(
-                                  style: const TextStyle(
-                                      fontSize: 18, color: Colors.black),
+                                  style: const TextStyle(fontSize: 18, color: Colors.black),
                                   children: [
                                     const TextSpan(
                                         text: 'Password: ',
                                         style: TextStyle(fontWeight: FontWeight.bold)),
-                                    TextSpan(text: _obscurePassword ? '••••••••' : account['Password'] ?? ''),
+                                    TextSpan(
+                                        text: _obscurePassword
+                                            ? '••••••••'
+                                            : account['Password'] ?? ''),
                                   ],
                                 ),
                               ),
                             ),
                             IconButton(
                               icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
+                                _obscurePassword ? Icons.visibility_off : Icons.visibility,
                                 color: Colors.grey,
                               ),
                               onPressed: () {
@@ -206,9 +219,8 @@ class MyAccountPageState extends State<MyAccountPage> {
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: (account['Emails'] as List<dynamic>? ?? [])
-                            .cast<String>()
-                            .map((email) {
+                        children: (account['Emails'] as List<dynamic>? ?? []).map((emailMap) {
+                          String email = emailMap['EmailAddress'] as String; // Extract the email address
                           return Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
@@ -246,13 +258,15 @@ class MyAccountPageState extends State<MyAccountPage> {
 
               // Buttons at the bottom
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 16.0),
                 child: Column(
                   children: [
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 32),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -270,7 +284,8 @@ class MyAccountPageState extends State<MyAccountPage> {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 32),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -287,4 +302,3 @@ class MyAccountPageState extends State<MyAccountPage> {
     );
   }
 }
-

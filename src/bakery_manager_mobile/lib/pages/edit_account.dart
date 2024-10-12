@@ -25,11 +25,14 @@ class _EditAccountPageState extends State<EditAccountPage> {
 
   List<Map<String, dynamic>> _emails = [];
   List<Map<String, dynamic>> _phones = [];
+  List<String> emailsToDelete = [];
+  List<String> originalEmails = [];
   List<TextEditingController> _emailControllers = [];
   List<TextEditingController> _phoneControllers = [];
 
-  final List<String> emailTypes = ['Work', 'Home', 'Other'];
-  final List<String> phoneTypes = ['Mobile', 'Home', 'Work', 'Fax'];
+  final List<String> emailTypes = ["personal", "work", "other", "primary"];
+  final List<String> phoneTypes = ["mobile", "home", "work", "fax", "primary"];
+  
 
   @override
   void initState() {
@@ -74,12 +77,15 @@ class _EditAccountPageState extends State<EditAccountPage> {
     setState(() {
       _has8Characters = password.length >= 8;
       _hasNumber = password.contains(RegExp(r'\d'));
-      _hasSpecialCharacter = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+      _hasSpecialCharacter =
+          password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
     });
   }
-   // Email validation function
+
+  // Email validation function
   String? _validateEmail(String email) {
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailRegex =
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     if (email.isEmpty) {
       return 'Email is required';
     } else if (!emailRegex.hasMatch(email)) {
@@ -103,7 +109,9 @@ class _EditAccountPageState extends State<EditAccountPage> {
     bool wasPrimary = _emails[index]['primary'];
 
     setState(() {
+      emailsToDelete.add(_emails[index]['address']);
       _emails.removeAt(index);
+
       _emailControllers.removeAt(index).dispose();
 
       // If the primary email was deleted, make the first email the new primary
@@ -136,7 +144,46 @@ class _EditAccountPageState extends State<EditAccountPage> {
       String username = usernameController.text;
       String password = passwordController.text;
 
-      Map<String, dynamic> response = await Future.delayed(const Duration(seconds: 2), () {
+      // Prepare to delete old emails
+      List<Map<String, dynamic>> emailsToAdd = [];
+
+      for (var email in originalEmails) {
+        await ApiService.deleteUserEmail(emailAddress: email);
+      }
+
+      // Check for emails that need to be deleted
+      for (var email in _emails) {
+        if (!_emailControllers[_emails.indexOf(email)].text.isNotEmpty) {
+          emailsToDelete.add(email['address']);
+        }
+      }
+
+      // Check for new emails to add
+      for (var i = 0; i < _emailControllers.length; i++) {
+        String emailAddress = _emailControllers[i].text;
+        if (emailAddress.isNotEmpty) {
+          emailsToAdd.add({
+            'address': emailAddress,
+            'type': emailTypes[i],
+            'isPrimary': _emails[i]
+                ['primary'],
+          });
+        }
+      }
+
+      // Delete old emails
+      for (var email in emailsToDelete) {
+        await ApiService.deleteUserEmail(emailAddress: email);
+      }
+
+      // Add new emails
+      for (var emailData in emailsToAdd) {
+        await ApiService.addUserEmail(
+            emailAddress: emailData['address'], type: emailData['type']);
+      }
+
+      Map<String, dynamic> response =
+          await Future.delayed(const Duration(seconds: 0), () {
         return {'status': 'success'};
       });
 
@@ -151,7 +198,8 @@ class _EditAccountPageState extends State<EditAccountPage> {
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Account update failed: ${response['reason']}')),
+          SnackBar(
+              content: Text('Account update failed: ${response['reason']}')),
         );
       }
     }
@@ -173,10 +221,12 @@ class _EditAccountPageState extends State<EditAccountPage> {
         _emails = userInfo['Emails'].map<Map<String, dynamic>>((email) {
           return {
             'address': email['EmailAddress'],
-            'type': email['EmailTypeDescription'],
+            'type': email['EmailTypeID'],
             'primary': email['Valid'], // Assuming 'Valid' indicates primary
           };
         }).toList();
+
+        originalEmails = _emails.map((emailMap) => emailMap['address'] as String).toList();
 
         _phones = userInfo['PhoneNumbers'].map<Map<String, dynamic>>((phone) {
           return {
@@ -513,7 +563,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                   onPressed: () {
                     setState(() {
                       _emails.add(
-                          {'address': '', 'type': 'Work', 'primary': false});
+                          {'address': '', 'type': 'work', 'primary': false});
                       _emailControllers.add(TextEditingController(text: ''));
                     });
                   },

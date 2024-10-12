@@ -400,49 +400,66 @@ class ApiService {
     }
   }
 
-  // Add User Email Function
   static Future<Map<String, dynamic>> addUserEmail({
-    required String sessionID,
     required String emailAddress,
-    required String emailType,
+    required String type,
   }) async {
-    final url = Uri.parse('$baseApiUrl/api/add_user_email'); // API endpoint URL
+    final url = Uri.parse('$baseApiUrl/add_user_email');
+    final sessionId = await SessionManager().getSessionToken();
+    final headers = <String, String>{
+        'session_id': sessionId!,
+        'email_address': emailAddress,
+        'type': type
+      };
 
     try {
-      // Perform the POST request
-      final response = await http.post(
-        url,
-        headers: {
-          'session_id': sessionID,
-          'email_address': emailAddress,
-          'type': emailType, // <personal|work|other>
-        },
-      );
+      final response = await http.post(url, headers: headers);
 
-      // If the response status is 200, parse the JSON response
-      if (response.statusCode == 200) {
-        Map<String, dynamic> responseBody = json.decode(response.body);
-        return {
-          'status': responseBody['status'],
-        };
-      }
-      // If the session is invalid or expired, handle 498 error
-      else if (response.statusCode == 498) {
-        Map<String, dynamic> responseBody = json.decode(response.body);
+      if (response.statusCode == 201) {
+        return {'status': 'success'};
+      } else {
+        final responseBody = jsonDecode(response.body);
         return {
           'status': 'error',
-          'reason': responseBody['reason'],
-        };
-      }
-      // Other errors
-      else {
-        return {
-          'status': 'error',
-          'reason': 'Failed to add email: ${response.statusCode}',
+          'reason': responseBody['reason'] ?? 'Failed to add email',
         };
       }
     } catch (e) {
-      // Catch network or parsing errors
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> deleteUserEmail({
+    required String emailAddress,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/user_email');
+    final sessionId = await SessionManager().getSessionToken();
+  final headers = <String, String>{
+    'session_id': sessionId!,
+    'email_address': emailAddress
+  };
+
+    try {
+      final response = await http.delete(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        return {'status': 'success'};
+      } else if (response.statusCode == 409) {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'error',
+          'reason': responseBody['reason'] ?? 'Email address does not exist',
+        };
+      } else {
+        return {
+          'status': 'error',
+          'reason': 'Failed to delete email: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
       return {
         'status': 'error',
         'reason': 'Network error: $e',
