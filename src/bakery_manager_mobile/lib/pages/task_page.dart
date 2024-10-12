@@ -14,10 +14,10 @@ class TaskPage extends StatefulWidget {
 
 class TaskPageState extends State<TaskPage> {
   late Future<List<Task>> _futureTasks;
-  List<Task> _allTasks = [];
   List<Task> _filteredTasks = [];
+  List<Task> _allTasks = [];
   String _currentFilter = 'All';
-  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
 
   // Page Initialization Function
   @override
@@ -26,80 +26,83 @@ class TaskPageState extends State<TaskPage> {
     _futureTasks = _fetchTasks();
   }
 
-  // Fetch tasks function (corrected)
+  // Fetch tasks function
   Future<List<Task>> _fetchTasks() async {
-  // Call getTasks function
     final result = await ApiService.getTasks();
 
     if (result['status'] == 'success') {
-    List<Task> tasks = result['tasks']; // Assuming this returns a List<Task>
+      List<Task> tasks = result['tasks'];
 
-      // Iterate through tasks and fetch recipe names
+      // Fetch recipe names
       for (var task in tasks) {
         final recipeNameResult = await ApiService.getRecipeName(task.recipeID);
-        if (recipeNameResult['status'] == 'success') {
-          task.name = recipeNameResult['recipeName']; // Store the recipe name in the task
-        } else {
-          task.name = 'Unknown Recipe'; // Handle errors by setting a default name
-        }
+        task.name = recipeNameResult['status'] == 'success'
+            ? recipeNameResult['recipeName']
+            : 'Unknown Recipe';
       }
+
+      setState(() {
+        _allTasks = tasks;
+        _filteredTasks = tasks; // Initially show all tasks
+      });
+
       return tasks;
     } else {
-      throw Exception(result['reason']); // Throw an exception with the error reason
+      throw Exception(result['reason']);
     }
   }
 
-  // Filtering tasks based on status and search query
-  void _filterTasks() {
-    setState(() {
-      List<Task> tasks = _allTasks;
-      if (_currentFilter != 'All') {
-        tasks = tasks.where((task) => task.status == _currentFilter).toList();
-      }
-      if (_searchQuery.isNotEmpty) {
-        tasks = tasks
-            .where((task) =>
-                (task.name ?? '')
-                    .toLowerCase()
-                    .contains(_searchQuery.toLowerCase()))
-            .toList();
-      }
-      _filteredTasks = tasks;
-    });
-  }
-
-  // Filter by status function
-  void _filterByStatus(String status) {
+  // Filtering tasks by status and query
+  void _filterTasks(String status) {
     setState(() {
       _currentFilter = status;
-      _filterTasks();
+      _filteredTasks = _allTasks.where((task) {
+        if (status == 'All') {
+          return true;
+        }
+        return task.status == status;
+      }).toList();
+      _filterTasksByQuery(
+          _searchController.text); // Apply search filter as well
     });
   }
 
-  // Build status filter button
-  Widget _buildStatusFilterButton(String status) {
+  // Filtering tasks by search query
+  void _filterTasksByQuery(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filterTasks(_currentFilter); // Restore status filter if query is empty
+      } else {
+        _filteredTasks = _filteredTasks.where((task) {
+          return task.name!.toLowerCase().contains(query.toLowerCase());
+        }).toList();
+      }
+    });
+  }
+
+  // Build filter button
+  Widget _buildFilterButton(String filter) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: _currentFilter == status ? Colors.orange : Colors.grey,
+        backgroundColor: _currentFilter == filter ? Colors.orange : Colors.grey,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
       ),
       onPressed: () {
-        _filterByStatus(status);
+        _filterTasks(filter);
       },
-      child: Text(status),
+      child: Text(filter),
     );
   }
 
-  // Page Content Build Function
+  // Build page content
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Stack(
           children: <Widget>[
-            // Stroked text as border.
             Text(
               'Daily Tasks',
               style: TextStyle(
@@ -111,7 +114,6 @@ class TaskPageState extends State<TaskPage> {
                   ..color = const Color.fromARGB(255, 140, 72, 27),
               ),
             ),
-            // Solid text as fill.
             const Text(
               'Daily Tasks',
               style: TextStyle(
@@ -129,15 +131,15 @@ class TaskPageState extends State<TaskPage> {
           icon: const Icon(Icons.arrow_back,
               color: Color.fromARGB(255, 140, 72, 27)),
           onPressed: () {
-            Navigator.pop(context); // Back navigation
+            Navigator.pop(context);
           },
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.home,
-                color: Color.fromARGB(255, 140, 72, 27)),
+            icon:
+                const Icon(Icons.home, color: Color.fromARGB(255, 140, 72, 27)),
             onPressed: () {
-              Navigator.popUntil(context, ModalRoute.withName('/')); // Home navigation
+              Navigator.popUntil(context, ModalRoute.withName('/'));
             },
           ),
         ],
@@ -146,18 +148,18 @@ class TaskPageState extends State<TaskPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Horizontal status filter bar
+            // Status filter bar
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildStatusFilterButton('All'),
+                  _buildFilterButton('All'),
                   const SizedBox(width: 8),
-                  _buildStatusFilterButton('Pending'),
+                  _buildFilterButton('Pending'),
                   const SizedBox(width: 8),
-                  _buildStatusFilterButton('In Progress'),
+                  _buildFilterButton('In Progress'),
                   const SizedBox(width: 8),
-                  _buildStatusFilterButton('Completed'),
+                  _buildFilterButton('Completed'),
                 ],
               ),
             ),
@@ -165,17 +167,15 @@ class TaskPageState extends State<TaskPage> {
 
             // Search Bar
             TextField(
-              onChanged: (value) {
-                _searchQuery = value;
-                _filterTasks();
-              }, // Search feature
+              controller: _searchController,
+              onChanged: _filterTasksByQuery,
               decoration: InputDecoration(
-                hintText: 'Search',
+                hintText: 'Search tasks',
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
                   onPressed: () {
-                    _searchQuery = '';
-                    _filterTasks();
+                    _searchController.clear();
+                    _filterTasksByQuery(''); // Clear search field
                   },
                 ),
                 border: const OutlineInputBorder(
@@ -185,7 +185,7 @@ class TaskPageState extends State<TaskPage> {
             ),
             const SizedBox(height: 16),
 
-            // List of tasks
+            // Task List
             Expanded(
               child: FutureBuilder<List<Task>>(
                 future: _futureTasks,
@@ -207,6 +207,7 @@ class TaskPageState extends State<TaskPage> {
                 },
               ),
             ),
+
             const SizedBox(height: 16),
 
             // Add Task Button
@@ -220,13 +221,10 @@ class TaskPageState extends State<TaskPage> {
                 ),
               ),
               onPressed: () {
-                // Navigate to AddTaskPage
                 Navigator.pushNamed(context, addTaskPageRoute);
               },
-              icon: const Icon(
-                Icons.add,
-                color: Color.fromARGB(255, 246, 235, 216),
-              ),
+              icon: const Icon(Icons.add,
+                  color: Color.fromARGB(255, 246, 235, 216)),
               label: const Text(
                 'Add Task',
                 style: TextStyle(
@@ -241,7 +239,7 @@ class TaskPageState extends State<TaskPage> {
   }
 }
 
-// Task Item Widget for the List of Tasks
+// Task Item Widget
 class _TaskItem extends StatelessWidget {
   final Task task;
   const _TaskItem({required this.task});
@@ -250,60 +248,55 @@ class _TaskItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        // Navigate to the task details page when tapped
         Navigator.pushNamed(context, taskDetailsPageRoute, arguments: task);
       },
-      child: Container(
-        decoration: const BoxDecoration(),
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          color: const Color.fromARGB(255, 209, 126, 51),
-          elevation: 4, // 3D effect
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  task.name!,
-                  style: const TextStyle(
-                    color: Color.fromARGB(255, 251, 250, 248),
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        color: const Color.fromARGB(255, 209, 126, 51),
+        elevation: 4,
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                task.name!,
+                style: const TextStyle(
+                  color: Color.fromARGB(255, 251, 250, 248),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Status: ${task.status}',
+                    style: TextStyle(
+                      color: _getStatusColor(task.status),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Status: ${task.status}',
-                      style: TextStyle(
-                        color: _getStatusColor(task.status),
-                        fontWeight: FontWeight.bold,
-                      ),
+                  Text(
+                    'Due: ${DateFormat('MM/dd HH:mm').format(task.dueDate)}',
+                    style: const TextStyle(
+                      color: Color.fromARGB(255, 246, 235, 216),
+                      fontStyle: FontStyle.italic,
                     ),
-                    Text(
-                      'Due: ${DateFormat('MM/dd HH:mm').format(task.dueDate)}',
-                      style: const TextStyle(
-                        color: Color.fromARGB(255, 246, 235, 216),
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  // Function to get color based on task status
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Pending':
