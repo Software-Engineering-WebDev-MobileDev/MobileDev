@@ -3,6 +3,7 @@ import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:flutter/material.dart';
 import '../models/task.dart';
+import 'package:intl/intl.dart';
 
 class TaskPage extends StatefulWidget {
   const TaskPage({super.key});
@@ -12,62 +13,142 @@ class TaskPage extends StatefulWidget {
 }
 
 class TaskPageState extends State<TaskPage> {
-  // Simulate an asynchronous operation that fetches tasks
-  Future<List<Task>> _fetchTasks() async {
-  // Call getTasks function
-  final result = await ApiService.getTasks();
-
-  if (result['status'] == 'success') {
-  List<Task> tasks = result['tasks']; // Assuming this returns a List<Task>
-
-    // Iterate through tasks and fetch recipe names
-    for (var task in tasks) {
-      final recipeNameResult = await ApiService.getRecipeName(task.recipeID);
-      if (recipeNameResult['status'] == 'success') {
-        task.name = recipeNameResult['recipeName']; // Store the recipe name in the task
-      } else {
-        task.name = 'Unknown Recipe'; // Handle errors by setting a default name
-      }
-    }
-    return tasks;
-  } else {
-    throw Exception(result['reason']); // Throw an exception with the error reason
-  }
-}
-
   late Future<List<Task>> _futureTasks;
   List<Task> _filteredTasks = [];
+  List<Task> _allTasks = [];
   String _currentFilter = 'All';
+  final TextEditingController _searchController = TextEditingController();
 
+  // Page Initialization Function
   @override
   void initState() {
     super.initState();
-    _futureTasks = _fetchTasks(); // Fetch tasks initially
+    _futureTasks = _fetchTasks();
   }
 
-  void _filterTasks(String status, List<Task> tasks) {
+  // Fetch tasks function
+  Future<List<Task>> _fetchTasks() async {
+    final result = await ApiService.getTasks();
+
+    if (result['status'] == 'success') {
+      List<Task> tasks = result['tasks'];
+
+      // Fetch recipe names
+      for (var task in tasks) {
+        final recipeNameResult = await ApiService.getRecipeName(task.recipeID);
+        task.name = recipeNameResult['status'] == 'success'
+            ? recipeNameResult['recipeName']
+            : 'Unknown Recipe';
+      }
+
+      setState(() {
+        _allTasks = tasks;
+        _filteredTasks = tasks; // Initially show all tasks
+      });
+
+      return tasks;
+    } else {
+      throw Exception(result['reason']);
+    }
+  }
+
+  // Filtering tasks by status and query
+  void _filterTasks(String status) {
     setState(() {
       _currentFilter = status;
-      if (status == 'All') {
-        _filteredTasks = tasks;
+      _filteredTasks = _allTasks.where((task) {
+        if (status == 'All') {
+          return true;
+        }
+        return task.status == status;
+      }).toList();
+      _filterTasksByQuery(
+          _searchController.text); // Apply search filter as well
+    });
+  }
+
+  // Filtering tasks by search query
+  void _filterTasksByQuery(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        _filterTasks(_currentFilter); // Restore status filter if query is empty
       } else {
-        _filteredTasks = tasks.where((task) => task.status == status).toList();
+        _filteredTasks = _filteredTasks.where((task) {
+          return task.name!.toLowerCase().contains(query.toLowerCase());
+        }).toList();
       }
     });
   }
 
+  // Build filter button
+  Widget _buildFilterButton(String filter) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: _currentFilter == filter ? Colors.orange : Colors.grey,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+      onPressed: () {
+        _filterTasks(filter);
+      },
+      child: Text(filter),
+    );
+  }
+
+  // Build page content
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Daily Tasks', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.orange,
+        title: Stack(
+          children: <Widget>[
+            Text(
+              'Daily Tasks',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                foreground: Paint()
+                  ..style = PaintingStyle.stroke
+                  ..strokeWidth = 6
+                  ..color = const Color.fromARGB(255, 140, 72, 27),
+              ),
+            ),
+            const Text(
+              'Daily Tasks',
+              style: TextStyle(
+                fontFamily: 'Pacifico',
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 246, 235, 216),
+              ),
+            ),
+          ],
+        ),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back,
+              color: Color.fromARGB(255, 140, 72, 27)),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        actions: [
+          IconButton(
+            icon:
+                const Icon(Icons.home, color: Color.fromARGB(255, 140, 72, 27)),
+            onPressed: () {
+              Navigator.popUntil(context, ModalRoute.withName('/'));
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Horizontal filter bar
+            // Status filter bar
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -83,6 +164,28 @@ class TaskPageState extends State<TaskPage> {
               ),
             ),
             const SizedBox(height: 16),
+
+            // Search Bar
+            TextField(
+              controller: _searchController,
+              onChanged: _filterTasksByQuery,
+              decoration: InputDecoration(
+                hintText: 'Search tasks',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    _filterTasksByQuery(''); // Clear search field
+                  },
+                ),
+                border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Task List
             Expanded(
               child: FutureBuilder<List<Task>>(
                 future: _futureTasks,
@@ -90,28 +193,27 @@ class TaskPageState extends State<TaskPage> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
                   } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (snapshot.hasData) {
-                    // Populate the filtered tasks list on the first load
-                    if (_filteredTasks.isEmpty) {
-                      _filteredTasks = snapshot.data!;
-                    }
+                    return Text('Error: ${snapshot.error}');
+                  } else if (_filteredTasks.isEmpty) {
+                    return const Text('No tasks found');
+                  } else {
                     return ListView.builder(
                       itemCount: _filteredTasks.length,
                       itemBuilder: (context, index) {
                         return _TaskItem(task: _filteredTasks[index]);
                       },
                     );
-                  } else {
-                    return const Center(child: Text('No tasks available'));
                   }
                 },
               ),
             ),
+
             const SizedBox(height: 16),
+
+            // Add Task Button
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+                backgroundColor: const Color.fromARGB(255, 209, 125, 51),
                 padding:
                     const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
@@ -119,41 +221,25 @@ class TaskPageState extends State<TaskPage> {
                 ),
               ),
               onPressed: () {
-                // TODO: Implement add task functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content:
-                          Text('Add task functionality not implemented yet')),
-                );
+                Navigator.pushNamed(context, addTaskPageRoute);
               },
-              icon: const Icon(Icons.add),
-              label: const Text('Add Task'),
+              icon: const Icon(Icons.add,
+                  color: Color.fromARGB(255, 246, 235, 216)),
+              label: const Text(
+                'Add Task',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 246, 235, 216),
+                ),
+              ),
             ),
           ],
         ),
       ),
     );
   }
-
-  Widget _buildFilterButton(String filter) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: _currentFilter == filter ? Colors.orange : Colors.grey,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-      ),
-      onPressed: () {
-        // Call _filterTasks within the FutureBuilder context
-        _futureTasks.then((tasks) {
-          _filterTasks(filter, tasks);
-        });
-      },
-      child: Text(filter),
-    );
-  }
 }
 
+// Task Item Widget
 class _TaskItem extends StatelessWidget {
   final Task task;
   const _TaskItem({required this.task});
@@ -162,83 +248,65 @@ class _TaskItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        // Navigate to task details page
         Navigator.pushNamed(context, taskDetailsPageRoute, arguments: task);
       },
-      child: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3), // Slight shadow
-              spreadRadius: 1,
-              blurRadius: 4,
-              offset: const Offset(0, 2), // Soft shadow
-            ),
-          ],
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
         ),
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          color: const Color(0xFFFDF1E0),
-          elevation: 2, // Slight elevation for shadow effect
-          margin:
-              const EdgeInsets.symmetric(vertical: 6), // Slightly reduced space
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  task.name!,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+        color: const Color.fromARGB(255, 209, 126, 51),
+        elevation: 4,
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                task.name!,
+                style: const TextStyle(
+                  color: Color.fromARGB(255, 251, 250, 248),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Status: ${task.status}',
+                    style: TextStyle(
+                      color: _getStatusColor(task.status),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Status: ${task.status}',
-                      style: TextStyle(
-                        color: _getStatusColor(task.status),
-                        fontWeight: FontWeight.bold,
-                      ),
+                  Text(
+                    'Due: ${DateFormat('MM/dd HH:mm').format(task.dueDate)}',
+                    style: const TextStyle(
+                      color: Color.fromARGB(255, 246, 235, 216),
+                      fontStyle: FontStyle.italic,
                     ),
-                    Text(
-                      'Due: ${_formatDate(task.dueDate)}',
-                      style: const TextStyle(
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  // Function to get color based on task status
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Pending':
-        return Colors.orange;
+        return const Color.fromARGB(255, 233, 255, 66);
       case 'In Progress':
-        return Colors.blue;
+        return const Color.fromARGB(255, 77, 255, 255);
       case 'Completed':
-        return Colors.green;
+        return const Color.fromARGB(255, 75, 253, 102);
       default:
         return Colors.black;
     }
-  }
-
-  // Function to format due date
-  String _formatDate(DateTime date) {
-    return '${date.hour}:${date.minute.toString().padLeft(2, '0')}';
   }
 }
