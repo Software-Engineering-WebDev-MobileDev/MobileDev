@@ -32,9 +32,20 @@ class TaskPageState extends State<TaskPage> {
         (observer) => observer is MyNavigatorObserver,
       ) as MyNavigatorObserver?;
       if (observer != null) {
-        observer.onReturned = _fetchTasks;
+        observer.onReturned = () async {
+          // Refetch account details when returning from another page
+          _futureTasks = _fetchTasks();
+          if(mounted) setState(() {}); // Trigger rebuild
+        };
       }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    
+    super.didChangeDependencies();
+    _futureTasks = _fetchTasks();
   }
 
   // Fetch tasks function
@@ -209,8 +220,14 @@ class TaskPageState extends State<TaskPage> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              onPressed: () {
-                Navigator.pushNamed(context, addTaskPageRoute);
+               onPressed: () {
+              
+                Navigator.pushNamed(context, addTaskPageRoute).then((_) {
+                  // Refetch tasks after returning from the add task page
+                  setState(() {
+                    _futureTasks = _fetchTasks();
+                  });
+                });
               },
               icon: const Icon(Icons.add,
                   color: Color.fromARGB(255, 246, 235, 216)),

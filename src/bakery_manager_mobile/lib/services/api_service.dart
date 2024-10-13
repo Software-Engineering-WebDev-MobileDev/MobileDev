@@ -405,7 +405,7 @@ class ApiService {
     }
   }
 
-   static Future<Map<String, dynamic>> addTask({
+  static Future<Map<String, dynamic>> addTask({
     required String recipeID,
     required int amountToBake,
     required String assignedEmployeeID,
@@ -413,7 +413,8 @@ class ApiService {
     String? comments,
   }) async {
     final url = Uri.parse('$baseApiUrl/add_task');
-    final sessionId = await SessionManager().getSessionToken(); // Assuming session manager gives you session token
+    final sessionId = await SessionManager()
+        .getSessionToken(); // Assuming session manager gives you session token
 
     // Set headers, including session_id
     final headers = <String, String>{
@@ -447,7 +448,8 @@ class ApiService {
         return {
           'status': 'success',
           'taskID': responseBody['taskID'],
-          if (responseBody['commentID'] != null) 'commentID': responseBody['commentID'],
+          if (responseBody['commentID'] != null)
+            'commentID': responseBody['commentID'],
         };
       } else {
         // Handle error responses
@@ -469,7 +471,7 @@ class ApiService {
   static Future<Map<String, dynamic>> deleteTask(String taskID) async {
     final url = Uri.parse('$baseApiUrl/delete_task/$taskID');
     final sessionId = await SessionManager().getSessionToken();
-    
+
     // Set headers including session_id
     final headers = <String, String>{
       'session_id': sessionId!,
@@ -501,57 +503,102 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> updateTask({
-  required String taskID,
-  required String recipeID,
-  required int amountToBake,
-  required String assignedEmployeeID,
-  String? comments,
-  String? commentID,
-  required String dueDate,
-  required String status,
-}) async {
-  final url = Uri.parse('$baseApiUrl/update_task/$taskID');
-  final sessionId = await SessionManager().getSessionToken();
-  
-  // Set headers including session_id
-  final headers = <String, String>{
-    'session_id': sessionId!,
-    'Content-Type': 'application/json', // Specify that we are sending JSON
-  };
+    required String taskID,
+    required String recipeID,
+    required int amountToBake,
+    required String assignedEmployeeID,
+    String? comments,
+    String? commentID,
+    required String dueDate,
+    required String status,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/update_task/$taskID');
+    final sessionId = await SessionManager().getSessionToken();
 
-  // Prepare the body for the request
-  final body = jsonEncode({
-    'RecipeID': recipeID,
-    'AmountToBake': amountToBake,
-    'AssignedEmployeeID': assignedEmployeeID,
-    'DueDate': dueDate,
-    'Status': status,
-  });
+    // Set headers including session_id
+    final headers = <String, String>{
+      'session_id': sessionId!,
+      'Content-Type': 'application/json', // Specify that we are sending JSON
+    };
 
-  try {
-    final response = await http.put(url, headers: headers, body: body);
+    // Prepare the body for the request
+    final body = jsonEncode({
+      'RecipeID': recipeID,
+      'AmountToBake': amountToBake,
+      'AssignedEmployeeID': assignedEmployeeID,
+      'DueDate': dueDate,
+      'Status': status,
+    });
 
-    if (response.statusCode == 200) {
-      return {'status': 'success'};
-    } else if (response.statusCode == 400) {
-      final responseBody = jsonDecode(response.body);
+    try {
+      final response = await http.put(url, headers: headers, body: body);
+
+      if (response.statusCode == 200) {
+        return {'status': 'success'};
+      } else if (response.statusCode == 400) {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'error',
+          'reason': responseBody['reason'] ?? 'Bad request',
+        };
+      } else {
+        return {
+          'status': 'error',
+          'reason': 'Failed to update task: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
       return {
         'status': 'error',
-        'reason': responseBody['reason'] ?? 'Bad request',
-      };
-    } else {
-      return {
-        'status': 'error',
-        'reason': 'Failed to update task: ${response.statusCode}',
+        'reason': 'Network error: $e',
       };
     }
-  } catch (e) {
-    return {
-      'status': 'error',
-      'reason': 'Network error: $e',
-    };
   }
-}
+
+  static Future<Map<String, dynamic>> completeTask({
+    required String taskID,
+    required String taskStatus,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/task_complete');
+    final sessionId =
+        await SessionManager().getSessionToken(); // Fetch session token
+
+    // Set headers, including session_id and task_id
+    final headers = <String, String>{
+      'session_id': sessionId!,
+      'task_id': taskID,
+      'task_status': taskStatus
+    };
+
+    try {
+      // Send POST request to complete task
+      final response = await http.post(
+        url,
+        headers: headers,
+      );
+
+      if (response.statusCode == 200) {
+        // If the request is successful, parse the response
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': responseBody['status'],
+        };
+      } else {
+        // Handle error responses
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'error',
+          'reason': responseBody['reason'] ?? 'Failed to complete task',
+        };
+      }
+    } catch (e) {
+      // Handle network or parsing errors
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
 
   static Future<Map<String, dynamic>> addUserEmail({
     required String emailAddress,
@@ -840,7 +887,9 @@ class ApiService {
             'status': 'success',
             'page': body['page'],
             'page_count': body['page_count'],
-            'content': (body['content'] as List<dynamic>).map((user) => Account.fromJson(user)).toList(),// Includes list of users
+            'content': (body['content'] as List<dynamic>)
+                .map((user) => Account.fromJson(user))
+                .toList(), // Includes list of users
           };
         } else {
           return {
