@@ -1,8 +1,8 @@
-import 'package:bakery_manager_mobile/services/session_manager.dart';
 import 'package:flutter/material.dart';
-import '../services/api_service.dart';
-import '../assets/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../services/api_service.dart';
+import '../services/session_manager.dart';
+import '../assets/constants.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,7 +12,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
-  final _formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>(); // Form key for validation
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _rememberMe = false;
@@ -23,7 +23,7 @@ class LoginPageState extends State<LoginPage> {
     super.initState();
     _usernameController.addListener(_updateButton);
     _passwordController.addListener(_updateButton);
-    _savedCredentials();
+    _loadSavedCredentials(); // Load saved credentials if "Remember Me" is checked
     _checkSession();
   }
 
@@ -42,7 +42,7 @@ class LoginPageState extends State<LoginPage> {
     });
   }
 
-  Future<void> _savedCredentials() async {
+  Future<void> _loadSavedCredentials() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool rememberMe = prefs.getBool('remember_me') ?? false;
     if (rememberMe) {
@@ -57,7 +57,7 @@ class LoginPageState extends State<LoginPage> {
   }
 
   // Save credentials to SharedPreferences
-  Future<void> _saveCredentials(String username, String password) async {
+  Future<void> _saveCredentials(String username) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (_rememberMe) {
       await prefs.setString('username', username);
@@ -78,19 +78,15 @@ class LoginPageState extends State<LoginPage> {
       final response = await ApiService.login(enteredUsername, enteredPassword);
 
       if (response['status'] == 'success') {
-        // Save credentials if 'Remember Me' is checked
-        await _saveCredentials(enteredUsername, enteredPassword);
+        await _saveCredentials(enteredUsername); // Save credentials if "Remember Me" is checked
 
         if (!mounted) return;
-
-        // Navigate to the home page and show success message
         Navigator.pushReplacementNamed(context, homePageRoute);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login successful')),
         );
       } else {
         if (mounted) {
-          // Show error message if login failed
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(response['reason'] ?? 'Login failed')),
           );
@@ -99,44 +95,9 @@ class LoginPageState extends State<LoginPage> {
     }
   }
 
-  // Page Content Build Function
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(10)),
-        ),
-        title: Stack(
-          children: <Widget>[
-            // Stroked text as border.
-            Text(
-              'The Rolling Scones',
-              style: TextStyle(
-                fontFamily: 'Pacifico',
-                fontSize: 30,
-                foreground: Paint()
-                  ..style = PaintingStyle.stroke
-                  ..strokeWidth = 6
-                  ..color = const Color.fromARGB(255, 140, 72, 27),
-              ),
-            ),
-            // Solid text as fill.
-            const Text(
-              'The Rolling Scones',
-              style: TextStyle(
-                fontFamily: 'Pacifico',
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 246, 235, 216),
-              ),
-            ),
-          ],
-        ),
-        automaticallyImplyLeading: false,
-      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -144,26 +105,33 @@ class LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                const Text(
-                  'Sign In',
-                  style: TextStyle(
-                    fontFamily: 'Pacifico',
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 209, 126, 51),
+                const SizedBox(height: 36), // Add space above the logo/text
+                const Center(
+                  child: Text(
+                    'The Rolling Scones',
+                    style: TextStyle(
+                      fontFamily: 'Pacifico',
+                      fontSize: 64,
+                      color: Color.fromARGB(255, 209, 126, 51),
+                    ),
+                    textAlign: TextAlign.center, // Center-align the title
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 36), // Add space between title and form
                 Form(
-                  key: _formKey,
+                  key: _formKey, // Form key for validation
                   child: Column(
                     children: <Widget>[
                       SizedBox(
                         width: 300,
                         child: TextFormField(
                           controller: _usernameController,
-                          decoration:
-                              const InputDecoration(labelText: 'Username'),
+                          decoration: const InputDecoration(
+                            labelText: 'Username',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                            ),
+                          ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please enter your username';
@@ -178,8 +146,12 @@ class LoginPageState extends State<LoginPage> {
                         width: 300,
                         child: TextFormField(
                           controller: _passwordController,
-                          decoration:
-                              const InputDecoration(labelText: 'Password'),
+                          decoration: const InputDecoration(
+                            labelText: 'Password',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                            ),
+                          ),
                           obscureText: true,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -214,6 +186,7 @@ class LoginPageState extends State<LoginPage> {
                           child: const Text('Login'),
                         ),
                       ),
+                      const SizedBox(height: 16),
                       TextButton(
                         onPressed: () {
                           if (mounted) {
