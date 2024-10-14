@@ -1,6 +1,7 @@
 import 'dart:async'; // Import to use Future and Timer
 import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:bakery_manager_mobile/services/api_service.dart';
+import 'package:bakery_manager_mobile/services/navigator_observer.dart';
 import 'package:flutter/material.dart';
 import '../models/task.dart';
 import 'package:intl/intl.dart';
@@ -24,6 +25,26 @@ class TaskPageState extends State<TaskPage> {
   void initState() {
     super.initState();
     _futureTasks = _fetchTasks();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final NavigatorState navigator = Navigator.of(context);
+      final MyNavigatorObserver? observer =
+          navigator.widget.observers.firstWhere(
+        (observer) => observer is MyNavigatorObserver,
+      ) as MyNavigatorObserver?;
+      if (observer != null) {
+        observer.onReturned = () async {
+          // Refetch account details when returning from another page
+          _futureTasks = _fetchTasks();
+          if (mounted) setState(() {}); // Trigger rebuild
+        };
+      }
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _futureTasks = _fetchTasks();
   }
 
   // Fetch tasks function
@@ -33,14 +54,6 @@ class TaskPageState extends State<TaskPage> {
     if (result['status'] == 'success') {
       List<Task> tasks = result['tasks'];
 
-      // Fetch recipe names
-      for (var task in tasks) {
-        final recipeNameResult = await ApiService.getRecipeName(task.recipeID);
-        task.name = recipeNameResult['status'] == 'success'
-            ? recipeNameResult['recipeName']
-            : 'Unknown Recipe';
-      }
-
       setState(() {
         _allTasks = tasks;
         _filteredTasks = tasks; // Initially show all tasks
@@ -48,35 +61,21 @@ class TaskPageState extends State<TaskPage> {
 
       return tasks;
     } else {
-      throw Exception(result['reason']);
+        ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to grab recipes')));
+        return [];
     }
   }
 
-  // Filtering tasks by status and query
-  void _filterTasks(String status) {
+  void _filterTasks(String status, {String query = ''}) {
     setState(() {
       _currentFilter = status;
       _filteredTasks = _allTasks.where((task) {
-        if (status == 'All') {
-          return true;
-        }
-        return task.status == status;
+        final matchesStatus = status == 'All' || task.status == status;
+        final matchesQuery =
+            task.name!.toLowerCase().contains(query.toLowerCase());
+        return matchesStatus && matchesQuery; // Filter by both status and query
       }).toList();
-      _filterTasksByQuery(
-          _searchController.text); // Apply search filter as well
-    });
-  }
-
-  // Filtering tasks by search query
-  void _filterTasksByQuery(String query) {
-    setState(() {
-      if (query.isEmpty) {
-        _filterTasks(_currentFilter); // Restore status filter if query is empty
-      } else {
-        _filteredTasks = _filteredTasks.where((task) {
-          return task.name!.toLowerCase().contains(query.toLowerCase());
-        }).toList();
-      }
     });
   }
 
@@ -155,14 +154,17 @@ class TaskPageState extends State<TaskPage> {
             // Search Bar
             TextField(
               controller: _searchController,
-              onChanged: _filterTasksByQuery,
+              onChanged: (query) {
+                _filterTasks(_currentFilter,
+                    query: query); // Filter by current status and query
+              },
               decoration: InputDecoration(
                 hintText: 'Search tasks',
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
                   onPressed: () {
                     _searchController.clear();
-                    _filterTasksByQuery(''); // Clear search field
+                    _filterTasks(''); // Clear search field
                   },
                 ),
                 border: const OutlineInputBorder(
@@ -178,7 +180,8 @@ class TaskPageState extends State<TaskPage> {
                 future: _futureTasks,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
+                    //return const Center(child: CircularProgressIndicator());
+                    return const SizedBox(height: 16);
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (_filteredTasks.isEmpty) {
@@ -208,7 +211,12 @@ class TaskPageState extends State<TaskPage> {
                 ),
               ),
               onPressed: () {
-                Navigator.pushNamed(context, addTaskPageRoute);
+                Navigator.pushNamed(context, addTaskPageRoute).then((_) {
+                  // Refetch tasks after returning from the add task page
+                  setState(() {
+                    _futureTasks = _fetchTasks();
+                  });
+                });
               },
               icon: const Icon(Icons.add,
                   color: Color.fromARGB(255, 246, 235, 216)),
@@ -226,6 +234,7 @@ class TaskPageState extends State<TaskPage> {
   }
 }
 
+// Task Item Widget
 // Task Item Widget
 class _TaskItem extends StatelessWidget {
   final Task task;
@@ -249,13 +258,29 @@ class _TaskItem extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                task.name!,
-                style: const TextStyle(
-                  color: Color.fromARGB(255, 251, 250, 248),
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+              // Row to include employee ID and task name
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${task.name} x${task.amountToBake}',
+                      style: const TextStyle(
+                        color: Color.fromARGB(255, 251, 250, 248),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  // Employee ID displayed on the top right
+                  Text(
+                    'Assigned Employee ID: ${task.employeeID}', // Assuming task has employeeID field
+                    style: const TextStyle(
+                      color: Color.fromARGB(255, 246, 235, 216),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               Row(

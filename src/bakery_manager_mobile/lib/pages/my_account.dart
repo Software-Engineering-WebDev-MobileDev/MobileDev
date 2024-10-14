@@ -1,6 +1,7 @@
 import 'package:bakery_manager_mobile/assets/constants.dart';
+import 'package:bakery_manager_mobile/services/api_service.dart';
+import 'package:bakery_manager_mobile/services/navigator_observer.dart';
 import 'package:flutter/material.dart';
-//import '../services/api_service.dart';
 
 class MyAccountPage extends StatefulWidget {
   const MyAccountPage({super.key});
@@ -14,42 +15,39 @@ class MyAccountPageState extends State<MyAccountPage> {
   bool _obscurePassword = true;
   bool _obscureEmployeeID = true;
 
-  // TODO: replace mock data with real data
-  final Map<String, dynamic> _accountPlaceholder = {
-    'FirstName': 'John', 
-    'LastName': 'Doe',
-    'EmployeeID': '12345',
-    'RoleID': 'Manager',
-    'Username': 'johndoe',
-    'Password': 'password123',
-    'Emails': ['johndoe@example.com', 'john.doe@home.com'], 
-    'PhoneNumbers': ['+1234567890', '+0987654321'],
-  };
-
   // Fetch account details from the API
   Future<Map<String, dynamic>> _fetchAccountDetails() async {
-    try {
-      /*
-      final response = await ApiService.getAccount(userID);
-      if (response['status'] == 'success') {
-        return response['accountDetails'];
-      } else {
-        debugPrint('Error: ${response['reason']}');
-        throw Exception('Failed to load account details: ${response['reason']}');
-      }
-      */
-      
-      return _accountPlaceholder;
-    } catch (error) {
-      debugPrint('Fetch account error: $error');
-      return _accountPlaceholder;
+    final response = await ApiService.getUserInfo(); // Call the API function
+
+    if (response['status'] == 'success') {
+      return response['content']; // Get the actual account details from the response
+    } else {
+      debugPrint('Error: ${response['reason']}');
+      return {};
     }
   }
 
   @override
   void initState() {
     super.initState();
+    // Initial fetch of account details
     _futureAccountDetails = _fetchAccountDetails();
+
+    // Set up the NavigatorObserver
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final NavigatorState navigator = Navigator.of(context);
+      final MyNavigatorObserver? observer =
+          navigator.widget.observers.firstWhere(
+        (observer) => observer is MyNavigatorObserver,
+      ) as MyNavigatorObserver?;
+      if (observer != null) {
+        observer.onReturned = () async {
+          // Refetch account details when returning from another page
+          _futureAccountDetails = _fetchAccountDetails();
+          if(mounted) setState(() {}); // Trigger rebuild
+        };
+      }
+    });
   }
 
   @override
@@ -89,7 +87,13 @@ class MyAccountPageState extends State<MyAccountPage> {
       body: FutureBuilder<Map<String, dynamic>>(
         future: _futureAccountDetails,
         builder: (context, snapshot) {
-          final account = snapshot.data ?? _accountPlaceholder;
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          final account = snapshot.data ?? {};
 
           return Column(
             children: [
@@ -100,17 +104,18 @@ class MyAccountPageState extends State<MyAccountPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 16),
-
                       // First Name
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: RichText(
                           text: TextSpan(
-                            style: const TextStyle(fontSize: 18, color: Colors.black),
+                            style: const TextStyle(
+                                fontSize: 18, color: Colors.black),
                             children: [
                               const TextSpan(
                                   text: 'First Name: ',
-                                  style: TextStyle(fontWeight: FontWeight.bold)),
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
                               TextSpan(text: account['FirstName'] ?? ''),
                             ],
                           ),
@@ -122,11 +127,13 @@ class MyAccountPageState extends State<MyAccountPage> {
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: RichText(
                           text: TextSpan(
-                            style: const TextStyle(fontSize: 18, color: Colors.black),
+                            style: const TextStyle(
+                                fontSize: 18, color: Colors.black),
                             children: [
                               const TextSpan(
                                   text: 'Last Name: ',
-                                  style: TextStyle(fontWeight: FontWeight.bold)),
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
                               TextSpan(text: account['LastName'] ?? ''),
                             ],
                           ),
@@ -146,8 +153,12 @@ class MyAccountPageState extends State<MyAccountPage> {
                                   children: [
                                     const TextSpan(
                                         text: 'Employee ID: ',
-                                        style: TextStyle(fontWeight: FontWeight.bold)),
-                                    TextSpan(text: _obscureEmployeeID ? '••••••••' : account['EmployeeID'] ?? ''),
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                    TextSpan(
+                                        text: _obscureEmployeeID
+                                            ? '••••••••'
+                                            : account['EmployeeID'] ?? ''),
                                   ],
                                 ),
                               ),
@@ -174,11 +185,13 @@ class MyAccountPageState extends State<MyAccountPage> {
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: RichText(
                           text: TextSpan(
-                            style: const TextStyle(fontSize: 18, color: Colors.black),
+                            style: const TextStyle(
+                                fontSize: 18, color: Colors.black),
                             children: [
                               const TextSpan(
                                   text: 'Username: ',
-                                  style: TextStyle(fontWeight: FontWeight.bold)),
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
                               TextSpan(text: account['Username'] ?? ''),
                             ],
                           ),
@@ -198,8 +211,12 @@ class MyAccountPageState extends State<MyAccountPage> {
                                   children: [
                                     const TextSpan(
                                         text: 'Password: ',
-                                        style: TextStyle(fontWeight: FontWeight.bold)),
-                                    TextSpan(text: _obscurePassword ? '••••••••' : account['Password'] ?? ''),
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                    TextSpan(
+                                        text: _obscurePassword
+                                            ? '••••••••'
+                                            : account['Password'] ?? ''),
                                   ],
                                 ),
                               ),
@@ -225,11 +242,15 @@ class MyAccountPageState extends State<MyAccountPage> {
                       // Emails
                       const Text(
                         'Emails:',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: (account['Emails'] as List<dynamic>).cast<String>().map((email) {
+                        children: (account['Emails'] as List<dynamic>? ?? [])
+                            .map((emailMap) {
+                          String email = emailMap['EmailAddress']
+                              as String; // Extract the email address
                           return Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
@@ -244,15 +265,21 @@ class MyAccountPageState extends State<MyAccountPage> {
                       // Phone Numbers
                       const Text(
                         'Phone Numbers:',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: (account['PhoneNumbers'] as List<dynamic>).cast<String>().map((phone) {
+                        children:
+                            (account['PhoneNumbers'] as List<dynamic>? ?? [])
+                                .map((phone) {
+                          // Assuming the phone map has a field named 'number' for the phone number
+                          String phoneNumber = phone["PhoneNumber"]
+                              as String; // Change 'number' to your actual key
                           return Padding(
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
-                              '• $phone',
+                              '• $phoneNumber',
                               style: const TextStyle(fontSize: 16),
                             ),
                           );
@@ -265,13 +292,15 @@ class MyAccountPageState extends State<MyAccountPage> {
 
               // Buttons at the bottom
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 16.0),
                 child: Column(
                   children: [
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 32),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -289,7 +318,8 @@ class MyAccountPageState extends State<MyAccountPage> {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 32),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
