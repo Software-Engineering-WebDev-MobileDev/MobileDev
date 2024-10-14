@@ -83,6 +83,8 @@ class CreateAccountPageState extends State<CreateAccountPage> {
           employeeID,
           username,
           password,
+          email,
+          phoneNumber
         );
 
         if (accountResponse['status'] == 'success') {

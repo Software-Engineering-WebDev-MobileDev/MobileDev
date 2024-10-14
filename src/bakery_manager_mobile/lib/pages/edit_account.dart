@@ -1,3 +1,4 @@
+import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:flutter/material.dart';
 
 class EditAccountPage extends StatefulWidget {
@@ -24,34 +25,30 @@ class _EditAccountPageState extends State<EditAccountPage> {
 
   List<Map<String, dynamic>> _emails = [];
   List<Map<String, dynamic>> _phones = [];
+  List<String> emailsToDelete = [];
+  List<String> originalEmails = [];
+  List<String> phonesToDelete = [];
+  List<String> originalPhones = [];
   List<TextEditingController> _emailControllers = [];
   List<TextEditingController> _phoneControllers = [];
 
-  final List<String> emailTypes = ['Work', 'Home', 'Other'];
-  final List<String> phoneTypes = ['Mobile', 'Home', 'Work', 'Fax'];
+  final List<String> emailTypes = ["personal", "work", "other", "primary"];
+  final List<String> phoneTypes = ["mobile", "home", "work", "fax", "primary"];
 
   @override
   void initState() {
     super.initState();
 
-    employeeIDController = TextEditingController(text: '12345-ABCDE');
-    firstNameController = TextEditingController(text: 'John');
-    lastNameController = TextEditingController(text: 'Doe');
-    usernameController = TextEditingController(text: 'johndoe');
-    passwordController = TextEditingController(text: 'password123');
+    // Set up controllers with default values (or empty)
+    employeeIDController = TextEditingController();
+    firstNameController = TextEditingController();
+    lastNameController = TextEditingController();
+    usernameController = TextEditingController();
+    passwordController = TextEditingController();
     confirmPasswordController = TextEditingController();
 
-    _emails = [
-      {'address': 'johndoe@example.com', 'type': 'Work', 'primary': true},
-      {'address': 'john.doe@home.com', 'type': 'Home', 'primary': false},
-    ];
-    _phones = [
-      {'number': '+1234567890', 'type': 'Mobile', 'primary': true},
-      {'number': '+0987654321', 'type': 'Home', 'primary': false},
-    ];
-
-    _emailControllers = _emails.map((email) => TextEditingController(text: email['address'])).toList();
-    _phoneControllers = _phones.map((phone) => TextEditingController(text: phone['number'])).toList();
+    // Fetch user data when the page loads
+    _fetchUserData();
 
     passwordController.addListener(_validatePassword);
   }
@@ -68,15 +65,12 @@ class _EditAccountPageState extends State<EditAccountPage> {
     for (var controller in _emailControllers) {
       controller.dispose();
     }
-
     for (var controller in _phoneControllers) {
       controller.dispose();
     }
-
     super.dispose();
   }
 
-  // Function to validate password requirements
   void _validatePassword() {
     String password = passwordController.text;
     setState(() {
@@ -108,15 +102,13 @@ class _EditAccountPageState extends State<EditAccountPage> {
     return null;
   }
 
-  // Remove email field and handle primary email reassignment
+  // Remove email field
   void _removeEmailField(int index) {
     bool wasPrimary = _emails[index]['primary'];
-
     setState(() {
+      emailsToDelete.add(_emails[index]['address']);
       _emails.removeAt(index);
       _emailControllers.removeAt(index).dispose();
-
-      // If the primary email was deleted, make the first email the new primary
       if (wasPrimary && _emails.isNotEmpty) {
         _emails[0]['primary'] = true;
         _emails[0]['type'] = 'Primary';
@@ -124,15 +116,13 @@ class _EditAccountPageState extends State<EditAccountPage> {
     });
   }
 
-  // Remove phone field and handle primary phone reassignment
+  // Remove phone field
   void _removePhoneField(int index) {
     bool wasPrimary = _phones[index]['primary'];
-
     setState(() {
+      phonesToDelete.add(_phones[index]['number']);
       _phones.removeAt(index);
       _phoneControllers.removeAt(index).dispose();
-
-      // If the primary phone was deleted, make the first phone the new primary
       if (wasPrimary && _phones.isNotEmpty) {
         _phones[0]['primary'] = true;
         _phones[0]['type'] = 'Primary';
@@ -149,7 +139,71 @@ class _EditAccountPageState extends State<EditAccountPage> {
       String username = usernameController.text;
       String password = passwordController.text;
 
-      Map<String, dynamic> response = await Future.delayed(const Duration(seconds: 2), () {
+      // Prepare to delete old emails
+      List<Map<String, dynamic>> emailsToAdd = [];
+
+      for (var email in originalEmails) {
+        await ApiService.deleteUserEmail(emailAddress: email);
+      }
+            // Delete old phone numbers
+      for (var phone in originalPhones) {
+        await ApiService.deleteUserPhone(phoneNumber: phone);
+      }
+
+
+      // Check for new emails to add
+      for (var i = 0; i < _emailControllers.length; i++) {
+        String emailAddress = _emailControllers[i].text;
+        if (emailAddress.isNotEmpty) {
+          emailsToAdd.add({
+            'address': emailAddress,
+            'type': emailTypes[i],
+            'isPrimary': _emails[i]['primary'],
+          });
+        }
+      }
+
+      // Delete old emails
+      for (var email in emailsToDelete) {
+        await ApiService.deleteUserEmail(emailAddress: email);
+      }
+
+      // Add new emails
+      for (var emailData in emailsToAdd) {
+        await ApiService.addUserEmail(
+          emailAddress: emailData['address'],
+          type: emailData['type'],
+        );
+      }
+
+      List<Map<String, dynamic>> phonesToAdd = [];
+
+      // Check for new phone numbers to add
+      for (var i = 0; i < _phoneControllers.length; i++) {
+        String phoneNumber = _phoneControllers[i].text;
+        if (phoneNumber.isNotEmpty) {
+          phonesToAdd.add({
+            'number': phoneNumber,
+            'type': phoneTypes[i],
+            'isPrimary': _phones[i]['primary'],
+          });
+        }
+      }
+
+      // Delete old phone numbers
+      for (var phone in phonesToDelete) {
+        await ApiService.deleteUserPhone(phoneNumber: phone);
+      }
+
+      // Add new phone numbers
+      for (var phoneData in phonesToAdd) {
+        await ApiService.addUserPhone(
+          phoneNumber: phoneData['number'],
+          type: phoneData['type'],
+        );
+      }
+
+      Map<String, dynamic> response = await Future.delayed(const Duration(seconds: 0), () {
         return {'status': 'success'};
       });
 
@@ -164,7 +218,9 @@ class _EditAccountPageState extends State<EditAccountPage> {
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Account update failed: ${response['reason']}')),
+          SnackBar(
+            content: Text('Account update failed: ${response['reason']}'),
+          ),
         );
       }
     }
@@ -359,6 +415,56 @@ Column _buildPhonesField() {
     }).toList(),
   );
 }
+  void _fetchUserData() async {
+    Map<String, dynamic> result = await ApiService.getUserInfo();
+
+    if (result['status'] == 'success') {
+      Map<String, dynamic> userInfo = result['content'];
+
+      setState(() {
+        employeeIDController.text = userInfo['EmployeeID'];
+        firstNameController.text = userInfo['FirstName'];
+        lastNameController.text = userInfo['LastName'];
+        usernameController.text = userInfo['Username'];
+
+        // Populate emails
+        _emails = (userInfo['Emails'] as List<dynamic>).map<Map<String, dynamic>>((email) {
+          return {
+            'address': email['EmailAddress'],
+            'type': email['EmailTypeID'],
+            'primary': false, // Assuming 'Valid' indicates primary
+          };
+        }).toList();
+
+        originalEmails = _emails.map((emailMap) => emailMap['address'] as String).toList();
+
+        // Populate phones
+        _phones = (userInfo['PhoneNumbers'] as List<dynamic>).map<Map<String, dynamic>>((phone) {
+          return {
+            'number': phone['PhoneNumber'],
+            'type': phone['PhoneTypeID'],
+            'primary': false, // Assuming 'Valid' indicates primary
+          };
+        }).toList();
+
+        originalPhones = _phones.map((phoneMap) => phoneMap['number'] as String).toList();
+
+        // Create controllers for each email/phone
+        _emailControllers = _emails
+            .map((email) => TextEditingController(text: email['address']))
+            .toList();
+        _phoneControllers = _phones
+            .map((phone) => TextEditingController(text: phone['number']))
+            .toList();
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Error fetching user data: ${result['reason']}')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -413,13 +519,15 @@ Column _buildPhonesField() {
                 ElevatedButton.icon(
                   onPressed: () {
                     setState(() {
-                      _emails.add({'address': '', 'type': 'Work', 'primary': false});
+                      _emails.add(
+                          {'address': '', 'type': 'work', 'primary': false});
                       _emailControllers.add(TextEditingController(text: ''));
                     });
                   },
                   icon: const Icon(Icons.add),
                   label: const Text('Add Email'),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.green),
                 ),
                 const SizedBox(height: 16),
 
@@ -433,13 +541,15 @@ Column _buildPhonesField() {
                 ElevatedButton.icon(
                   onPressed: () {
                     setState(() {
-                      _phones.add({'number': '', 'type': 'Mobile', 'primary': false});
+                      _phones.add(
+                          {'number': '', 'type': 'mobile', 'primary': false});
                       _phoneControllers.add(TextEditingController(text: ''));
                     });
                   },
                   icon: const Icon(Icons.add),
                   label: const Text('Add Phone'),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.green),
                 ),
                 const SizedBox(height: 32),
 
