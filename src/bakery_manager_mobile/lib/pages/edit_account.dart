@@ -109,6 +109,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
     return null;
   }
 
+  // Remove email field and handle primary email reassignment
   void _removeEmailField(int index) {
     bool wasPrimary = _emails[index]['primary'];
 
@@ -119,10 +120,12 @@ class _EditAccountPageState extends State<EditAccountPage> {
       // If the primary email was deleted, make the first email the new primary
       if (wasPrimary && _emails.isNotEmpty) {
         _emails[0]['primary'] = true;
+        _emails[0]['type'] = 'Primary';
       }
     });
   }
 
+  // Remove phone field and handle primary phone reassignment
   void _removePhoneField(int index) {
     bool wasPrimary = _phones[index]['primary'];
 
@@ -133,6 +136,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
       // If the primary phone was deleted, make the first phone the new primary
       if (wasPrimary && _phones.isNotEmpty) {
         _phones[0]['primary'] = true;
+        _phones[0]['type'] = 'Primary';
       }
     });
   }
@@ -167,17 +171,180 @@ class _EditAccountPageState extends State<EditAccountPage> {
     }
   }
 
+  // Build emails field
+  Column _buildEmailsField() {
+    return Column(
+      children: _emails.asMap().entries.map((entry) {
+        int idx = entry.key;
+        var email = entry.value;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _emailControllers[idx],
+                  decoration: InputDecoration(
+                    hintText: 'Email ${idx + 1}',
+                    border: OutlineInputBorder(
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                      borderSide: BorderSide(
+                        color: _validateEmail(_emailControllers[idx].text) == null ? Colors.grey : Colors.red,
+                      ),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() {});
+                  },
+                  validator: (value) => _validateEmail(value!),
+                ),
+              ),
+              DropdownButton<String>(
+                value: email['type'],
+                onChanged: (newValue) {
+                  setState(() {
+                    email['type'] = newValue!;
+
+                    // If a non-primary type is selected and this email is currently primary, make the first email primary
+                    if (newValue != 'Primary' && email['primary']) {
+                      email['primary'] = false;
+                      _emails[0]['primary'] = true;
+                      _emails[0]['type'] = 'Primary';
+                    }
+                  });
+                },
+                items: ['Primary', ...emailTypes.where((type) => type != 'Primary')].map((type) {
+                  return DropdownMenuItem(
+                    value: type,
+                    child: Text(type),
+                  );
+                }).toList(),
+              ),
+              Radio<bool>(
+                value: true,
+                groupValue: email['primary'],
+                onChanged: (value) {
+                  setState(() {
+                    for (var em in _emails) {
+                      em['primary'] = false;
+                      if (em['type'] == 'Primary') {
+                        em['type'] = 'Work'; // Or default type if they were primary
+                      }
+                    }
+                    email['primary'] = true;
+                    email['type'] = 'Primary'; // Ensure dropdown shows 'Primary'
+                  });
+                },
+              ),
+              const Text('Primary'),
+              if (_emails.length > 1)
+                IconButton(
+                  icon: const Icon(Icons.remove_circle, color: Colors.red),
+                  onPressed: () => _removeEmailField(idx),
+                ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  // Build phones field
+  Column _buildPhonesField() {
+    return Column(
+      children: _phones.asMap().entries.map((entry) {
+        int idx = entry.key;
+        var phone = entry.value;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _phoneControllers[idx],
+                  decoration: InputDecoration(
+                    hintText: 'Phone ${idx + 1}',
+                    border: OutlineInputBorder(
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                      borderSide: BorderSide(
+                        color: _validatePhone(_phoneControllers[idx].text) == null ? Colors.grey : Colors.red,
+                      ),
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() {});
+                  },
+                  validator: (value) => _validatePhone(value!),
+                ),
+              ),
+              DropdownButton<String>(
+                value: phone['type'],
+                onChanged: (newValue) {
+                  setState(() {
+                    phone['type'] = newValue!;
+
+                    // If a non-primary type is selected and this phone is currently primary, make the first phone primary
+                    if (newValue != 'Primary' && phone['primary']) {
+                      phone['primary'] = false;
+                      _phones[0]['primary'] = true;
+                      _phones[0]['type'] = 'Primary';
+                    }
+                  });
+                },
+                items: ['Primary', ...phoneTypes.where((type) => type != 'Primary')].map((type) {
+                  return DropdownMenuItem(
+                    value: type,
+                    child: Text(type),
+                  );
+                }).toList(),
+              ),
+              Radio<bool>(
+                value: true,
+                groupValue: phone['primary'],
+                onChanged: (value) {
+                  setState(() {
+                    for (var ph in _phones) {
+                      ph['primary'] = false;
+                      if (ph['type'] == 'Primary') {
+                        ph['type'] = 'Mobile'; // Or default type if they were primary
+                      }
+                    }
+                    phone['primary'] = true;
+                    phone['type'] = 'Primary'; // Ensure dropdown shows 'Primary'
+                  });
+                },
+              ),
+              const Text('Primary'),
+              if (_phones.length > 1)
+                IconButton(
+                  icon: const Icon(Icons.remove_circle, color: Colors.red),
+                  onPressed: () => _removePhoneField(idx),
+                ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Account', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.orange,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        shape: const RoundedRectangleBorder(),
+        title: const Stack(
+          children: <Widget>[
+            Text(
+              'Edit Account',
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
       ),
       body: SingleChildScrollView(
@@ -190,272 +357,13 @@ class _EditAccountPageState extends State<EditAccountPage> {
               children: [
                 const SizedBox(height: 16),
 
-                // FirstName Field
-                TextFormField(
-                  controller: firstNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'First Name',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'First Name is required';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // LastName Field
-                TextFormField(
-                  controller: lastNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Last Name',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Last Name is required';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // EmployeeID Field
-                TextFormField(
-                  controller: employeeIDController,
-                  decoration: const InputDecoration(
-                    labelText: 'Employee ID',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Employee ID is required';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // Username Field
-                TextFormField(
-                  controller: usernameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Username',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Username is required';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // Password Field
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: passwordController,
-                        obscureText: _obscurePassword,
-                        decoration: const InputDecoration(
-                          labelText: 'Password',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Password is required';
-                          }
-                          if (!_has8Characters) {
-                            return 'Password must be at least 8 characters';
-                          }
-                          if (!_hasNumber) {
-                            return 'Password must contain at least one number';
-                          }
-                          if (!_hasSpecialCharacter) {
-                            return 'Password must contain at least one special character';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-
-                // Password Requirements Display
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          _has8Characters ? Icons.check_circle : Icons.radio_button_unchecked,
-                          color: _has8Characters ? Colors.green : Colors.grey,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        const Text('At least 8 characters'),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Icon(
-                          _hasNumber ? Icons.check_circle : Icons.radio_button_unchecked,
-                          color: _hasNumber ? Colors.green : Colors.grey,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        const Text('Contains a number'),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Icon(
-                          _hasSpecialCharacter ? Icons.check_circle : Icons.radio_button_unchecked,
-                          color: _hasSpecialCharacter ? Colors.green : Colors.grey,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        const Text('Contains a special character'),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Confirm Password Field
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: confirmPasswordController,
-                        obscureText: _obscureConfirmPassword,
-                        decoration: const InputDecoration(
-                          labelText: 'Confirm Password',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please confirm your password';
-                          }
-                          if (value != passwordController.text) {
-                            return 'Passwords do not match';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscureConfirmPassword = !_obscureConfirmPassword;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
                 // Emails Field
                 const Text(
                   'Emails:',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                Column(
-                  children: _emails.asMap().entries.map((entry) {
-                    int idx = entry.key;
-                    var email = entry.value;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _emailControllers[idx],
-                              decoration: InputDecoration(
-                                hintText: 'Email ${idx + 1}',
-                                border: OutlineInputBorder(
-                                  borderRadius: const BorderRadius.all(Radius.circular(10)),
-                                  borderSide: BorderSide(
-                                    color: _validateEmail(_emailControllers[idx].text) == null ? Colors.grey : Colors.red,
-                                  ),
-                                ),
-                              ),
-                              onChanged: (value) {
-                                setState(() {});
-                              },
-                              validator: (value) => _validateEmail(value!),
-                            ),
-                          ),
-                          DropdownButton<String>(
-                            value: email['type'],
-                            onChanged: (newValue) {
-                              setState(() {
-                                email['type'] = newValue!;
-                              });
-                            },
-                            items: emailTypes.map((type) {
-                              return DropdownMenuItem(
-                                value: type,
-                                child: Text(type),
-                              );
-                            }).toList(),
-                          ),
-                          Radio<bool>(
-                            value: true,
-                            groupValue: email['primary'],
-                            onChanged: (value) {
-                              setState(() {
-                                for (var em in _emails) {
-                                  em['primary'] = false;
-                                }
-                                email['primary'] = true;
-                              });
-                            },
-                          ),
-                          const Text('Primary'),
-                          if (_emails.length > 1)
-                            IconButton(
-                              icon: const Icon(Icons.remove_circle, color: Colors.red),
-                              onPressed: () => _removeEmailField(idx),
-                            ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
+                _buildEmailsField(),
                 ElevatedButton.icon(
                   onPressed: () {
                     setState(() {
@@ -475,72 +383,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                Column(
-                  children: _phones.asMap().entries.map((entry) {
-                    int idx = entry.key;
-                    var phone = entry.value;
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: _phoneControllers[idx],
-                              decoration: InputDecoration(
-                                hintText: 'Phone ${idx + 1}',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                                  borderSide: BorderSide(
-                                    color: _validatePhone(_phoneControllers[idx].text) == null
-                                        ? Colors.grey
-                                        : Colors.red,
-                                  ),
-                                ),
-                                errorMaxLines: 3,
-                              ),
-                              onChanged: (value) {
-                                setState(() {});
-                              },
-                              validator: (value) => _validatePhone(value!),
-                            ),
-                          ),
-                          DropdownButton<String>(
-                            value: phone['type'],
-                            onChanged: (newValue) {
-                              setState(() {
-                                phone['type'] = newValue!;
-                              });
-                            },
-                            items: phoneTypes.map((type) {
-                              return DropdownMenuItem(
-                                value: type,
-                                child: Text(type),
-                              );
-                            }).toList(),
-                          ),
-                          Radio<bool>(
-                            value: true,
-                            groupValue: phone['primary'],
-                            onChanged: (value) {
-                              setState(() {
-                                for (var ph in _phones) {
-                                  ph['primary'] = false;
-                                }
-                                phone['primary'] = true;
-                              });
-                            },
-                          ),
-                          const Text('Primary'),
-                          if (_phones.length > 1)
-                            IconButton(
-                              icon: const Icon(Icons.remove_circle, color: Colors.red),
-                              onPressed: () => _removePhoneField(idx),
-                            ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
+                _buildPhonesField(),
                 ElevatedButton.icon(
                   onPressed: () {
                     setState(() {
