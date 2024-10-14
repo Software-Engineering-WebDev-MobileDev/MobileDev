@@ -347,7 +347,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                ElevatedButton(
+                ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 209, 125, 51),
                     foregroundColor: Colors.white, // White font color
@@ -389,7 +389,11 @@ class _EditRecipePageState extends State<EditRecipePage> {
                       }
                     }
                   },
-                  child: const Text('Update Recipe'),
+                  icon: const Icon(
+                    Icons.update,
+                    color: Colors.white,
+                  ),
+                  label: const Text('Update Recipe'),
                 ),
               ],
             ),
