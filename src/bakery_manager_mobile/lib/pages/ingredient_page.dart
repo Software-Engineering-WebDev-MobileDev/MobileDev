@@ -3,6 +3,7 @@ import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:flutter/material.dart';
 import '../models/ingredient.dart';
+import 'package:bakery_manager_mobile/pages/add_ingredients.dart';
 
 class IngredientPage extends StatefulWidget {
   const IngredientPage({super.key});
@@ -23,14 +24,17 @@ class IngredientPageState extends State<IngredientPage> {
   }
 
   Future<List<Ingredient>> _fetchIngredients() async {
-    // Call getInventory function
-    final result = await ApiService.getInventory();
+    // // Call getInventory function
+    // final result = await ApiService.getInventory();
 
-    if (result['status'] == 'success') {
-      return result['inventory'];
-    } else {
-      throw Exception(result['reason']);
-    }
+    // // if (result['status'] == 'success') {
+    // //   return result['inventory'];
+    // // } else {
+    // //   throw Exception(result['reason']);
+    // // //
+    List<Ingredient> ingredientList = [(Ingredient(ingredientID: "38462", name: "Test", quantity: 0, quantityUnit: "g", shelfLife: 0, shelfLifeUnit: "shelfLifeUnit", reorderAmount: 0, reorderUnit: "reorderUnit"))];
+ 
+    return Future.value(ingredientList);
   }
 
   void _filterIngredients(String query, List<Ingredient> ingredients) {
@@ -159,10 +163,11 @@ class IngredientPageState extends State<IngredientPage> {
               ),
               onPressed: () {
                 // TODO: Implement add ingredient functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text(
-                          'Add ingredient functionality not implemented yet')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AddIngredientPage(),
+                  ),
                 );
               },
               icon: const Icon(Icons.add),
