@@ -178,6 +178,9 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                     if (value == null || value.isEmpty) {
                       return 'First Name is required';
                     }
+                    if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+                      return 'First Name can only contain letters';
+                    }
                     return null;
                   },
                 ),
@@ -195,6 +198,9 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Last Name is required';
+                    }
+                    if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+                      return 'Last Name can only contain letters';
                     }
                     return null;
                   },
