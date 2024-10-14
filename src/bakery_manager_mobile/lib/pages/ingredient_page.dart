@@ -78,20 +78,17 @@ class IngredientPageState extends State<IngredientPage> {
             ),
           ],
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back,
-              color: Color.fromARGB(255, 140, 72, 27)),
+                leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.pop(context); // Back navigation
+            Navigator.pop(context);
           },
         ),
         actions: [
           IconButton(
-            icon:
-                const Icon(Icons.home, color: Color.fromARGB(255, 140, 72, 27)),
+            icon: const Icon(Icons.home, color: Colors.white),
             onPressed: () {
-              Navigator.popUntil(
-                  context, ModalRoute.withName('/')); // Home navigation
+              Navigator.popUntil(context, ModalRoute.withName('/'));
             },
           ),
         ],

@@ -19,7 +19,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
   final TextEditingController cookTimeController = TextEditingController();
   final TextEditingController servingsController = TextEditingController();
 
-  int recipeNameCharCount = 0; // Character count for recipe name
+  int recipeNameCharCount = 0;
   final List<RecipeIngredient> ingredients = [
     RecipeIngredient(
       recipeIngredientId: '',
@@ -83,12 +83,19 @@ class _AddRecipePageState extends State<AddRecipePage> {
         ),
         backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back,
-              color: Color.fromARGB(255, 140, 72, 27)),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home, color: Colors.white),
+            onPressed: () {
+              Navigator.popUntil(context, ModalRoute.withName('/'));
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -313,14 +320,14 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   label: const Text('Add Ingredient'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
-                    foregroundColor: Colors.white, // Set font color to white
+                    foregroundColor: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 209, 125, 51),
-                    foregroundColor: Colors.white, // Set font color to white
+                    foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),

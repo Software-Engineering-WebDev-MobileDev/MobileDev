@@ -66,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         //logout button
         leading: IconButton(
-          color: const Color.fromARGB(255, 92, 40, 10),
+          color: Colors.white,
           icon: const Icon(Icons.logout),
           onPressed: _logout,
         ),

@@ -126,12 +126,19 @@ class AddTaskPageState extends State<AddTaskPage> {
         ),
         backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back,
-              color: Color.fromARGB(255, 140, 72, 27)),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home, color: Colors.white),
+            onPressed: () {
+              Navigator.popUntil(context, ModalRoute.withName('/'));
+            },
+          ),
+        ],
       ),
       body: FutureBuilder<List<Recipe>>(
         future: _futureRecipes,
@@ -347,7 +354,7 @@ class AddTaskPageState extends State<AddTaskPage> {
                 },
                 child: const Text(
                   'Add Task',
-                  style: TextStyle(color: Colors.white), // This line makes the font white
+                  style: TextStyle(color: Colors.white),
                 ),
               ),
             ],
@@ -361,7 +368,7 @@ class AddTaskPageState extends State<AddTaskPage> {
   void dispose() {
     amountToBakeController.dispose();
     dueDateController.dispose();
-    dueTimeController.dispose(); // Dispose the controller
+    dueTimeController.dispose();
     super.dispose();
   }
 }
