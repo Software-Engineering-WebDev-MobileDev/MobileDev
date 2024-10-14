@@ -113,13 +113,13 @@ class _EditAccountPageState extends State<EditAccountPage> {
         await ApiService.deleteUserPhone(phoneNumber: phone);
       }
 
-      // Check for new emails to add
+ // Check for new emails to add
       for (var i = 0; i < _emailControllers.length; i++) {
         String emailAddress = _emailControllers[i].text;
         if (emailAddress.isNotEmpty) {
           emailsToAdd.add({
             'address': emailAddress,
-            'type': emailTypes[i],
+            'type': _emails[i]['type'],
             'isPrimary': _emails[i]['primary'],
           });
         }
@@ -146,7 +146,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
         if (phoneNumber.isNotEmpty) {
           phonesToAdd.add({
             'number': phoneNumber,
-            'type': phoneTypes[i],
+            'type': _phones[i]['type'],
             'isPrimary': _phones[i]['primary'],
           });
         }
@@ -468,19 +468,27 @@ class _EditAccountPageState extends State<EditAccountPage> {
                 ),
                 const SizedBox(height: 8),
                 _buildEmailsField(),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _emails.add(
-                          {'address': '', 'type': 'work', 'primary': false});
-                      _emailControllers.add(TextEditingController(text: ''));
-                    });
-                  },
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Email'),
-                  style:
-                      ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                ),
+                  // Add Email Button
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _emails.add({'address': '', 'type': 'work', 'primary': false});
+                        _emailControllers.add(TextEditingController(text: ''));
+                      });
+                    },
+                    icon: const Icon(Icons.add, color: Colors.white),
+                    label: const Text(
+                      'Add Email',
+                      style: TextStyle(color: Colors.white), // Set text color to white
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16), // Skinnier button
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
                 const SizedBox(height: 16),
 
                 // Phone Numbers Field
@@ -493,30 +501,39 @@ class _EditAccountPageState extends State<EditAccountPage> {
                 ElevatedButton.icon(
                   onPressed: () {
                     setState(() {
-                      _phones.add(
-                          {'number': '', 'type': 'mobile', 'primary': false});
+                      _phones.add({'number': '', 'type': 'mobile', 'primary': false});
                       _phoneControllers.add(TextEditingController(text: ''));
                     });
                   },
-                  icon: const Icon(Icons.add),
-                  label: const Text('Add Phone'),
-                  style:
-                      ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                ),
-                const SizedBox(height: 32),
-
-                // Update Account Button
-                ElevatedButton(
+                  icon: const Icon(Icons.add, color: Colors.white),
+                  label: const Text(
+                    'Add Phone',
+                    style: TextStyle(color: Colors.white), // Set text color to white
+                  ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 209, 125, 51),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: Colors.green,
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16), // Skinnier button
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  onPressed: _saveAccountChanges, // Call the save function
-                  child: const Text('Update Account'),
                 ),
+                const SizedBox(height: 32),
+
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16), // Skinnier button
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: _saveAccountChanges, // Call the save function
+                child: const Text(
+                  'Update Account',
+                  style: TextStyle(color: Colors.white), // Set text color to white
+                ),
+              ),
               ],
             ),
           ),
