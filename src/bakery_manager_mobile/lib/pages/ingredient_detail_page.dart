@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/ingredient.dart';
+import 'package:bakery_manager_mobile/pages/edit_ingredients.dart';
+import 'package:bakery_manager_mobile/pages/edit_stock.dart';
+import 'package:bakery_manager_mobile/pages/viewrecords.dart';
 
 class IngredientDetailPage extends StatelessWidget {
   const IngredientDetailPage({super.key});
@@ -30,8 +33,7 @@ class IngredientDetailPage extends StatelessWidget {
           ),
         ],
       ),
-      body: Center(
-        // Ensure everything is centered on the page
+      body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -59,91 +61,129 @@ class IngredientDetailPage extends StatelessWidget {
               ),
               const SizedBox(height: 32), // Add space before the buttons
 
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 20, horizontal: 40),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onPressed: () {
-                  // TODO: Implement View Records functionality
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text(
-                            'View Records functionality not implemented yet')),
-                  );
-                },
-                child:
-                    const Text('View Records', style: TextStyle(fontSize: 20)),
-              ),
-              const SizedBox(height: 32), // Add space between buttons
+              Center(
+                child: Column(
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 24),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ViewRecordsPage(ingredient: ingredient),
+                          ),
+                        );
+                      },
+                      child: const Text('View Records',
+                          style: TextStyle(fontSize: 18)),
+                    ),
+                    const SizedBox(
+                        height:
+                            16), // Add space between buttons// Add space between buttons
 
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange, // Make the button orange
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 20, horizontal: 40),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onPressed: () {
-                  // TODO: Implement Edit Stock Levels functionality
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text(
-                            'Edit Stock Levels functionality not implemented yet')),
-                  );
-                },
-                child: const Text('Edit Stock Levels',
-                    style: TextStyle(fontSize: 20)),
-              ),
-              const SizedBox(height: 32),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Colors.orange, // Make the button orange
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 24),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                EditStockPage(ingredient: ingredient),
+                          ),
+                        );
+                      },
+                      child: const Text('Edit Stock Levels',
+                          style: TextStyle(fontSize: 18)),
+                    ),
+                    const SizedBox(height: 16),
 
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange, // Make the button orange
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 20, horizontal: 40),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                onPressed: () {
-                  // TODO: Implement Edit Ingredient functionality
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text(
-                            'Edit Ingredient functionality not implemented yet')),
-                  );
-                },
-                child: const Text('Edit Ingredient Details',
-                    style: TextStyle(fontSize: 20)),
-              ),
-              const SizedBox(height: 32),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Colors.orange, // Make the button orange
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 24),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                EditIngredientPage(ingredient: ingredient),
+                          ),
+                        );
+                      },
+                      child: const Text('Edit Ingredient Details',
+                          style: TextStyle(fontSize: 18)),
+                    ),
+                    const SizedBox(height: 16),
 
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange, // Make the button orange
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 20, horizontal: 40),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Colors.orange, // Make the button orange
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12, horizontal: 24),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        // TODO: Implement Delete Ingredient functionality
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('Delete Ingredient'),
+                              content: const Text(
+                                  'Are you sure you want to delete this ingredient?'),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: const Text('Cancel'),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                ),
+                                TextButton(
+                                  child: const Text('Delete'),
+                                  onPressed: () {
+                                    // TODO: Implement delete functionality here
+                                    Navigator.of(context).pop();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text('Ingredient deleted')),
+                                    );
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      child: const Text('Delete Ingredient',
+                          style: TextStyle(fontSize: 18)),
+                    ),
+                  ],
                 ),
-                onPressed: () {
-                  // TODO: Implement Delete Ingredient functionality
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text(
-                            'Delete Ingredient functionality not implemented yet')),
-                  );
-                },
-                child: const Text('Delete Ingredient',
-                    style: TextStyle(fontSize: 20)),
               ),
             ],
           ),
