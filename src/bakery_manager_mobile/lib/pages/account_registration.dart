@@ -88,6 +88,8 @@ class CreateAccountPageState extends State<CreateAccountPage> {
           employeeID,
           username,
           password,
+          email,
+          phoneNumber
         );
 
         if (accountResponse['status'] == 'success') {
@@ -115,7 +117,6 @@ class CreateAccountPageState extends State<CreateAccountPage> {
             // Step 4: All succeeded, save credentials and show success message
             SharedPreferences prefs = await SharedPreferences.getInstance();
             await prefs.setString('username', username);
-            await prefs.setString('password', password);
 
             if (!mounted) return;
             ScaffoldMessenger.of(context).showSnackBar(

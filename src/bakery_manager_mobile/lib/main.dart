@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'pages/routes.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'services/navigator_observer.dart';
-import 'services/session_manager.dart'; // Import your SessionManager class
+import 'services/session_manager.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
