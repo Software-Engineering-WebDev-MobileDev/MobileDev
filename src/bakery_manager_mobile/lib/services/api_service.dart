@@ -5,7 +5,6 @@ import 'package:bakery_manager_mobile/models/task.dart';
 import 'package:http/http.dart' as http;
 import '../models/recipe.dart';
 //import '../models/account.dart';
-//import '../models/account.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'session_manager.dart';
 
@@ -260,8 +259,6 @@ class ApiService {
 
     try {
       final response = await http.get(url, headers: headers);
-    try {
-      final response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -278,7 +275,6 @@ class ApiService {
           'reason': 'Failed to fetch recipe name: ${response.statusCode}',
         };
       }
-    } catch (e) {
     } catch (e) {
       return {
         'status': 'error',
@@ -339,9 +335,6 @@ class ApiService {
       String password,
       String email,
       String phoneNumber) async {
-      String password,
-      String email,
-      String phoneNumber) async {
     final url = Uri.parse('$baseApiUrl/create_account');
     final headers = {
       'employee_id': employeeID,
@@ -349,8 +342,6 @@ class ApiService {
       'last_name': lastName,
       'username': username,
       'password': password,
-      'email_address': email,
-      'phone_number': phoneNumber
       'email_address': email,
       'phone_number': phoneNumber
     };
@@ -590,8 +581,7 @@ class ApiService {
         // If the request is successful, parse the response
         final responseBody = jsonDecode(response.body);
         return {
-          'status': 'error',
-          'reason': 'Failed to delete email: ${response.statusCode}',
+          'status': responseBody['status'],
         };
       } else {
         // Handle error responses
@@ -699,39 +689,7 @@ class ApiService {
         return {
           'status': 'error',
           'reason': responseBody['reason'] ?? 'Failed to add phone number',
-          'reason': responseBody['reason'] ?? 'Failed to add phone number',
         };
-      }
-    } catch (e) {
-      return {
-        'status': 'error',
-        'reason': 'Network error: $e',
-      };
-    }
-  }
-
-  static Future<Map<String, dynamic>> deleteUserPhone({
-    required String phoneNumber,
-  }) async {
-    final url = Uri.parse('$baseApiUrl/user_phone');
-    final sessionId = await SessionManager().getSessionToken();
-    final headers = <String, String>{
-      'session_id': sessionId!,
-      'phone_number': phoneNumber,
-    };
-
-    try {
-      final response = await http.delete(url, headers: headers);
-
-      if (response.statusCode == 200) {
-        return {'status': 'success'};
-      } else if (response.statusCode == 409) {
-        final responseBody = jsonDecode(response.body);
-        return {
-          'status': 'error',
-          'reason': responseBody['reason'] ?? 'Phone number does not exist',
-        };
-      } else {
       }
     } catch (e) {
       return {
@@ -766,7 +724,6 @@ class ApiService {
         return {
           'status': 'error',
           'reason': 'Failed to delete phone number: ${response.statusCode}',
-          'reason': 'Failed to delete phone number: ${response.statusCode}',
         };
       }
     } catch (e) {
@@ -776,7 +733,6 @@ class ApiService {
       };
     }
   }
-
 
   // Login Function
   static Future<Map<String, dynamic>> login(
@@ -863,20 +819,7 @@ class ApiService {
     }
   }
 
-
   // Get Account Function
-  static Future<Map<String, dynamic>> getUserInfo() async {
-    final url = Uri.parse('$baseApiUrl/my_info');
-    String sessionId = await SessionManager().getSessionToken() ?? "";
-
-    try {
-      // Make the HTTP GET request
-      final response = await http.get(
-        url,
-        headers: {
-          'session_id': sessionId,
-        },
-      );
   static Future<Map<String, dynamic>> getUserInfo() async {
     final url = Uri.parse('$baseApiUrl/my_info');
     String sessionId = await SessionManager().getSessionToken() ?? "";
@@ -906,22 +849,8 @@ class ApiService {
           };
         }
       } else {
-
-        if (body['status'] == 'success') {
-          return {
-            'status': 'success',
-            'content': body['content'], // Includes all user information
-          };
-        } else {
-          return {
-            'status': 'error',
-            'reason': body['reason'],
-          };
-        }
-      } else {
         return {
           'status': 'error',
-          'reason': 'Failed to load user info: ${response.statusCode}',
           'reason': 'Failed to load user info: ${response.statusCode}',
         };
       }
