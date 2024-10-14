@@ -193,7 +193,8 @@ class TaskPageState extends State<TaskPage> {
                 future: _futureTasks,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
+                    //return const Center(child: CircularProgressIndicator());
+                    return const SizedBox(height: 16);
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (_filteredTasks.isEmpty) {
