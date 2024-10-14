@@ -117,7 +117,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
         title: const Stack(
           children: <Widget>[
             Text(
-              'Home',
+              'All Recipes',
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
@@ -237,7 +237,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
               label: const Text(
                 'Add recipe',
                 style: TextStyle(
-                  color: Color.fromARGB(255, 246, 235, 216),
+                  color: Colors.white
                 ),
               ),
             ),
@@ -271,7 +271,7 @@ class _RecipeItem extends StatelessWidget {
           child: Text(
             recipe.recipeName,
             style: const TextStyle(
-              color: Color.fromARGB(255, 209, 125, 51),
+              color: Color.fromARGB(255, 140, 72, 27),
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),

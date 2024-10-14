@@ -365,7 +365,20 @@ Column _buildPhonesField() {
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 209, 125, 51),
-                leading: IconButton(
+        shape: const RoundedRectangleBorder(),
+        title: const Stack(
+          children: <Widget>[
+            Text(
+              'Edit Account',
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Colors.white
+              ),
+            ),
+          ],
+        ),
+        leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
@@ -379,19 +392,6 @@ Column _buildPhonesField() {
             },
           ),
         ],
-        shape: const RoundedRectangleBorder(),
-        title: const Stack(
-          children: <Widget>[
-            Text(
-              'Edit Account',
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
       ),
       body: SingleChildScrollView(
         child: Padding(

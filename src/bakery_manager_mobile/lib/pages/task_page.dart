@@ -101,32 +101,21 @@ class TaskPageState extends State<TaskPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Stack(
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        shape: const RoundedRectangleBorder(),
+        title: const Stack(
           children: <Widget>[
             Text(
-              'Daily Tasks',
+              'All Tasks',
               style: TextStyle(
-                fontFamily: 'Pacifico',
-                fontSize: 30,
-                foreground: Paint()
-                  ..style = PaintingStyle.stroke
-                  ..strokeWidth = 6
-                  ..color = const Color.fromARGB(255, 140, 72, 27),
-              ),
-            ),
-            const Text(
-              'Daily Tasks',
-              style: TextStyle(
-                fontFamily: 'Pacifico',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 246, 235, 216),
+                color: Colors.white
               ),
             ),
           ],
         ),
-        centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {

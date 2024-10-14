@@ -56,8 +56,21 @@ class MyAccountPageState extends State<MyAccountPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Account', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.orange,
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        shape: const RoundedRectangleBorder(),
+        title: const Stack(
+          children: <Widget>[
+            Text(
+              'Account Details',
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Colors.white
+              ),
+            ),
+          ],
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {

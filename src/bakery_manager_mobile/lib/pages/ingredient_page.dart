@@ -50,35 +50,22 @@ class IngredientPageState extends State<IngredientPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         centerTitle: true,
-        title: Stack(
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        shape: const RoundedRectangleBorder(),
+        title: const Stack(
           children: <Widget>[
-            // Stroked text as border.
             Text(
-              'Inventory',
+              'All Ingredients',
               style: TextStyle(
-                fontFamily: 'Pacifico',
-                fontSize: 30,
-                foreground: Paint()
-                  ..style = PaintingStyle.stroke
-                  ..strokeWidth = 6
-                  ..color = const Color.fromARGB(255, 140, 72, 27),
-              ),
-            ),
-            // Solid text as fill.
-            const Text(
-              'Inventory',
-              style: TextStyle(
-                fontFamily: 'Pacifico',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 246, 235, 216),
+                color: Colors.white
               ),
             ),
           ],
         ),
-                leading: IconButton(
+        leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);

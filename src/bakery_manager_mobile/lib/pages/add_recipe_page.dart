@@ -69,17 +69,13 @@ class _AddRecipePageState extends State<AddRecipePage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Stack(
-          children: <Widget>[
-            Text(
-              'Add a New Recipe',
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
+        title: const Text(
+          'Add a New Recipe',
+          style: TextStyle(
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         leading: IconButton(
@@ -234,7 +230,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 // Ingredients Section
                 const Text(
                   'Ingredients:',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 ...ingredients.asMap().entries.map((entry) {
@@ -321,6 +317,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
+                    minimumSize: const Size(120, 48),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                   ),
                 ),
                 const SizedBox(height: 16),

@@ -85,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     fontFamily: 'Pacifico',
                     fontSize: 40,
                     fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 209, 126, 51),
+                    color: Color.fromARGB(255, 140, 72, 27),
                   ),
                 ),
               ),

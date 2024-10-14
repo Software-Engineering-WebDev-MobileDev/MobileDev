@@ -91,19 +91,20 @@ class _EditRecipePageState extends State<EditRecipePage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        shape: const RoundedRectangleBorder(),
         title: const Stack(
           children: <Widget>[
             Text(
-              'Add a New Recipe',
+              'Edit Recipe',
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Colors.white
               ),
             ),
           ],
         ),
-        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
