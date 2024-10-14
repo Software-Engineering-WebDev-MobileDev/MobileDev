@@ -25,6 +25,7 @@ class Task {
     return Task(
       taskID: json['TaskID'],
       recipeID: json['RecipeID'],
+      name: json['RecipeName'],
       amountToBake: json['AmountToBake'],
       status: json['Status'],
       assignmentDate: DateTime.parse(json['AssignmentDate']),
@@ -32,7 +33,7 @@ class Task {
       completionDate: json['CompletionDate'] != null
           ? DateTime.parse(json['CompletionDate'])
           : null, // Handle null value for CompletionDate
-      employeeID: json['AssignedEmployeeID'],
+      employeeID: json['EmployeeID'],
     );
   }
 }

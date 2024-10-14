@@ -10,18 +10,6 @@ class EditAccountPage extends StatefulWidget {
 
 class _EditAccountPageState extends State<EditAccountPage> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController employeeIDController;
-  late TextEditingController firstNameController;
-  late TextEditingController lastNameController;
-  late TextEditingController usernameController;
-  late TextEditingController passwordController;
-  late TextEditingController confirmPasswordController;
-
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
-  bool _has8Characters = false;
-  bool _hasNumber = false;
-  bool _hasSpecialCharacter = false;
 
   List<Map<String, dynamic>> _emails = [];
   List<Map<String, dynamic>> _phones = [];
@@ -40,28 +28,13 @@ class _EditAccountPageState extends State<EditAccountPage> {
     super.initState();
 
     // Set up controllers with default values (or empty)
-    employeeIDController = TextEditingController();
-    firstNameController = TextEditingController();
-    lastNameController = TextEditingController();
-    usernameController = TextEditingController();
-    passwordController = TextEditingController();
-    confirmPasswordController = TextEditingController();
 
     // Fetch user data when the page loads
     _fetchUserData();
-
-    passwordController.addListener(_validatePassword);
   }
 
   @override
   void dispose() {
-    employeeIDController.dispose();
-    firstNameController.dispose();
-    lastNameController.dispose();
-    usernameController.dispose();
-    passwordController.removeListener(_validatePassword);
-    passwordController.dispose();
-    confirmPasswordController.dispose();
     for (var controller in _emailControllers) {
       controller.dispose();
     }
@@ -71,18 +44,15 @@ class _EditAccountPageState extends State<EditAccountPage> {
     super.dispose();
   }
 
-  void _validatePassword() {
-    String password = passwordController.text;
-    setState(() {
-      _has8Characters = password.length >= 8;
-      _hasNumber = password.contains(RegExp(r'\d'));
-      _hasSpecialCharacter = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
-    });
+  String _capitalizeFirstLetter(String input) {
+    if (input.isEmpty) return input;
+    return input[0].toUpperCase() + input.substring(1);
   }
 
   // Email validation function
   String? _validateEmail(String email) {
-    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+    final emailRegex =
+        RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     if (email.isEmpty) {
       return 'Email is required';
     } else if (!emailRegex.hasMatch(email)) {
@@ -102,7 +72,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
     return null;
   }
 
-  // Remove email field
+  // Remove email field and handle primary email reassignment
   void _removeEmailField(int index) {
     bool wasPrimary = _emails[index]['primary'];
     setState(() {
@@ -116,7 +86,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
     });
   }
 
-  // Remove phone field
+  // Remove phone field and handle primary phone reassignment
   void _removePhoneField(int index) {
     bool wasPrimary = _phones[index]['primary'];
     setState(() {
@@ -132,24 +102,16 @@ class _EditAccountPageState extends State<EditAccountPage> {
 
   Future<void> _saveAccountChanges() async {
     if (_formKey.currentState!.validate()) {
-      // Get user input from the text controllers
-      String firstName = firstNameController.text;
-      String lastName = lastNameController.text;
-      String employeeID = employeeIDController.text;
-      String username = usernameController.text;
-      String password = passwordController.text;
-
       // Prepare to delete old emails
       List<Map<String, dynamic>> emailsToAdd = [];
 
       for (var email in originalEmails) {
         await ApiService.deleteUserEmail(emailAddress: email);
       }
-            // Delete old phone numbers
+      // Delete old phone numbers
       for (var phone in originalPhones) {
         await ApiService.deleteUserPhone(phoneNumber: phone);
       }
-
 
       // Check for new emails to add
       for (var i = 0; i < _emailControllers.length; i++) {
@@ -203,7 +165,8 @@ class _EditAccountPageState extends State<EditAccountPage> {
         );
       }
 
-      Map<String, dynamic> response = await Future.delayed(const Duration(seconds: 0), () {
+      Map<String, dynamic> response =
+          await Future.delayed(const Duration(seconds: 0), () {
         return {'status': 'success'};
       });
 
@@ -227,194 +190,185 @@ class _EditAccountPageState extends State<EditAccountPage> {
   }
 
 // Build emails field with primary dropdown change and updated type list
-Column _buildEmailsField() {
-  return Column(
-    children: _emails.asMap().entries.map((entry) {
-      int idx = entry.key;
-      var email = entry.value;
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
-        child: Row(
-          children: [
-            // Email Text Field
-            Expanded(
-              child: TextFormField(
-                controller: _emailControllers[idx],
-                decoration: InputDecoration(
-                  hintText: 'Email ${idx + 1}',
-                  border: OutlineInputBorder(
-                    borderRadius: const BorderRadius.all(Radius.circular(10)),
-                    borderSide: BorderSide(
-                      color: _validateEmail(_emailControllers[idx].text) == null
-                          ? Colors.grey
-                          : Colors.red,
+  Column _buildEmailsField() {
+    return Column(
+      children: _emails.asMap().entries.map((entry) {
+        int idx = entry.key;
+        var email = entry.value;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: Row(
+            children: [
+              // Email Text Field
+              Expanded(
+                child: TextFormField(
+                  controller: _emailControllers[idx],
+                  decoration: InputDecoration(
+                    hintText: 'Email ${idx + 1}',
+                    border: OutlineInputBorder(
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                      borderSide: BorderSide(
+                        color:
+                            _validateEmail(_emailControllers[idx].text) == null
+                                ? Colors.grey
+                                : Colors.red,
+                      ),
                     ),
                   ),
+                  onChanged: (value) {
+                    setState(() {});
+                  },
+                  validator: (value) => _validateEmail(value!),
                 ),
+              ),
+              const SizedBox(width: 8),
+
+              // Primary Radio Button
+              Radio<bool>(
+                value: true,
+                groupValue: email['primary'],
                 onChanged: (value) {
-                  setState(() {});
-                },
-                validator: (value) => _validateEmail(value!),
-              ),
-            ),
-            const SizedBox(width: 8),
-            
-            // Primary Radio Button
-            Radio<bool>(
-              value: true,
-              groupValue: email['primary'],
-              onChanged: (value) {
-                setState(() {
-                  // Clear all other primary flags
-                  for (var em in _emails) {
-                    em['primary'] = false;
-                    if (em['type'] == 'Primary') {
-                      em['type'] = emailTypes[0]; // Set to default type
+                  setState(() {
+                    // Clear all other primary flags
+                    for (var em in _emails) {
+                      em['primary'] = false;
+                      if (em['type'] == 'primary') {
+                        em['type'] = emailTypes[0]; // Reset to default type
+                      }
                     }
-                  }
-                  email['primary'] = true;
-                  email['type'] = 'Primary'; // Set the dropdown value to Primary
-                });
-              },
-            ),
-            const Text('Primary'),
-            const SizedBox(width: 8),
-
-            // Email Type Dropdown
-            DropdownButton<String>(
-              value: email['primary'] ? 'Primary' : email['type'],
-              onChanged: email['primary']
-                  ? null // Disable dropdown when primary is selected
-                  : (newValue) {
-                      setState(() {
-                        email['type'] = newValue!;
-                      });
-                    },
-              items: [
-                if (email['primary']) // Show 'Primary' only if selected by radio
-                  const DropdownMenuItem(
-                    value: 'Primary',
-                    child: Text('Primary'),
-                  ),
-                ...['Personal', 'Home', 'Work', 'Other']
-                    .where((type) => type != 'Primary')
-                    .map((type) {
-                  return DropdownMenuItem(
-                    value: type,
-                    child: Text(type),
-                  );
-                }).toList(),
-              ],
-            ),
-            const SizedBox(width: 8),
-
-            // Subtract/Remove Button
-            if (_emails.length > 1)
-              IconButton(
-                icon: const Icon(Icons.remove_circle, color: Colors.red),
-                onPressed: () => _removeEmailField(idx),
+                    email['primary'] = true;
+                    email['type'] =
+                        'primary'; // Set the dropdown value to Primary
+                  });
+                },
               ),
-          ],
-        ),
-      );
-    }).toList(),
-  );
-}
+              const Text('Primary'),
+              const SizedBox(width: 8),
+
+              // Email Type Dropdown
+              DropdownButton<String>(
+                value: email['primary'] ? 'primary' : email['type'],
+                onChanged: email['primary']
+                    ? null // Disable dropdown when primary is selected
+                    : (newValue) {
+                        setState(() {
+                          email['type'] = newValue!;
+                        });
+                      },
+                items: [
+                  ...emailTypes.map((type) {
+                    return DropdownMenuItem(
+                      value: type,
+                      child: Text(_capitalizeFirstLetter(type)),
+                    );
+                  }).toList(),
+                ],
+              ),
+              const SizedBox(width: 8),
+
+              // Subtract/Remove Button
+              if (_emails.length > 1)
+                IconButton(
+                  icon: const Icon(Icons.remove_circle, color: Colors.red),
+                  onPressed: () => _removeEmailField(idx),
+                ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
 
 // Build phones field with primary dropdown change
-Column _buildPhonesField() {
-  return Column(
-    children: _phones.asMap().entries.map((entry) {
-      int idx = entry.key;
-      var phone = entry.value;
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 8.0),
-        child: Row(
-          children: [
-            // Phone Number Field
-            Expanded(
-              child: TextFormField(
-                controller: _phoneControllers[idx],
-                decoration: InputDecoration(
-                  hintText: 'Phone ${idx + 1}',
-                  border: OutlineInputBorder(
-                    borderRadius: const BorderRadius.all(Radius.circular(10)),
-                    borderSide: BorderSide(
-                      color: _validatePhone(_phoneControllers[idx].text) == null
-                          ? Colors.grey
-                          : Colors.red,
+  Column _buildPhonesField() {
+    return Column(
+      children: _phones.asMap().entries.map((entry) {
+        int idx = entry.key;
+        var phone = entry.value;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: Row(
+            children: [
+              // Phone Number Field
+              Expanded(
+                child: TextFormField(
+                  controller: _phoneControllers[idx],
+                  decoration: InputDecoration(
+                    hintText: 'Phone ${idx + 1}',
+                    border: OutlineInputBorder(
+                      borderRadius: const BorderRadius.all(Radius.circular(10)),
+                      borderSide: BorderSide(
+                        color:
+                            _validatePhone(_phoneControllers[idx].text) == null
+                                ? Colors.grey
+                                : Colors.red,
+                      ),
                     ),
                   ),
+                  onChanged: (value) {
+                    setState(() {});
+                  },
+                  validator: (value) => _validatePhone(value!),
                 ),
+              ),
+              const SizedBox(width: 8),
+
+              // Primary Radio Button
+              Radio<bool>(
+                value: true,
+                groupValue: phone['primary'],
                 onChanged: (value) {
-                  setState(() {});
-                },
-                validator: (value) => _validatePhone(value!),
-              ),
-            ),
-            const SizedBox(width: 8),
-
-            // Primary Radio Button
-            Radio<bool>(
-              value: true,
-              groupValue: phone['primary'],
-              onChanged: (value) {
-                setState(() {
-                  // Clear all other primary flags
-                  for (var ph in _phones) {
-                    ph['primary'] = false;
-                    if (ph['type'] == 'Primary') {
-                      ph['type'] = phoneTypes[0]; // Set to default type
+                  setState(() {
+                    // Clear all other primary flags
+                    for (var ph in _phones) {
+                      ph['primary'] = false;
+                      if (ph['type'] == 'primary') {
+                        ph['type'] = phoneTypes[0]; // Reset to default type
+                      }
                     }
-                  }
-                  phone['primary'] = true;
-                  phone['type'] = 'Primary'; // Set the dropdown value to Primary
-                });
-              },
-            ),
-            const Text('Primary'),
-            const SizedBox(width: 8),
-
-            // Phone Type Dropdown
-            DropdownButton<String>(
-              value: phone['primary'] ? 'Primary' : phone['type'],
-              onChanged: phone['primary']
-                  ? null // Disable dropdown when primary is selected
-                  : (newValue) {
-                      setState(() {
-                        phone['type'] = newValue!;
-                      });
-                    },
-              items: [
-                if (phone['primary']) // Show 'Primary' only if selected by radio
-                  const DropdownMenuItem(
-                    value: 'Primary',
-                    child: Text('Primary'),
-                  ),
-                ...phoneTypes
-                    .where((type) => type != 'Primary')
-                    .map((type) {
-                  return DropdownMenuItem(
-                    value: type,
-                    child: Text(type),
-                  );
-                }).toList(),
-              ],
-            ),
-            const SizedBox(width: 8),
-
-            // Subtract/Remove Button
-            if (_phones.length > 1)
-              IconButton(
-                icon: const Icon(Icons.remove_circle, color: Colors.red),
-                onPressed: () => _removePhoneField(idx),
+                    phone['primary'] = true;
+                    phone['type'] =
+                        'primary'; // Set the dropdown value to Primary
+                  });
+                },
               ),
-          ],
-        ),
-      );
-    }).toList(),
-  );
-}
+              const Text('Primary'),
+              const SizedBox(width: 8),
+
+              // Phone Type Dropdown
+              DropdownButton<String>(
+                value: phone['primary'] ? 'primary' : phone['type'],
+                onChanged: phone['primary']
+                    ? null // Disable dropdown when primary is selected
+                    : (newValue) {
+                        setState(() {
+                          phone['type'] = newValue!;
+                        });
+                      },
+                items: [
+                  ...phoneTypes.map((type) {
+                    return DropdownMenuItem(
+                      value: type,
+                      child: Text(_capitalizeFirstLetter(type)),
+                    );
+                  }).toList(),
+                ],
+              ),
+              const SizedBox(width: 8),
+
+              // Subtract/Remove Button
+              if (_phones.length > 1)
+                IconButton(
+                  icon: const Icon(Icons.remove_circle, color: Colors.red),
+                  onPressed: () => _removePhoneField(idx),
+                ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
   void _fetchUserData() async {
     Map<String, dynamic> result = await ApiService.getUserInfo();
 
@@ -422,13 +376,9 @@ Column _buildPhonesField() {
       Map<String, dynamic> userInfo = result['content'];
 
       setState(() {
-        employeeIDController.text = userInfo['EmployeeID'];
-        firstNameController.text = userInfo['FirstName'];
-        lastNameController.text = userInfo['LastName'];
-        usernameController.text = userInfo['Username'];
-
         // Populate emails
-        _emails = (userInfo['Emails'] as List<dynamic>).map<Map<String, dynamic>>((email) {
+        _emails = (userInfo['Emails'] as List<dynamic>)
+            .map<Map<String, dynamic>>((email) {
           return {
             'address': email['EmailAddress'],
             'type': email['EmailTypeID'],
@@ -436,10 +386,12 @@ Column _buildPhonesField() {
           };
         }).toList();
 
-        originalEmails = _emails.map((emailMap) => emailMap['address'] as String).toList();
+        originalEmails =
+            _emails.map((emailMap) => emailMap['address'] as String).toList();
 
         // Populate phones
-        _phones = (userInfo['PhoneNumbers'] as List<dynamic>).map<Map<String, dynamic>>((phone) {
+        _phones = (userInfo['PhoneNumbers'] as List<dynamic>)
+            .map<Map<String, dynamic>>((phone) {
           return {
             'number': phone['PhoneNumber'],
             'type': phone['PhoneTypeID'],
@@ -447,7 +399,8 @@ Column _buildPhonesField() {
           };
         }).toList();
 
-        originalPhones = _phones.map((phoneMap) => phoneMap['number'] as String).toList();
+        originalPhones =
+            _phones.map((phoneMap) => phoneMap['number'] as String).toList();
 
         // Create controllers for each email/phone
         _emailControllers = _emails
@@ -477,10 +430,9 @@ Column _buildPhonesField() {
             Text(
               'Edit Account',
               style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: Colors.white
-              ),
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
             ),
           ],
         ),
