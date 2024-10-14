@@ -27,6 +27,11 @@ class _MyHomePageState extends State<MyHomePage> {
     _loadUserData();
   }
 
+  String _capitalizeFirstLetter(String input) {
+    if (input.isEmpty) return input;
+    return input[0].toUpperCase() + input.substring(1);
+  }
+
   Future<void> _loadUserData() async {
     // Call the API to get user info
     Map<String, dynamic> userInfo = await ApiService.getUserInfo();
@@ -35,8 +40,8 @@ class _MyHomePageState extends State<MyHomePage> {
     if (userInfo['status'] == 'success') {
       setState(() {
         // Assuming userInfo['content'] contains a map with first and last name
-        _firstName = userInfo['content']['FirstName'] ?? 'John';
-        _lastName = userInfo['content']['LastName'] ?? 'Doe';
+        _firstName = userInfo['content']['FirstName'] ?? '';
+        _lastName = userInfo['content']['LastName'] ?? '';
         _roleName = userInfo['content']['RoleName'] ?? 'Employee';
       });
     } else {
@@ -131,7 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               Text(
-                _roleName,
+                _capitalizeFirstLetter(_roleName),
                 style: const TextStyle(
                   fontSize: 16,
                   color: Colors.black54,
