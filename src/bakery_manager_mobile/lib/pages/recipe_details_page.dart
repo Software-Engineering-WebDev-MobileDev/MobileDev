@@ -111,7 +111,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
             // Servings Section
             const Text(
               'Servings:',
-              style: TextStyle(fontSize:24, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
@@ -168,6 +168,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
             Center(
               child: Column(
                 children: [
+                  // Edit Recipe Button
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 209, 125, 51),
@@ -189,16 +190,15 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                       color: Colors.white,
                     ),
                     label: const Text(
-                      'Edit Recipe',
-                      style: TextStyle(
-                        color: Colors.white, // White font color
-                      ),
+                      '  Edit Recipe  ',
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
                   const SizedBox(height: 16), // Space between the buttons
+                  // Delete Recipe Button
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                      backgroundColor: const Color(0xFF800000), // Maroon color
                       padding: const EdgeInsets.symmetric(
                           vertical: 16, horizontal: 32),
                       shape: RoundedRectangleBorder(
@@ -252,9 +252,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                     ),
                     label: const Text(
                       'Delete Recipe',
-                      style: TextStyle(
-                        color: Colors.white, // White font color
-                      ),
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
                 ],

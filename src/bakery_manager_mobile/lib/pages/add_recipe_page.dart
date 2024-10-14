@@ -322,11 +322,12 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                ElevatedButton(
+                ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 209, 125, 51),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16, horizontal: 32),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -394,7 +395,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                       }
                     }
                   },
-                  child: const Text('Save Recipe'),
+                  icon: const Icon(Icons.save), // Save icon added
+                  label: const Text('Save Recipe'),
                 ),
               ],
             ),
