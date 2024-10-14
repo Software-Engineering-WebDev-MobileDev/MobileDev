@@ -35,7 +35,7 @@ class TaskPageState extends State<TaskPage> {
         observer.onReturned = () async {
           // Refetch account details when returning from another page
           _futureTasks = _fetchTasks();
-          if(mounted) setState(() {}); // Trigger rebuild
+          if (mounted) setState(() {}); // Trigger rebuild
         };
       }
     });
@@ -43,7 +43,6 @@ class TaskPageState extends State<TaskPage> {
 
   @override
   void didChangeDependencies() {
-    
     super.didChangeDependencies();
     _futureTasks = _fetchTasks();
   }
@@ -62,7 +61,9 @@ class TaskPageState extends State<TaskPage> {
 
       return tasks;
     } else {
-      throw Exception(result['reason']);
+        ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to grab recipes')));
+        return [];
     }
   }
 
@@ -167,7 +168,8 @@ class TaskPageState extends State<TaskPage> {
             TextField(
               controller: _searchController,
               onChanged: (query) {
-                _filterTasks(_currentFilter, query: query); // Filter by current status and query
+                _filterTasks(_currentFilter,
+                    query: query); // Filter by current status and query
               },
               decoration: InputDecoration(
                 hintText: 'Search tasks',
@@ -220,8 +222,7 @@ class TaskPageState extends State<TaskPage> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-               onPressed: () {
-              
+              onPressed: () {
                 Navigator.pushNamed(context, addTaskPageRoute).then((_) {
                   // Refetch tasks after returning from the add task page
                   setState(() {
