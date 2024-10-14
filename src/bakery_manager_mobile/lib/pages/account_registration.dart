@@ -22,9 +22,6 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  String _emailType = 'Work';
-  String _phoneType = 'Mobile';
-
   // Password requirement indicators
   bool _has8Characters = false;
   bool _hasNumber = false;
@@ -33,7 +30,6 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   @override
   void initState() {
     super.initState();
-
     passwordController.addListener(_validatePassword);
     usernameController.addListener(_checkRequirement);
   }
@@ -69,7 +65,6 @@ class CreateAccountPageState extends State<CreateAccountPage> {
     }
   }
 
-
   Future<void> _createAccount() async {
     if (_formKey.currentState!.validate()) {
       String firstName = firstNameController.text.trim();
@@ -91,51 +86,16 @@ class CreateAccountPageState extends State<CreateAccountPage> {
         );
 
         if (accountResponse['status'] == 'success') {
-          // Step 2: Add email from account creation response
-          // Map<String, dynamic> emailResponse = await ApiService.addUserEmail(
-          //   sessionID: '',
-          //   emailAddress: email,
-          //   emailType: _emailType, 
-          // );
+          // Step 2: Save credentials and show success message
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('username', username);
+          await prefs.setString('password', password);
 
-          //if (emailResponse['status'] == 'success') {
-            // Step 3: Add email from account creation response
-            
-            /*
-            Map<String, dynamic> phoneResponse = await ApiService.addPhoneNumber(
-              phoneNumber,
-              employeeID,
-              _phoneType,
-            );
-
-
-            if (phoneResponse['status'] == 'success') {
-            */
-
-            // Step 4: All succeeded, save credentials and show success message
-            SharedPreferences prefs = await SharedPreferences.getInstance();
-            await prefs.setString('username', username);
-            await prefs.setString('password', password);
-
-            if (!mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Account created successfully!')),
-            );
-            Navigator.pop(context); // Go back after success
-            /*
-            } else {
-              // Phone addition failed
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Failed to add phone number: ${phoneResponse['reason']}')),
-              );
-            }
-            */
-
-    //       } else {
-    //         ScaffoldMessenger.of(context).showSnackBar(
-    //           SnackBar(content: Text('${emailResponse['reason']}')),
-    //         );
-    //       }
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Account created successfully!')),
+          );
+          Navigator.pop(context); // Go back after success
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Account creation failed: ${accountResponse['reason']}')),
@@ -170,7 +130,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-       appBar: AppBar(
+      appBar: AppBar(
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         shape: const RoundedRectangleBorder(),
@@ -406,55 +366,23 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 140,
-                      child: TextFormField(
-                        controller: emailController,
-                        decoration: const InputDecoration(
-                          hintText: 'Email',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Email is required';
-                          }
-                          if (!value.contains('@')) {
-                            return 'Please enter a valid email address';
-                          }
-                          return null;
-                        },
-                      ),
+                TextFormField(
+                  controller: emailController,
+                  decoration: const InputDecoration(
+                    hintText: 'Email',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
-                    const SizedBox(width: 8),
-                    SizedBox(
-                      width: 100,
-                      child: DropdownButtonFormField<String>(
-                        isExpanded: true,
-                        value: _emailType,
-                        onChanged: (newValue) {
-                          setState(() {
-                            _emailType = newValue!;
-                          });
-                        },
-                        items: ['Personal', 'Work', 'Other'].map((type) {
-                          return DropdownMenuItem(
-                            value: type,
-                            child: Text(type),
-                          );
-                        }).toList(),
-                        decoration: const InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Email is required';
+                    }
+                    if (!value.contains('@')) {
+                      return 'Please enter a valid email address';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
 
@@ -464,55 +392,23 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 140,
-                      child: TextFormField(
-                        controller: phoneController,
-                        decoration: const InputDecoration(
-                          hintText: 'Phone Number',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Phone number is required';
-                          }
-                          if (!RegExp(r'^\d{10}$').hasMatch(value)) {
-                            return 'Phone number must be 10 digits';
-                          }
-                          return null;
-                        },
-                      ),
+                TextFormField(
+                  controller: phoneController,
+                  decoration: const InputDecoration(
+                    hintText: 'Phone Number',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
-                    const SizedBox(width: 8),
-                    SizedBox(
-                      width: 100,
-                      child: DropdownButtonFormField<String>(
-                        isExpanded: true,
-                        value: _phoneType,
-                        onChanged: (newValue) {
-                          setState(() {
-                            _phoneType = newValue!;
-                          });
-                        },
-                        items: ['Mobile', 'Home', 'Work', 'Fax'].map((type) {
-                          return DropdownMenuItem(
-                            value: type,
-                            child: Text(type),
-                          );
-                        }).toList(),
-                        decoration: const InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Phone number is required';
+                    }
+                    if (!RegExp(r'^\d{10}$').hasMatch(value)) {
+                      return 'Phone number must be 10 digits';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 32),
 
@@ -526,7 +422,10 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                     ),
                   ),
                   onPressed: _createAccount, // Call the create account function
-                  child: const Text('Create Account'),
+                  child: const Text(
+                    'Create Account',
+                    style: TextStyle(color: Colors.white), // Set font color to white
+                  ),
                 ),
               ],
             ),
