@@ -165,14 +165,15 @@ class CreateAccountPageState extends State<CreateAccountPage> {
               children: [
                 const SizedBox(height: 16),
 
-                // FirstName Field
                 TextFormField(
                   controller: firstNameController,
+                  maxLength: 64, 
                   decoration: const InputDecoration(
                     labelText: 'First Name',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
+                    counterText: ''
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -189,11 +190,13 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                 // LastName Field
                 TextFormField(
                   controller: lastNameController,
+                  maxLength: 64,
                   decoration: const InputDecoration(
                     labelText: 'Last Name',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
+                    counterText: ''
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -210,15 +213,20 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                 // EmployeeID Field
                 TextFormField(
                   controller: employeeIDController,
+                  maxLength: 50,
                   decoration: const InputDecoration(
                     labelText: 'Employee ID',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
+                    counterText: ''
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Employee ID is required';
+                    }
+                    if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(value)) {
+                      return 'Employee ID can only contain letters and numbers';
                     }
                     return null;
                   },
@@ -228,15 +236,20 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                 // Username Field
                 TextFormField(
                   controller: usernameController,
+                  maxLength: 20, 
                   decoration: const InputDecoration(
                     labelText: 'Username',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
+                    counterText: ''
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Username is required';
+                      return 'Employee ID is required';
+                    }
+                    if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(value)) {
+                      return 'Employee ID can only contain letters and numbers';
                     }
                     return null;
                   },
@@ -249,12 +262,14 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                     Expanded(
                       child: TextFormField(
                         controller: passwordController,
+                        maxLength: 256, 
                         obscureText: _obscurePassword,
                         decoration: const InputDecoration(
                           labelText: 'Password',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(10)),
                           ),
+                          counterText: ''
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -342,6 +357,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(10)),
                           ),
+                          counterText: ''
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -369,24 +385,21 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                 const SizedBox(height: 16),
 
                 // Email Field
-                const Text(
-                  'Email:',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
                 TextFormField(
                   controller: emailController,
+                  maxLength: 50,
                   decoration: const InputDecoration(
-                    hintText: 'Email',
+                    labelText: 'Email',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
+                    counterText: '',
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Email is required';
                     }
-                    if (!value.contains('@')) {
+                    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(value)) {
                       return 'Please enter a valid email address';
                     }
                     return null;
@@ -395,18 +408,16 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                 const SizedBox(height: 16),
 
                 // Phone Number Field
-                const Text(
-                  'Phone Number:',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
                 TextFormField(
                   controller: phoneController,
+                  maxLength: 10,
+                  keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
-                    hintText: 'Phone Number',
+                    labelText: 'Phone Number',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
+                    counterText: null,
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -418,7 +429,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
 
                 // Create Account Button
                 ElevatedButton(
