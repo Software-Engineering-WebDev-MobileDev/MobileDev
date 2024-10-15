@@ -32,19 +32,47 @@ class MyAccountPageState extends State<MyAccountPage> {
   }
 
   Future<void> _handleLogout(BuildContext context) async {
-    bool success = await ApiService.logout();
-    if (success) {
-      // Clear session token from SessionManager
-      await SessionManager().clearSession();
-      // Navigate to the login page
-      Navigator.pushReplacementNamed(context, '/login');
-    } else {
-      // Show an error message if logout fails
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Logout failed. Please try again.')),
-      );
+    bool? shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Logout'),
+          content: const Text('Are you sure you want to log out?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false); // Return false (cancel)
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(true); // Return true (confirm)
+              },
+              child: const Text('Logout'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldLogout == true) {
+      bool success = await ApiService.logout();
+      if (success) {
+        // Clear session token from SessionManager
+        await SessionManager().clearSession();
+        // Navigate to the login page
+        Navigator.pushReplacementNamed(context, '/login');
+      } else {
+        // Show an error message if logout fails
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Logout failed. Please try again.')),
+        );
+      }
     }
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -202,7 +230,7 @@ class MyAccountPageState extends State<MyAccountPage> {
                         }).toList(),
                       ),
 
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 64),
 
                       // Action Buttons
                       Center(

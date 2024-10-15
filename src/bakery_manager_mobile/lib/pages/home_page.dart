@@ -53,16 +53,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _logout() async {
-    if (await ApiService.logout()) {
-      if (!mounted) {
-        return;
-      }
-      SessionManager().clearSession();
-      Navigator.pushReplacementNamed(context, loginPageRoute);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,12 +71,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ],
-        ),
-        //logout button
-        leading: IconButton(
-          color: Colors.white,
-          icon: const Icon(Icons.logout),
-          onPressed: _logout,
         ),
       ),
       body: SafeArea(
