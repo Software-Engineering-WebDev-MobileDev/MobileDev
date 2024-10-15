@@ -14,6 +14,7 @@ class MyAccountPageState extends State<MyAccountPage> {
   late Future<Map<String, dynamic>> _futureAccountDetails;
   bool _obscurePassword = true;
   bool _obscureEmployeeID = true;
+  MyNavigatorObserver? _observer;
 
   // Fetch account details from the API
   Future<Map<String, dynamic>> _fetchAccountDetails() async {
@@ -30,24 +31,37 @@ class MyAccountPageState extends State<MyAccountPage> {
   @override
   void initState() {
     super.initState();
-    // Initial fetch of account details
     _futureAccountDetails = _fetchAccountDetails();
-
-    // Set up the NavigatorObserver
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final NavigatorState navigator = Navigator.of(context);
       final MyNavigatorObserver? observer =
-          navigator.widget.observers.firstWhere(
+        _observer = navigator.widget.observers.firstWhere(
         (observer) => observer is MyNavigatorObserver,
       ) as MyNavigatorObserver?;
       if (observer != null) {
         observer.onReturned = () async {
           // Refetch account details when returning from another page
-          _futureAccountDetails = _fetchAccountDetails();
-          if(mounted) setState(() {}); // Trigger rebuild
+          if (mounted) {
+            _futureAccountDetails = _fetchAccountDetails();
+            setState(() {});
+          } // Trigger rebuild
         };
       }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _futureAccountDetails = _fetchAccountDetails();
+  }
+
+  @override
+  void dispose() {
+    if (_observer != null) {
+      _observer!.onReturned = null; // Remove the callback to avoid memory leaks
+    }
+    super.dispose();
   }
 
   @override

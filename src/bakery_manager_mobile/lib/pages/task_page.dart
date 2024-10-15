@@ -19,6 +19,7 @@ class TaskPageState extends State<TaskPage> {
   List<Task> _allTasks = [];
   String _currentFilter = 'All';
   final TextEditingController _searchController = TextEditingController();
+  MyNavigatorObserver? _observer;
 
   // Page Initialization Function
   @override
@@ -28,14 +29,16 @@ class TaskPageState extends State<TaskPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final NavigatorState navigator = Navigator.of(context);
       final MyNavigatorObserver? observer =
-          navigator.widget.observers.firstWhere(
+        _observer = navigator.widget.observers.firstWhere(
         (observer) => observer is MyNavigatorObserver,
       ) as MyNavigatorObserver?;
       if (observer != null) {
         observer.onReturned = () async {
           // Refetch account details when returning from another page
-          _futureTasks = _fetchTasks();
-          if (mounted) setState(() {}); // Trigger rebuild
+          if (mounted) {
+            _futureTasks = _fetchTasks();
+            setState(() {});
+          } // Trigger rebuild
         };
       }
     });
@@ -45,6 +48,15 @@ class TaskPageState extends State<TaskPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _futureTasks = _fetchTasks();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    if (_observer != null) {
+      _observer!.onReturned = null; // Remove the callback to avoid memory leaks
+    }
+    super.dispose();
   }
 
   // Fetch tasks function
@@ -61,9 +73,9 @@ class TaskPageState extends State<TaskPage> {
 
       return tasks;
     } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to grab recipes')));
-        return [];
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to grab recipes')));
+      return [];
     }
   }
 
@@ -100,43 +112,29 @@ class TaskPageState extends State<TaskPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Stack(
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        shape: const RoundedRectangleBorder(),
+        title: const Stack(
           children: <Widget>[
             Text(
-              'Daily Tasks',
+              'All Tasks',
               style: TextStyle(
-                fontFamily: 'Pacifico',
-                fontSize: 30,
-                foreground: Paint()
-                  ..style = PaintingStyle.stroke
-                  ..strokeWidth = 6
-                  ..color = const Color.fromARGB(255, 140, 72, 27),
-              ),
-            ),
-            const Text(
-              'Daily Tasks',
-              style: TextStyle(
-                fontFamily: 'Pacifico',
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 246, 235, 216),
-              ),
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
             ),
           ],
         ),
-        centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back,
-              color: Color.fromARGB(255, 140, 72, 27)),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
         actions: [
           IconButton(
-            icon:
-                const Icon(Icons.home, color: Color.fromARGB(255, 140, 72, 27)),
+            icon: const Icon(Icons.home, color: Colors.white),
             onPressed: () {
               Navigator.popUntil(context, ModalRoute.withName('/'));
             },
