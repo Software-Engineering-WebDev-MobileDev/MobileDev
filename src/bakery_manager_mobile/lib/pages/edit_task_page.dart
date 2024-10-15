@@ -34,19 +34,6 @@ class _EditTaskPageState extends State<EditTaskPage> {
   // Account list for dropdown
   List<Account> _allAccounts = [];
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Retrieve the Task object passed from the previous screen
-    task = ModalRoute.of(context)!.settings.arguments as Task;
-
-    // Prepopulate form fields with task data
-    amountToBakeController.text = task!.amountToBake.toString();
-    dueDateController.text = DateFormat('yyyy-MM-dd').format(task!.dueDate);
-    selectedDueDate = task!.dueDate;
-    selectedDueTime = TimeOfDay.fromDateTime(task!.dueDate);
-    dueTimeController.text = selectedDueTime!.format(context);
-  }
 
   @override
   void initState() {
