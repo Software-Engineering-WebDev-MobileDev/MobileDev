@@ -51,8 +51,8 @@ class ApiService {
       int servings = 1,
       String description = "",
       String category = "",
-      double prepTime = 0,
-      double cookTime = 0}) async {
+      int prepTime = 0,
+      int cookTime = 0}) async {
     final url = Uri.parse('$baseApiUrl/add_recipe');
     final headers = {'Content-Type': 'application/json'};
     final body = jsonEncode({
@@ -96,8 +96,8 @@ class ApiService {
     required String instructions,
     required int servings,
     required String category,
-    required double prepTime,
-    required double cookTime,
+    required int prepTime,
+    required int cookTime,
     required String description,
   }) async {
     final url = Uri.parse('$baseApiUrl/update_recipe/$recipeId');

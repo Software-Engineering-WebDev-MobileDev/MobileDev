@@ -61,7 +61,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
       //     recipeIngredientId: ing['id'],
       //     componentId: ing['componentId'],
       //     ingredientDescription: ing['ingredientDescription'],
-      //     quantity: double.tryParse(ing['quantity'].toString()) ?? 0.0,
+      //     quantity: int.tryParse(ing['quantity'].toString()) ?? 0.0,
       //     measurement: ing['unit'],
       //   ));
       // }
@@ -370,8 +370,8 @@ class _EditRecipePageState extends State<EditRecipePage> {
                         recipeId: (ModalRoute.of(context)!.settings.arguments as Recipe).recipeId,
                         recipeName: recipeName,
                         instructions: instructions,
-                        prepTime: double.tryParse(prepTime) ?? 0,
-                        cookTime: double.tryParse(cookTime) ?? 0,
+                        prepTime: int.tryParse(prepTime) ?? 0,
+                        cookTime: int.tryParse(cookTime) ?? 0,
                         servings: int.tryParse(servings) ?? 1,
                         category: selectedCategory ?? 'Other',
                         description: '',

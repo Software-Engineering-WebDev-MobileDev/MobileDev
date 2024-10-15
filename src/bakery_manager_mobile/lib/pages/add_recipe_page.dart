@@ -263,7 +263,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                         Expanded(
                           child: TextFormField(
                             onChanged: (value) => ingredient.quantity =
-                                double.tryParse(value) ?? 0.0,
+                                double.tryParse(value) ?? 0,
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
                               labelText: 'Quantity',
@@ -345,8 +345,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                       Map<String, dynamic> response = await ApiService.addRecipe(
                         recipeName: recipeName,
                         ingredients: instructions,
-                        prepTime: double.tryParse(prepTime) ?? 0,
-                        cookTime: double.tryParse(cookTime) ?? 0,
+                        prepTime: int.tryParse(prepTime) ?? 0,
+                        cookTime: int.tryParse(cookTime) ?? 0,
                         servings: int.tryParse(servings) ?? 1,
                         category: selectedCategory ?? "Bread",
                       );
