@@ -203,29 +203,35 @@ Column _buildEmailsField() {
         padding: const EdgeInsets.only(bottom: 8.0),
         child: Row(
           children: [
-            // Email Text Field
-            Expanded(
-              child: TextFormField(
-                controller: _emailControllers[idx],
-                maxLength: 50, // Limit email to 50 characters
-                decoration: InputDecoration(
-                  hintText: 'Email ${idx + 1}',
-                  border: OutlineInputBorder(
-                    borderRadius: const BorderRadius.all(Radius.circular(10)),
-                    borderSide: BorderSide(
-                      color:
-                          _validateEmail(_emailControllers[idx].text) == null
-                              ? Colors.grey
-                              : Colors.red,
-                    ),
+          // Email Text Field
+          Expanded(
+            child: TextFormField(
+              controller: _emailControllers[idx],
+              // maxLength removed
+              decoration: InputDecoration(
+                hintText: 'Email ${idx + 1}',
+                border: OutlineInputBorder(
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+                  borderSide: BorderSide(
+                    color: _validateEmail(_emailControllers[idx].text) == null
+                        ? Colors.grey
+                        : Colors.red,
                   ),
                 ),
-                onChanged: (value) {
-                  setState(() {});
-                },
-                validator: (value) => _validateEmail(value!),
               ),
+              onChanged: (value) {
+                // Enforce max length of 50 characters
+                if (value.length > 50) {
+                  _emailControllers[idx].text = value.substring(0, 50);
+                  _emailControllers[idx].selection = TextSelection.fromPosition(
+                    TextPosition(offset: 50),
+                  );
+                }
+                setState(() {});
+              },
+              validator: (value) => _validateEmail(value!),
             ),
+          ),
             const SizedBox(width: 8),
 
             // Primary Radio Button
@@ -552,20 +558,21 @@ Column _buildPhonesField() {
                 ),
                 const SizedBox(height: 32),
 
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 209, 125, 51),
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16), // Skinnier button
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 209, 125, 51), // Orange color
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16), // Skinnier button
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: _saveAccountChanges, // Call the save function
+                  icon: const Icon(Icons.update, color: Colors.white), // Icon for update
+                  label: const Text(
+                    'Update Account',
+                    style: TextStyle(color: Colors.white), // Set text color to white
                   ),
                 ),
-                onPressed: _saveAccountChanges, // Call the save function
-                child: const Text(
-                  'Update Account',
-                  style: TextStyle(color: Colors.white), // Set text color to white
-                ),
-              ),
               ],
             ),
           ),
