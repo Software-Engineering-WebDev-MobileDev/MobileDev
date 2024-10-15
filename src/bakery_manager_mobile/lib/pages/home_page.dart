@@ -58,6 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
+        automaticallyImplyLeading: false,
         backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         shape: const RoundedRectangleBorder(),
         title: const Stack(
