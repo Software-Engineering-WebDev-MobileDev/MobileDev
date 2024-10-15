@@ -40,6 +40,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
     super.initState();
     // Fetch recipes and accounts
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      task = ModalRoute.of(context)!.settings.arguments as Task;
       _fetchRecipes();
       _fetchAccounts();
     });
