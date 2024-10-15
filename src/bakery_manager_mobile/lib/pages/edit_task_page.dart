@@ -41,6 +41,11 @@ class _EditTaskPageState extends State<EditTaskPage> {
     // Fetch recipes and accounts
     WidgetsBinding.instance.addPostFrameCallback((_) {
       task = ModalRoute.of(context)!.settings.arguments as Task;
+      amountToBakeController.text = task!.amountToBake.toString();
+      dueDateController.text = DateFormat('yyyy-MM-dd').format(task!.dueDate);
+      selectedDueDate = task!.dueDate;
+      selectedDueTime = TimeOfDay.fromDateTime(task!.dueDate);
+      dueTimeController.text = selectedDueTime!.format(context);
       _fetchRecipes();
       _fetchAccounts();
     });
