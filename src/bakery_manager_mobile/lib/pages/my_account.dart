@@ -1,6 +1,6 @@
 import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:bakery_manager_mobile/services/api_service.dart';
-import 'package:bakery_manager_mobile/services/navigator_observer.dart';
+import 'package:bakery_manager_mobile/services/session_manager.dart';
 import 'package:flutter/material.dart';
 
 class MyAccountPage extends StatefulWidget {
@@ -28,22 +28,22 @@ class MyAccountPageState extends State<MyAccountPage> {
   @override
   void initState() {
     super.initState();
-    // Initial fetch of account details
     _futureAccountDetails = _fetchAccountDetails();
+  }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final NavigatorState navigator = Navigator.of(context);
-      final MyNavigatorObserver? observer =
-          navigator.widget.observers.firstWhere(
-        (observer) => observer is MyNavigatorObserver,
-      ) as MyNavigatorObserver?;
-      if (observer != null) {
-        observer.onReturned = () async {
-          _futureAccountDetails = _fetchAccountDetails();
-          if (mounted) setState(() {});
-        };
-      }
-    });
+  Future<void> _handleLogout(BuildContext context) async {
+    bool success = await ApiService.logout();
+    if (success) {
+      // Clear session token from SessionManager
+      await SessionManager().clearSession();
+      // Navigate to the login page
+      Navigator.pushReplacementNamed(context, '/login');
+    } else {
+      // Show an error message if logout fails
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Logout failed. Please try again.')),
+      );
+    }
   }
 
   @override
@@ -228,9 +228,7 @@ class MyAccountPageState extends State<MyAccountPage> {
                             ),
                             const SizedBox(height: 16),
                             ElevatedButton.icon(
-                              onPressed: () {
-                                Navigator.pushReplacementNamed(context, '/login');
-                              },
+                              onPressed: () => _handleLogout(context),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF800000), // Maroon color
                                 padding: const EdgeInsets.symmetric(
