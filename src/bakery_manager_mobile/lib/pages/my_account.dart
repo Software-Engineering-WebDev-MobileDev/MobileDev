@@ -42,8 +42,9 @@ class MyAccountPageState extends State<MyAccountPage> {
         observer.onReturned = () async {
           // Refetch account details when returning from another page
           if (mounted) {
-            _futureAccountDetails = _fetchAccountDetails();
-            setState(() {});
+            setState(() {
+              _futureAccountDetails = _fetchAccountDetails();
+            });
           } // Trigger rebuild
         };
       }

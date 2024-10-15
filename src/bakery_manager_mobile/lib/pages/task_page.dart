@@ -36,8 +36,9 @@ class TaskPageState extends State<TaskPage> {
         observer.onReturned = () async {
           // Refetch account details when returning from another page
           if (mounted) {
-            _futureTasks = _fetchTasks();
-            setState(() {});
+            setState(() {
+              _futureTasks = _fetchTasks();
+            });
           } // Trigger rebuild
         };
       }
@@ -222,12 +223,7 @@ class TaskPageState extends State<TaskPage> {
                 ),
               ),
               onPressed: () {
-                Navigator.pushNamed(context, addTaskPageRoute).then((_) {
-                  // Refetch tasks after returning from the add task page
-                  setState(() {
-                    _futureTasks = _fetchTasks();
-                  });
-                });
+                Navigator.pushNamed(context, addTaskPageRoute);
               },
               icon: const Icon(Icons.add,
                   color: Color.fromARGB(255, 246, 235, 216)),
