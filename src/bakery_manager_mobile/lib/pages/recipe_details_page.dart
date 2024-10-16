@@ -30,17 +30,13 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Stack(
-          children: <Widget>[
-            Text(
-              'View Recipe',
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-          ],
+        title: Text(
+          recipe.recipeName,  // Replace "View Recipe" with recipe name
+          style: const TextStyle(
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         leading: IconButton(
@@ -64,61 +60,24 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 16),
-            // Recipe Name Section
-            const Text(
-              'Recipe Name:',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              recipe.recipeName,
-              style: const TextStyle(fontSize: 20), // Increased font size
-            ),
-            const SizedBox(height: 16),
-            // Category Section
-            const Text(
-              'Category:',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              recipe.category.isNotEmpty ? recipe.category : 'No category',
-              style: const TextStyle(fontSize: 20), // Increased font size
+
+            // 2x2 Grid for Recipe Info
+            GridView(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 3,
+              ),
+              children: [
+                _GridItem(title: 'Prep Time:', value: '${recipe.prepTime} minutes'),
+                _GridItem(title: 'Category:', value: recipe.category.isNotEmpty ? recipe.category : 'No category'),
+                _GridItem(title: 'Cook Time:', value: '${recipe.cookTime} minutes'),
+                _GridItem(title: 'Servings:', value: recipe.servings.toString()),
+              ],
             ),
             const SizedBox(height: 16),
-            // Prep Time Section
-            const Text(
-              'Prep Time:',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${recipe.prepTime} minutes',
-              style: const TextStyle(fontSize: 20), // Increased font size
-            ),
-            const SizedBox(height: 16),
-            // Cook Time Section
-            const Text(
-              'Cook Time:',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${recipe.cookTime} minutes',
-              style: const TextStyle(fontSize: 20), // Increased font size
-            ),
-            const SizedBox(height: 16),
-            // Servings Section
-            const Text(
-              'Servings:',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              recipe.servings.toString(),
-              style: const TextStyle(fontSize: 20), // Increased font size
-            ),
-            const SizedBox(height: 16),
+            
             // Ingredients Section
             const Text(
               'Ingredients:',
@@ -142,7 +101,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                         padding: const EdgeInsets.only(bottom: 8.0),
                         child: Text(
                           '${ingredient['IngredientDescription'] ?? 'Unknown'}: ${ingredient['Quantity'] ?? 'N/A'} ${ingredient['UnitOfMeasure'] ?? ''}',
-                          style: const TextStyle(fontSize: 20), // Increased font size
+                          style: const TextStyle(fontSize: 20),
                         ),
                       );
                     }).toList(),
@@ -151,6 +110,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
               },
             ),
             const SizedBox(height: 16),
+            
             // Instructions Section
             const Text(
               'Instructions:',
@@ -161,9 +121,10 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
               recipe.instructions.isNotEmpty
                   ? recipe.instructions
                   : 'No instructions provided.',
-              style: const TextStyle(fontSize: 20), // Increased font size
+              style: const TextStyle(fontSize: 20),
             ),
             const SizedBox(height: 24),
+            
             // Centered Action Buttons
             Center(
               child: Column(
@@ -195,6 +156,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                     ),
                   ),
                   const SizedBox(height: 16), // Space between the buttons
+                  
                   // Delete Recipe Button
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
@@ -261,6 +223,37 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+// Helper Widget for Grid Items
+class _GridItem extends StatelessWidget {
+  final String title;
+  final String value;
+
+  const _GridItem({required this.title, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 16,
+          ),
+        ),
+      ],
     );
   }
 }
