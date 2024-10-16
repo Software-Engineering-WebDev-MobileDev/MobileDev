@@ -19,7 +19,6 @@ class _AddRecipePageState extends State<AddRecipePage> {
   final TextEditingController cookTimeController = TextEditingController();
   final TextEditingController servingsController = TextEditingController();
 
-  int recipeNameCharCount = 0;
   final List<RecipeIngredient> ingredients = [
     RecipeIngredient(
       recipeIngredientId: '',
@@ -35,12 +34,6 @@ class _AddRecipePageState extends State<AddRecipePage> {
   @override
   void initState() {
     super.initState();
-    // Listener to track character count for recipe name
-    recipeNameController.addListener(() {
-      setState(() {
-        recipeNameCharCount = recipeNameController.text.length;
-      });
-    });
   }
 
   void _addIngredientField() {
@@ -56,7 +49,6 @@ class _AddRecipePageState extends State<AddRecipePage> {
   }
 
   void _removeIngredientField(int index) {
-    // Ensure at least one ingredient remains
     if (ingredients.length > 1) {
       setState(() {
         ingredients.removeAt(index);
@@ -69,15 +61,20 @@ class _AddRecipePageState extends State<AddRecipePage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text(
-          'Add a New Recipe',
-          style: TextStyle(
-            fontSize: 30,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
         backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        shape: const RoundedRectangleBorder(),
+        title: const Stack(
+          children: <Widget>[
+            Text(
+              'Add Recipe',
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
@@ -118,6 +115,12 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     }
                     return null;
                   },
+                  buildCounter: (BuildContext context,
+                      {required int currentLength,
+                      required bool isFocused,
+                      required int? maxLength}) {
+                    return null; // Don't show character count
+                  },
                 ),
                 const SizedBox(height: 16),
                 // Category Field
@@ -148,9 +151,10 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   },
                 ),
                 const SizedBox(height: 16),
-                // Prep Time Field (Integer Only)
+                // Prep Time Field
                 TextFormField(
                   controller: prepTimeController,
+                  maxLength: 10,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     labelText: 'Prep Time (minutes)',
@@ -166,11 +170,18 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     }
                     return null;
                   },
+                  buildCounter: (BuildContext context,
+                      {required int currentLength,
+                      required bool isFocused,
+                      required int? maxLength}) {
+                    return null; // Don't show the counter
+                  },
                 ),
                 const SizedBox(height: 16),
-                // Cook Time Field (Integer Only)
+                // Cook Time Field
                 TextFormField(
                   controller: cookTimeController,
+                  maxLength: 10,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     labelText: 'Cook Time (minutes)',
@@ -186,11 +197,18 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     }
                     return null;
                   },
+                  buildCounter: (BuildContext context,
+                      {required int currentLength,
+                      required bool isFocused,
+                      required int? maxLength}) {
+                    return null; // Don't show the counter
+                  },
                 ),
                 const SizedBox(height: 16),
-                // Servings Field (Integer Only)
+                // Servings Field
                 TextFormField(
                   controller: servingsController,
+                  maxLength: 10,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     labelText: 'Servings',
@@ -206,13 +224,20 @@ class _AddRecipePageState extends State<AddRecipePage> {
                     }
                     return null;
                   },
+                  buildCounter: (BuildContext context,
+                      {required int currentLength,
+                      required bool isFocused,
+                      required int? maxLength}) {
+                    return null; // Don't show the counter
+                  },
                 ),
                 const SizedBox(height: 16),
+
                 // Instructions Field
                 TextFormField(
                   controller: instructionsController,
                   keyboardType: TextInputType.multiline,
-                  maxLines: null,
+                  maxLines: 6, // Increased box size
                   decoration: const InputDecoration(
                     labelText: 'Instructions',
                     border: OutlineInputBorder(
@@ -227,10 +252,11 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   },
                 ),
                 const SizedBox(height: 16),
+
                 // Ingredients Section
                 const Text(
                   'Ingredients:',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 ...ingredients.asMap().entries.map((entry) {
@@ -263,7 +289,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                         Expanded(
                           child: TextFormField(
                             onChanged: (value) => ingredient.quantity =
-                                double.tryParse(value) ?? 0,
+                                double.tryParse(value) ?? 0.0,
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
                               labelText: 'Quantity',
@@ -316,12 +342,11 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   label: const Text('Add Ingredient'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(120, 48),
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    foregroundColor: Colors.white, // White font color
                   ),
                 ),
                 const SizedBox(height: 16),
+
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 209, 125, 51),
@@ -334,7 +359,6 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   ),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      // Perform API call
                       String recipeName = recipeNameController.text;
                       String instructions = instructionsController.text;
                       String prepTime = prepTimeController.text;

@@ -100,7 +100,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Colors.white
+                color: Colors.white,
               ),
             ),
           ],
@@ -142,7 +142,16 @@ class _EditRecipePageState extends State<EditRecipePage> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Recipe Name is required';
+                    } else if (value.length > 50) {
+                      return 'Recipe Name can\'t exceed 50 characters';
                     }
+                    return null;
+                  },
+                  buildCounter: (BuildContext context,
+                      {required int currentLength,
+                      required bool isFocused,
+                      required int? maxLength}) {
+                    // Don't show the character count
                     return null;
                   },
                 ),
@@ -178,6 +187,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
                 // Prep Time Field
                 TextFormField(
                   controller: prepTimeController,
+                  maxLength: 10,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     labelText: 'Prep Time (minutes)',
@@ -193,11 +203,18 @@ class _EditRecipePageState extends State<EditRecipePage> {
                     }
                     return null;
                   },
+                  buildCounter: (BuildContext context,
+                      {required int currentLength,
+                      required bool isFocused,
+                      required int? maxLength}) {
+                    return null; // Don't show the counter
+                  },
                 ),
                 const SizedBox(height: 16),
                 // Cook Time Field
                 TextFormField(
                   controller: cookTimeController,
+                  maxLength: 10,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     labelText: 'Cook Time (minutes)',
@@ -213,11 +230,18 @@ class _EditRecipePageState extends State<EditRecipePage> {
                     }
                     return null;
                   },
+                  buildCounter: (BuildContext context,
+                      {required int currentLength,
+                      required bool isFocused,
+                      required int? maxLength}) {
+                    return null; // Don't show the counter
+                  },
                 ),
                 const SizedBox(height: 16),
                 // Servings Field
                 TextFormField(
                   controller: servingsController,
+                  maxLength: 10,
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     labelText: 'Servings',
@@ -233,24 +257,11 @@ class _EditRecipePageState extends State<EditRecipePage> {
                     }
                     return null;
                   },
-                ),
-                const SizedBox(height: 16),
-                // Instructions Field
-                TextFormField(
-                  controller: instructionsController,
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
-                  decoration: const InputDecoration(
-                    labelText: 'Instructions',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Instructions are required';
-                    }
-                    return null;
+                  buildCounter: (BuildContext context,
+                      {required int currentLength,
+                      required bool isFocused,
+                      required int? maxLength}) {
+                    return null; // Don't show the counter
                   },
                 ),
                 const SizedBox(height: 16),
@@ -345,6 +356,24 @@ class _EditRecipePageState extends State<EditRecipePage> {
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white, // White font color
                   ),
+                ),
+                const SizedBox(height: 16),
+                // Instructions Field (moved under Ingredients and increased in size)
+                TextFormField(
+                  controller: instructionsController,
+                  maxLines: 6, // Increased size
+                  decoration: const InputDecoration(
+                    labelText: 'Instructions',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Instructions are required';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
