@@ -488,6 +488,22 @@ class ApiService {
           'status': 'error',
           'reason': responseBody['reason'] ?? 'Forbidden access',
         };
+      }else if (response.statusCode == 500) {
+        final response = await http.delete(url, headers: headers);
+        if (response.statusCode == 200) {
+          return {'status': 'success'};
+        } else if (response.statusCode == 403) {
+          final responseBody = jsonDecode(response.body);
+          return {
+            'status': 'error',
+            'reason': responseBody['reason'] ?? 'Forbidden access',
+          };
+        } else {
+            return {
+            'status': 'error',
+            'reason': 'Failed to delete task: ${response.statusCode}',
+          };
+        }
       } else {
         return {
           'status': 'error',

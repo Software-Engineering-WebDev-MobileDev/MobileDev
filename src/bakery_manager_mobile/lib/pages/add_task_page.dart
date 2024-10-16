@@ -409,7 +409,8 @@ class AddTaskPageState extends State<AddTaskPage> {
                 },
                 child: const Text(
                   'Add Task',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(
+                      color: Colors.white), // This line makes the font white
                 ),
               ),
             ],

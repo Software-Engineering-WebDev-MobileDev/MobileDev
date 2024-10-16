@@ -2,6 +2,7 @@ import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:bakery_manager_mobile/services/session_manager.dart';
 import 'package:flutter/material.dart';
+import '../services/navigator_observer.dart';
 
 class MyAccountPage extends StatefulWidget {
   const MyAccountPage({super.key});
@@ -12,6 +13,9 @@ class MyAccountPage extends StatefulWidget {
 
 class MyAccountPageState extends State<MyAccountPage> {
   late Future<Map<String, dynamic>> _futureAccountDetails;
+  bool _obscurePassword = true;
+  bool _obscureEmployeeID = true;
+  MyNavigatorObserver? _observer;
 
   // Fetch account details from the API
   Future<Map<String, dynamic>> _fetchAccountDetails() async {
@@ -29,6 +33,23 @@ class MyAccountPageState extends State<MyAccountPage> {
   void initState() {
     super.initState();
     _futureAccountDetails = _fetchAccountDetails();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final NavigatorState navigator = Navigator.of(context);
+      final MyNavigatorObserver? observer =
+        _observer = navigator.widget.observers.firstWhere(
+        (observer) => observer is MyNavigatorObserver,
+      ) as MyNavigatorObserver?;
+      if (observer != null) {
+        observer.onReturned = () async {
+          // Refetch account details when returning from another page
+          if (mounted) {
+            setState(() {
+              _futureAccountDetails = _fetchAccountDetails();
+            });
+          } // Trigger rebuild
+        };
+      }
+    });
   }
 
   Future<void> _handleLogout(BuildContext context) async {
@@ -73,6 +94,20 @@ class MyAccountPageState extends State<MyAccountPage> {
   }
 
   
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _futureAccountDetails = _fetchAccountDetails();
+  }
+
+  @override
+  void dispose() {
+    if (_observer != null) {
+      _observer!.onReturned = null; // Remove the callback to avoid memory leaks
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

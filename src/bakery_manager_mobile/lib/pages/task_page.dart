@@ -19,6 +19,7 @@ class TaskPageState extends State<TaskPage> {
   List<Task> _allTasks = [];
   String _currentFilter = 'All';
   final TextEditingController _searchController = TextEditingController();
+  MyNavigatorObserver? _observer;
 
   // Page Initialization Function
   @override
@@ -28,14 +29,17 @@ class TaskPageState extends State<TaskPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final NavigatorState navigator = Navigator.of(context);
       final MyNavigatorObserver? observer =
-          navigator.widget.observers.firstWhere(
+        _observer = navigator.widget.observers.firstWhere(
         (observer) => observer is MyNavigatorObserver,
       ) as MyNavigatorObserver?;
       if (observer != null) {
         observer.onReturned = () async {
           // Refetch account details when returning from another page
-          _futureTasks = _fetchTasks();
-          if (mounted) setState(() {}); // Trigger rebuild
+          if (mounted) {
+            setState(() {
+              _futureTasks = _fetchTasks();
+            });
+          } // Trigger rebuild
         };
       }
     });
@@ -45,6 +49,15 @@ class TaskPageState extends State<TaskPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _futureTasks = _fetchTasks();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    if (_observer != null) {
+      _observer!.onReturned = null; // Remove the callback to avoid memory leaks
+    }
+    super.dispose();
   }
 
   // Fetch tasks function
@@ -61,9 +74,9 @@ class TaskPageState extends State<TaskPage> {
 
       return tasks;
     } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to grab recipes')));
-        return [];
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to grab recipes')));
+      return [];
     }
   }
 
