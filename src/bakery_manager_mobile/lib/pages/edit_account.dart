@@ -617,7 +617,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
                                 hintText: 'Phone ${idx + 1}',
                                 border: OutlineInputBorder(
                                   borderRadius:
-                                      BorderRadius.all(Radius.circular(10)),
+                                      const BorderRadius.all(Radius.circular(10)),
                                   borderSide: BorderSide(
                                     color: _validatePhone(
                                                 _phoneControllers[idx].text) ==

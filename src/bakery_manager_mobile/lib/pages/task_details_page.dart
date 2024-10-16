@@ -22,38 +22,73 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
   // Function to update task status and provide an undo button
   Future<void> _updateTaskStatus(String newStatus) async {
+    // Call the API to complete the task
+  final result = await ApiService.completeTask(taskID: task.taskID, taskStatus: newStatus);
+
+  // Check if the API call was successful
+  if (result['status'] == 'success') {
     setState(() {
       task = Task(
         taskID: task.taskID,
         recipeID: task.recipeID,
         amountToBake: task.amountToBake,
         assignmentDate: task.assignmentDate,
-        completionDate: task.completionDate,
+        completionDate: DateTime.now(),
         employeeID: task.employeeID,
         name: task.name,
         status: newStatus,
         dueDate: task.dueDate,
       );
-    });
+    }); 
+  } else {
+    // Handle error
+  }
 
-    // Uncomment the API call when integrating
-    // await ApiService.updateTaskStatus(task.taskID, newStatus);
-
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Task marked as $newStatus'),
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('Task marked as Complete'),
     ));
   }
 
   // Function to reverse task status (go back one step)
-  void _undoTaskStatus() {
-    String? undoStatus;
-    if (task.status == 'In Progress') {
-      undoStatus = 'Pending'; // Revert to 'Pending' from 'In Progress'
-    } else if (task.status == 'Completed') {
-      undoStatus = 'In Progress'; // Revert to 'In Progress' from 'Completed'
+  void _undoTaskStatus() async{
+    String oldStatus;
+    if (task.status == "Completed") {
+      oldStatus = "In Progress";
+    } else {
+      oldStatus = "Pending";
     }
-    if (undoStatus != null) {
-      _updateTaskStatus(undoStatus);
+    final response = await ApiService.updateTask(
+      taskID: task.taskID,
+      recipeID: task.recipeID,
+      amountToBake: task.amountToBake,
+      dueDate: task.dueDate.toIso8601String(),
+      assignedEmployeeID: task.employeeID,
+      status: oldStatus,
+    );
+
+    if (response['status'] == 'success') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Task updated successfully')),
+      );
+      setState(() {
+      task = Task(
+        taskID: task.taskID,
+        recipeID: task.recipeID,
+        amountToBake: task.amountToBake,
+        assignmentDate: task.assignmentDate,
+        completionDate: null,
+        employeeID: task.employeeID,
+        name: task.name,
+        status: oldStatus,
+        dueDate: task.dueDate,
+      );
+    }); 
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(
+                'Error updating task: ${response['reason'] ?? 'Unknown error'}')),
+      );
     }
   }
 
@@ -133,7 +168,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       TextSpan(
-                        text: task.status ?? 'N/A',
+                        text: task.status,
                         style: TextStyle(
                           color: _getStatusColor(task.status),
                           fontWeight: FontWeight.bold,
@@ -155,7 +190,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         text: 'Due Date: ',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      TextSpan(text: _formatDate(task.dueDate)),
+                      TextSpan(text: _formatDate(task.dueDate.toLocal())),
                     ],
                   ),
                 ),
@@ -172,7 +207,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         text: 'Amount to Bake: ',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      TextSpan(text: task.amountToBake != null ? '${task.amountToBake}' : 'N/A'),
+                      TextSpan(text:'${task.amountToBake}'),
                     ],
                   ),
                 ),
@@ -189,7 +224,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         text: 'Assigned on: ',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      TextSpan(text: _formatDate(task.assignmentDate)),
+                      TextSpan(text: _formatDate(task.assignmentDate.toLocal())),
                     ],
                   ),
                 ),
@@ -206,7 +241,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                           text: 'Completed on: ',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        TextSpan(text: _formatDate(task.completionDate)),
+                        TextSpan(text: _formatDate(task.completionDate?.toLocal())),
                       ],
                     ),
                   ),
@@ -367,7 +402,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         if (confirmed) {
                           // Call API to delete task and handle success/failure
                           try {
-                            // await ApiService.deleteTask(task.taskID ?? '');
+                            await ApiService.deleteTask(task.taskID);
                             Navigator.pop(context); // Navigate back after deletion
                           } catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(
