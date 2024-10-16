@@ -19,7 +19,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String _firstName = '';
   String _lastName = '';
-  String _roleName = '';
 
   @override
   void initState() {
@@ -42,13 +41,12 @@ class _MyHomePageState extends State<MyHomePage> {
         // Assuming userInfo['content'] contains a map with first and last name
         _firstName = userInfo['content']['FirstName'] ?? '';
         _lastName = userInfo['content']['LastName'] ?? '';
-        _roleName = userInfo['content']['RoleName'] ?? 'Employee';
       });
     } else {
-      // Handle the error case, maybe show a message or set default names
+      // Handle the error case, show only "Hi!"
       setState(() {
-        _firstName = 'John';
-        _lastName = 'Doe';
+        _firstName = '';
+        _lastName = '';
       });
     }
   }
@@ -101,13 +99,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Color.fromARGB(255, 209, 125, 51),
-                ),
-              ),
-              Text(
-                _capitalizeFirstLetter(_roleName),
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.black54,
                 ),
               ),
               const SizedBox(height: 80),
