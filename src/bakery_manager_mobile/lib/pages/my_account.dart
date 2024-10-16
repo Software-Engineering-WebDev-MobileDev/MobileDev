@@ -13,8 +13,6 @@ class MyAccountPage extends StatefulWidget {
 
 class MyAccountPageState extends State<MyAccountPage> {
   late Future<Map<String, dynamic>> _futureAccountDetails;
-  bool _obscurePassword = true;
-  bool _obscureEmployeeID = true;
   MyNavigatorObserver? _observer;
 
   // Fetch account details from the API

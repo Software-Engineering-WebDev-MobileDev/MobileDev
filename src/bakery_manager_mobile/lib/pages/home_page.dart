@@ -39,8 +39,8 @@ class _MyHomePageState extends State<MyHomePage> {
     if (userInfo['status'] == 'success') {
       setState(() {
         // Assuming userInfo['content'] contains a map with first and last name
-        _firstName = userInfo['content']['FirstName'] ?? '';
-        _lastName = userInfo['content']['LastName'] ?? '';
+        _firstName = _capitalizeFirstLetter(userInfo['content']['FirstName'] ?? '');
+        _lastName = _capitalizeFirstLetter(userInfo['content']['LastName'] ?? '');
       });
     } else {
       // Handle the error case, show only "Hi!"
