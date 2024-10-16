@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import '../models/task.dart';
+import '../models/account.dart';
 import '../services/api_service.dart';
 import '../assets/constants.dart';
 import 'package:intl/intl.dart'; // For date formatting
+import 'dart:async'; // Import to use Future and Timer
 
 class TaskDetailPage extends StatefulWidget {
   const TaskDetailPage({super.key});
@@ -13,12 +15,45 @@ class TaskDetailPage extends StatefulWidget {
 
 class _TaskDetailPageState extends State<TaskDetailPage> {
   late Task task;
+  String? employeeName; // Variable to store employee's name
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Retrieve the Task object passed from the previous screen
     task = ModalRoute.of(context)!.settings.arguments as Task;
+    _fetchAndSetEmployeeName(); // Fetch the employee's name
+  }
+
+  Future<void> _fetchAndSetEmployeeName() async {
+    List<Account> users = await _fetchUsers();
+    Account? matchedEmployee = users.firstWhere(
+      (user) => user.employeeId == task.employeeID,
+      orElse: () => Account(
+        employeeId: 'Unknown',
+        firstName: 'Unknown',
+        lastName: '',
+        username: 'Unknown',
+        role: 'Unknown',
+      ),
+    );
+    setState(() {
+      employeeName = '${matchedEmployee.firstName} ${matchedEmployee.lastName}'; // Set employee name
+    });
+  }
+
+  // Fetch users function
+  Future<List<Account>> _fetchUsers() {
+    return ApiService.getUserList().then((response) {
+      if (response['status'] == 'success') {
+        List<Account> users = response['content'];
+        return users;
+      } else {
+        throw Exception('Failed to fetch users: ${response['reason'] ?? 'Unknown error'}');
+      }
+    }).catchError((error) {
+      return <Account>[]; // Return an empty list on error
+    });
   }
 
   // Function to update task status and provide an undo button
@@ -195,7 +230,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                     children: [
                       const TextSpan(text: 'Assigned Employee: '),
                       TextSpan(
-                        text: task.employeeID,
+                        text: employeeName ?? task.employeeID, // Show employee name or employee ID if name is not available
                         style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
                       ),
                     ],
