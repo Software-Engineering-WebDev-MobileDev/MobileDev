@@ -89,7 +89,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
       bool isSelected = _currentCategoryFilter == category;
       return ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: isSelected ? const Color.fromARGB(255, 140, 72, 27) : Colors.grey,
+          backgroundColor: isSelected ? const Color.fromARGB(255, 140, 72, 27): Colors.grey,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
@@ -100,7 +100,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
         child: Text(
           category,
           style: TextStyle(
-            color: isSelected ? Colors.white : Colors.white, // Text color is white in both cases
+            color: isSelected ? Colors.white : Colors.white,
           ),
         ),
       );

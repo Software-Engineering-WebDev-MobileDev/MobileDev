@@ -81,9 +81,10 @@ class TaskPageState extends State<TaskPage> {
 
   // Build filter button
   Widget _buildFilterButton(String filter) {
+    bool isSelected = _currentFilter == filter;
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: _currentFilter == filter ? Colors.orange : Colors.grey,
+        backgroundColor: _currentFilter == filter ? const Color.fromARGB(255, 140, 72, 27): Colors.grey,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
@@ -91,7 +92,13 @@ class TaskPageState extends State<TaskPage> {
       onPressed: () {
         _filterTasks(filter);
       },
-      child: Text(filter),
+      child: Text(
+        filter,
+        style: TextStyle(
+          color: isSelected ? Colors.white : Colors.white,
+        ),
+        ),
+      //child: Text(filter),
     );
   }
 
