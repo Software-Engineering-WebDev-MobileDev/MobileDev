@@ -291,7 +291,7 @@ class MyAccountPageState extends State<MyAccountPage> {
                             ElevatedButton.icon(
                               onPressed: () => _handleLogout(context),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF800000), // Maroon color
+                                backgroundColor: const Color(0xFF800000),
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 16, horizontal: 32),
                                 shape: RoundedRectangleBorder(

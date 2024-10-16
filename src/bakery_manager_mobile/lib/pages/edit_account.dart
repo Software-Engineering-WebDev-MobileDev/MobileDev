@@ -566,11 +566,11 @@ Column _buildPhonesField() {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  onPressed: _saveAccountChanges, // Call the save function
-                  icon: const Icon(Icons.update, color: Colors.white), // Icon for update
+                  onPressed: _saveAccountChanges,
+                  icon: const Icon(Icons.update, color: Colors.white),
                   label: const Text(
                     'Update Account',
-                    style: TextStyle(color: Colors.white), // Set text color to white
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
               ],
