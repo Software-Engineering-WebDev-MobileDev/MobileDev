@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/task.dart';
 import '../services/api_service.dart';
 import '../assets/constants.dart';
+import 'package:intl/intl.dart'; // For date formatting
 
 class TaskDetailPage extends StatefulWidget {
   const TaskDetailPage({super.key});
@@ -22,27 +23,25 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
   // Function to update task status and provide an undo button
   Future<void> _updateTaskStatus(String newStatus) async {
-    // Call the API to complete the task
-  final result = await ApiService.completeTask(taskID: task.taskID, taskStatus: newStatus);
+    final result = await ApiService.completeTask(taskID: task.taskID, taskStatus: newStatus);
 
-  // Check if the API call was successful
-  if (result['status'] == 'success') {
-    setState(() {
-      task = Task(
-        taskID: task.taskID,
-        recipeID: task.recipeID,
-        amountToBake: task.amountToBake,
-        assignmentDate: task.assignmentDate,
-        completionDate: DateTime.now(),
-        employeeID: task.employeeID,
-        name: task.name,
-        status: newStatus,
-        dueDate: task.dueDate,
-      );
-    }); 
-  } else {
-    // Handle error
-  }
+    if (result['status'] == 'success') {
+      setState(() {
+        task = Task(
+          taskID: task.taskID,
+          recipeID: task.recipeID,
+          amountToBake: task.amountToBake,
+          assignmentDate: task.assignmentDate,
+          completionDate: DateTime.now(),
+          employeeID: task.employeeID,
+          name: task.name,
+          status: newStatus,
+          dueDate: task.dueDate,
+        );
+      });
+    } else {
+      // Handle error
+    }
 
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text('Task marked as Complete'),
@@ -50,7 +49,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   }
 
   // Function to reverse task status (go back one step)
-  void _undoTaskStatus() async{
+  void _undoTaskStatus() async {
     String oldStatus;
     if (task.status == "Completed") {
       oldStatus = "In Progress";
@@ -71,23 +70,25 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         const SnackBar(content: Text('Task updated successfully')),
       );
       setState(() {
-      task = Task(
-        taskID: task.taskID,
-        recipeID: task.recipeID,
-        amountToBake: task.amountToBake,
-        assignmentDate: task.assignmentDate,
-        completionDate: null,
-        employeeID: task.employeeID,
-        name: task.name,
-        status: oldStatus,
-        dueDate: task.dueDate,
-      );
-    }); 
+        task = Task(
+          taskID: task.taskID,
+          recipeID: task.recipeID,
+          amountToBake: task.amountToBake,
+          assignmentDate: task.assignmentDate,
+          completionDate: null,
+          employeeID: task.employeeID,
+          name: task.name,
+          status: oldStatus,
+          dueDate: task.dueDate,
+        );
+      });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content: Text(
-                'Error updating task: ${response['reason'] ?? 'Unknown error'}')),
+          content: Text(
+            'Error updating task: ${response['reason'] ?? 'Unknown error'}',
+          ),
+        ),
       );
     }
   }
@@ -99,17 +100,13 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         shape: const RoundedRectangleBorder(),
-        title: const Stack(
-          children: <Widget>[
-            Text(
-              'Task Details',
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: Colors.white
-              ),
-            ),
-          ],
+        title: const Text(
+          'Task Details',
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -139,13 +136,30 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: RichText(
                   text: TextSpan(
-                    style: const TextStyle(fontSize: 18, color: Colors.black),
+                    style: const TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
                     children: [
-                      const TextSpan(
-                        text: 'Task Name: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      const TextSpan(text: 'Task Name: '),
+                      TextSpan(
+                        text: task.name ?? 'N/A',
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
                       ),
-                      TextSpan(text: task.name ?? 'N/A'),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Amount to Bake (moved below Task Name)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: RichText(
+                  text: TextSpan(
+                    style: const TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
+                    children: [
+                      const TextSpan(text: 'Amount to Bake: '),
+                      TextSpan(
+                        text: '${task.amountToBake}',
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
+                      ),
                     ],
                   ),
                 ),
@@ -156,18 +170,33 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: RichText(
                   text: TextSpan(
-                    style: const TextStyle(fontSize: 18, color: Colors.black),
+                    style: const TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
                     children: [
-                      const TextSpan(
-                        text: 'Status: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                      const TextSpan(text: 'Status: '),
                       TextSpan(
                         text: task.status,
                         style: TextStyle(
+                          fontSize: 20,
                           color: _getStatusColor(task.status),
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.bold, // Making status bold
                         ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Assigned Employee
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: RichText(
+                  text: TextSpan(
+                    style: const TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
+                    children: [
+                      const TextSpan(text: 'Assigned Employee: '),
+                      TextSpan(
+                        text: task.employeeID,
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
                       ),
                     ],
                   ),
@@ -179,30 +208,13 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: RichText(
                   text: TextSpan(
-                    style: const TextStyle(fontSize: 18, color: Colors.black),
+                    style: const TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
                     children: [
-                      const TextSpan(
-                        text: 'Due Date: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      const TextSpan(text: 'Due Date: '),
+                      TextSpan(
+                        text: _formatDate(task.dueDate.toLocal()),
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
                       ),
-                      TextSpan(text: _formatDate(task.dueDate.toLocal())),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Amount to Bake
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: RichText(
-                  text: TextSpan(
-                    style: const TextStyle(fontSize: 18, color: Colors.black),
-                    children: [
-                      const TextSpan(
-                        text: 'Amount to Bake: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(text:'${task.amountToBake}'),
                     ],
                   ),
                 ),
@@ -213,13 +225,13 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: RichText(
                   text: TextSpan(
-                    style: const TextStyle(fontSize: 18, color: Colors.black),
+                    style: const TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
                     children: [
-                      const TextSpan(
-                        text: 'Assigned on: ',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                      const TextSpan(text: 'Assigned on: '),
+                      TextSpan(
+                        text: _formatDate(task.assignmentDate.toLocal()),
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
                       ),
-                      TextSpan(text: _formatDate(task.assignmentDate.toLocal())),
                     ],
                   ),
                 ),
@@ -230,26 +242,25 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: RichText(
                     text: TextSpan(
-                      style: const TextStyle(fontSize: 18, color: Colors.black),
+                      style: const TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
                       children: [
-                        const TextSpan(
-                          text: 'Completed on: ',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                        const TextSpan(text: 'Completed on: '),
+                        TextSpan(
+                          text: _formatDate(task.completionDate?.toLocal()),
+                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
                         ),
-                        TextSpan(text: _formatDate(task.completionDate?.toLocal())),
                       ],
                     ),
                   ),
                 ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: 48), // Increased space before Edit Task button
 
               Center(
                 child: Column(
                   children: [
-                    // Conditional button based on task status
                     if (task.status == 'Pending')
-                      ElevatedButton(
+                      ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
                           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
@@ -260,11 +271,12 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         onPressed: () {
                           _updateTaskStatus('In Progress');
                         },
-                        child: const Text('Mark In Progress', style: TextStyle(color: Colors.white)),
+                        icon: const Icon(Icons.work, color: Colors.white), // Icon for "In Progress"
+                        label: const Text('   Mark In Progress   ', style: TextStyle(color: Colors.white)),
                       ),
 
                     if (task.status == 'In Progress') ...[
-                      ElevatedButton(
+                      ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
@@ -275,7 +287,8 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         onPressed: () {
                           _updateTaskStatus('Completed');
                         },
-                        child: const Text('Mark Completed', style: TextStyle(color: Colors.white)),
+                        icon: const Icon(Icons.check, color: Colors.white), // Checkmark for "Completed"
+                        label: const Text('   Mark Completed   ', style: TextStyle(color: Colors.white)),
                       ),
                       const SizedBox(height: 16), // Space between the buttons
 
@@ -326,8 +339,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                           ),
                         ),
                       ),
-
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 64),
 
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
@@ -338,21 +350,20 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         ),
                       ),
                       onPressed: () {
-                        // Navigate to the EditTaskPage, passing the Task object as an argument
                         Navigator.pushNamed(
                           context,
                           editTaskPageRoute,
-                          arguments: task
+                          arguments: task,
                         );
                       },
                       icon: const Icon(
                         Icons.edit,
-                        color: Color.fromARGB(255, 246, 235, 216),
+                        color: Colors.white, 
                       ),
                       label: const Text(
-                        'Edit Task',
+                        '  Edit Task  ',
                         style: TextStyle(
-                          color: Color.fromARGB(255, 246, 235, 216),
+                          color: Colors.white,
                         ),
                       ),
                     ),
@@ -360,7 +371,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
+                        backgroundColor: const Color(0xFF800000),
                         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -372,20 +383,17 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                           builder: (BuildContext context) {
                             return AlertDialog(
                               title: const Text('Delete Task'),
-                              content: const Text(
-                                  'Are you sure you want to delete this task?'),
+                              content: const Text('Are you sure you want to delete this task?'),
                               actions: <Widget>[
                                 TextButton(
                                   onPressed: () {
-                                    Navigator.of(context)
-                                        .pop(false); // User cancels deletion
+                                    Navigator.of(context).pop(false); // User cancels deletion
                                   },
                                   child: const Text('Cancel'),
                                 ),
                                 TextButton(
                                   onPressed: () {
-                                    Navigator.of(context)
-                                        .pop(true); // User confirms deletion
+                                    Navigator.of(context).pop(true); // User confirms deletion
                                   },
                                   child: const Text('Delete'),
                                 ),
@@ -395,7 +403,6 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         );
 
                         if (confirmed) {
-                          // Call API to delete task and handle success/failure
                           try {
                             await ApiService.deleteTask(task.taskID);
                             Navigator.pop(context); // Navigate back after deletion
@@ -425,23 +432,21 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     );
   }
 
-  // Utility function to format date
   String _formatDate(DateTime? date) {
     if (date == null) {
       return 'N/A';
     }
-    return '${date.month}/${date.day}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+    return DateFormat('MM/dd/yyyy hh:mm a').format(date);
   }
 
-  // Utility function to get color based on task status
-  Color _getStatusColor(String? status) {
+  Color _getStatusColor(String status) {
     switch (status) {
       case 'Pending':
-        return Colors.orange;
+        return const Color(0xFFF44336); // Red for Pending
       case 'In Progress':
-        return const Color.fromARGB(255, 71, 172, 255);
+        return const Color(0xFF2196F3); // Blue for In Progress
       case 'Completed':
-        return Colors.green;
+        return const Color(0xFF4CAF50); // Green for Completed
       default:
         return Colors.black;
     }

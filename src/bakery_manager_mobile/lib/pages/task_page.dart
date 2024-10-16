@@ -254,8 +254,6 @@ class TaskPageState extends State<TaskPage> {
   }
 }
 
-// Task Item Widget
-// Task Item Widget
 class _TaskItem extends StatelessWidget {
   final Task task;
   const _TaskItem({required this.task});
@@ -270,53 +268,67 @@ class _TaskItem extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        color: const Color.fromARGB(255, 209, 126, 51),
-        elevation: 4,
+        color: const Color.fromARGB(255, 246, 235, 216), // Light background color
+        elevation: 4, // 3D effect
         margin: const EdgeInsets.symmetric(vertical: 8),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Row to include employee ID and task name
+              // Task name, amount to bake, and assigned employee in one row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
                     child: Text(
-                      '${task.name} x${task.amountToBake}',
+                      '${task.name} x${task.amountToBake}', // Task and amount
                       style: const TextStyle(
-                        color: Color.fromARGB(255, 251, 250, 248),
+                        color: Color.fromARGB(255, 140, 72, 27),
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                  // Employee ID displayed on the top right
-                  Text(
-                    'Assigned Employee ID: ${task.employeeID}', // Assuming task has employeeID field
-                    style: const TextStyle(
-                      color: Color.fromARGB(255, 246, 235, 216),
-                      fontWeight: FontWeight.bold,
-                    ),
+                  // Employee ID and Assigned Employee text to the right
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Assigned Employee:', // Static text
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 140, 72, 27),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        'ID: ${task.employeeID}', // Display Employee ID
+                        style: const TextStyle(
+                          color: Color.fromARGB(255, 140, 72, 27),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
               const SizedBox(height: 8),
+
+              // Status and due date
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Status: ${task.status}',
+                    'Status: ${task.status}', // Display Task Status
                     style: TextStyle(
-                      color: _getStatusColor(task.status),
+                      color: _getStatusColor(task.status), // Status color
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    'Due: ${DateFormat('MM/dd HH:mm').format(task.dueDate)}',
+                    // Format the due date with AM/PM
+                    'Due: ${DateFormat('MM/dd hh:mm a').format(task.dueDate)}', // e.g., 08/12 02:45 PM
                     style: const TextStyle(
-                      color: Color.fromARGB(255, 246, 235, 216),
+                      color: Color.fromARGB(255, 140, 72, 27),
                       fontStyle: FontStyle.italic,
                     ),
                   ),
@@ -332,11 +344,11 @@ class _TaskItem extends StatelessWidget {
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Pending':
-        return const Color.fromARGB(255, 233, 255, 66);
+        return const Color(0xFFF44336); // Red for Pending
       case 'In Progress':
-        return const Color.fromARGB(255, 77, 255, 255);
+        return const Color(0xFF2196F3); // Blue for In Progress
       case 'Completed':
-        return const Color.fromARGB(255, 75, 253, 102);
+        return const Color(0xFF4CAF50); // Green for Completed
       default:
         return Colors.black;
     }
