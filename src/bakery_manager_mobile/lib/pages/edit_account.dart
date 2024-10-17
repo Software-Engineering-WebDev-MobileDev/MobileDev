@@ -569,8 +569,8 @@ Column _buildPhonesField() {
                   onPressed: _saveAccountChanges,
                   icon: const Icon(Icons.update, color: Colors.white),
                   label: const Text(
-                    'Update Account',
-                    style: TextStyle(color: Colors.white),
+                    'Update Contact Info',
+                    style: TextStyle(color: Colors.white), // Set text color to white
                   ),
                 ),
               ],

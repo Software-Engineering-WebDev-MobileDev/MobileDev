@@ -91,14 +91,6 @@ class MyAccountPageState extends State<MyAccountPage> {
     }
   }
 
-  
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _futureAccountDetails = _fetchAccountDetails();
-  }
-
   @override
   void dispose() {
     if (_observer != null) {
@@ -283,7 +275,7 @@ class MyAccountPageState extends State<MyAccountPage> {
                               },
                               icon: const Icon(Icons.edit, color: Colors.white),
                               label: const Text(
-                                'Edit Account',
+                                'Edit Contact Info',
                                 style: TextStyle(color: Colors.white),
                               ),
                             ),
@@ -300,7 +292,7 @@ class MyAccountPageState extends State<MyAccountPage> {
                               ),
                               icon: const Icon(Icons.logout, color: Colors.white),
                               label: const Text(
-                                '    Log Out    ',
+                                '        Log Out        ',
                                 style: TextStyle(color: Colors.white),
                               ),
                             ),
