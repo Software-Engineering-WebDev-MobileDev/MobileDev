@@ -569,7 +569,7 @@ Column _buildPhonesField() {
                   onPressed: _saveAccountChanges, // Call the save function
                   icon: const Icon(Icons.update, color: Colors.white), // Icon for update
                   label: const Text(
-                    'Update Account',
+                    'Update Contact Info',
                     style: TextStyle(color: Colors.white), // Set text color to white
                   ),
                 ),
