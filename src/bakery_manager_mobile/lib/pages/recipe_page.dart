@@ -21,7 +21,6 @@ class AllRecipesPageState extends State<AllRecipesPage> {
   @override
   void initState() {
     super.initState();
-    //    _fetchRecipes(); // Lists all recipes
     _fetchRecipes(); // Fetch recipes initially
 
     // Adds the observer to the navigator
