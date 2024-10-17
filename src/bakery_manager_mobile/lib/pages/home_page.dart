@@ -19,7 +19,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String _firstName = '';
   String _lastName = '';
-  String _roleName = '';
 
   @override
   void initState() {
@@ -40,26 +39,15 @@ class _MyHomePageState extends State<MyHomePage> {
     if (userInfo['status'] == 'success') {
       setState(() {
         // Assuming userInfo['content'] contains a map with first and last name
-        _firstName = userInfo['content']['FirstName'] ?? '';
-        _lastName = userInfo['content']['LastName'] ?? '';
-        _roleName = userInfo['content']['RoleName'] ?? 'Employee';
+        _firstName = _capitalizeFirstLetter(userInfo['content']['FirstName'] ?? '');
+        _lastName = _capitalizeFirstLetter(userInfo['content']['LastName'] ?? '');
       });
     } else {
-      // Handle the error case, maybe show a message or set default names
+      // Handle the error case, show only "Hi!"
       setState(() {
-        _firstName = 'John';
-        _lastName = 'Doe';
+        _firstName = '';
+        _lastName = '';
       });
-    }
-  }
-
-  void _logout() async {
-    if (await ApiService.logout()) {
-      if (!mounted) {
-        return;
-      }
-      SessionManager().clearSession();
-      Navigator.pushReplacementNamed(context, loginPageRoute);
     }
   }
 
@@ -68,42 +56,20 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
+        automaticallyImplyLeading: false,
         backgroundColor: const Color.fromARGB(255, 209, 125, 51),
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(10)),
-        ),
-        // made the color scheme and design of the title more consistent
-        title: Stack(
+        shape: const RoundedRectangleBorder(),
+        title: const Stack(
           children: <Widget>[
-            // Stroked text as border.
             Text(
-              'The Rolling Scones',
+              'Home',
               style: TextStyle(
-                fontFamily: 'Pacifico',
-                fontSize: 30,
-                foreground: Paint()
-                  ..style = PaintingStyle.stroke
-                  ..strokeWidth = 6
-                  ..color = const Color.fromARGB(255, 140, 72, 27),
-              ),
-            ),
-            // Solid text as fill.
-            const Text(
-              'The Rolling Scones',
-              style: TextStyle(
-                fontFamily: 'Pacifico',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 246, 235, 216),
+                color: Colors.white
               ),
             ),
           ],
-        ),
-        //changed the color of the icon button
-        leading: IconButton(
-          color: const Color.fromARGB(255, 92, 40, 10),
-          icon: const Icon(Icons.logout),
-          onPressed: _logout,
         ),
       ),
       body: SafeArea(
@@ -118,9 +84,9 @@ class _MyHomePageState extends State<MyHomePage> {
                   'A Simple Bakery',
                   style: TextStyle(
                     fontFamily: 'Pacifico',
-                    fontSize: 28,
+                    fontSize: 40,
                     fontWeight: FontWeight.bold,
-                    color: Colors.orange,
+                    color: Color.fromARGB(255, 140, 72, 27),
                   ),
                 ),
               ),
@@ -130,19 +96,12 @@ class _MyHomePageState extends State<MyHomePage> {
               Text(
                 'Hi $_firstName $_lastName!',
                 style: const TextStyle(
-                  fontSize: 22,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Color.fromARGB(255, 209, 125, 51),
                 ),
               ),
-              Text(
-                _capitalizeFirstLetter(_roleName),
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.black54,
-                ),
-              ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 80),
               const Expanded(
                 child: OptionsBar(),
               ),
@@ -203,16 +162,16 @@ class OptionsBar extends StatelessWidget {
         children: [
           Icon(
             icon,
-            size: 24,
-            color: const Color.fromARGB(255, 246, 235, 216),
+            size: 36,
+            color: Colors.white
           ),
           const SizedBox(height: 5),
           Text(
             title,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 12,
-              color: Color.fromARGB(255, 246, 235, 216),
+              fontSize: 18,
+              color: Colors.white
             ),
           ),
         ],

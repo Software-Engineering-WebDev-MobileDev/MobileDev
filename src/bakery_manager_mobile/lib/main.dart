@@ -49,8 +49,9 @@ class _MyAppState extends State<MyApp> {
           navigatorKey: navigatorKey,
           theme: ThemeData(
             useMaterial3: true,
+            scaffoldBackgroundColor: Colors.white,
             colorScheme: ColorScheme.fromSeed(
-                seedColor: const Color.fromARGB(0, 255, 187, 0)),
+                seedColor: const Color.fromARGB(255, 209, 125, 51)),
           ),
           initialRoute: loginPageRoute,
           routes: appRoutes,

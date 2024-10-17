@@ -7,10 +7,10 @@ class RecipeDetailPage extends StatefulWidget {
   const RecipeDetailPage({super.key});
 
   @override
-  State<RecipeDetailPage> createState() => RecipeDetailPageState();
+  State<RecipeDetailPage> createState() => _RecipeDetailPageState();
 }
 
-class RecipeDetailPageState extends State<RecipeDetailPage> {
+class _RecipeDetailPageState extends State<RecipeDetailPage> {
   late Future<List<Map<String, dynamic>>> _futureIngredients;
 
   Future<List<Map<String, dynamic>>> _fetchIngredients(String recipeId) async {
@@ -29,8 +29,16 @@ class RecipeDetailPageState extends State<RecipeDetailPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('View Recipe', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.orange,
+        centerTitle: true,
+        title: Text(
+          recipe.recipeName,  // Replace "View Recipe" with recipe name
+          style: const TextStyle(
+            fontSize: 30,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
@@ -46,78 +54,82 @@ class RecipeDetailPageState extends State<RecipeDetailPage> {
           ),
         ],
       ),
-      body: Center(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Recipe: ${recipe.recipeName}',
-                      style: const TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Ingredients:',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    FutureBuilder<List<Map<String, dynamic>>>(
-                      future: _futureIngredients,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else if (!snapshot.hasData ||
-                            snapshot.data!.isEmpty) {
-                          return const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8.0),
-                            child:
-                                Text('No ingredients found for this recipe.'),
-                          );
-                        } else {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: snapshot.data!.map((ingredient) {
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
-                                child: Text(
-                                  '• ${ingredient['IngredientDescription'] ?? 'Unknown'}: ${ingredient['Quantity'] ?? 'N/A'} ${ingredient['UnitOfMeasure'] ?? ''}',
-                                  style: const TextStyle(fontSize: 16),
-                                ),
-                              );
-                            }).toList(),
-                          );
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Instructions:',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      recipe.instructions.isNotEmpty
-                          ? recipe.instructions
-                          : 'No instructions provided.',
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                ),
+            const SizedBox(height: 16),
+
+            // 2x2 Grid for Recipe Info
+            GridView(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 3,
               ),
+              children: [
+                _GridItem(title: 'Prep Time:', value: '${recipe.prepTime} minutes'),
+                _GridItem(title: 'Category:', value: recipe.category.isNotEmpty ? recipe.category : 'No category'),
+                _GridItem(title: 'Cook Time:', value: '${recipe.cookTime} minutes'),
+                _GridItem(title: 'Servings:', value: recipe.servings.toString()),
+              ],
             ),
-            Container(
-              padding: const EdgeInsets.all(16.0),
+            const SizedBox(height: 16),
+            
+            // Ingredients Section
+            const Text(
+              'Ingredients:',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            FutureBuilder<List<Map<String, dynamic>>>(
+              future: _futureIngredients,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const CircularProgressIndicator();
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Text('No ingredients found for this recipe.');
+                } else {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: snapshot.data!.map((ingredient) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Text(
+                          '${ingredient['IngredientDescription'] ?? 'Unknown'}: ${ingredient['Quantity'] ?? 'N/A'} ${ingredient['UnitOfMeasure'] ?? ''}',
+                          style: const TextStyle(fontSize: 20),
+                        ),
+                      );
+                    }).toList(),
+                  );
+                }
+              },
+            ),
+            const SizedBox(height: 16),
+            
+            // Instructions Section
+            const Text(
+              'Instructions:',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              recipe.instructions.isNotEmpty
+                  ? recipe.instructions
+                  : 'No instructions provided.',
+              style: const TextStyle(fontSize: 20),
+            ),
+            const SizedBox(height: 24),
+            
+            // Centered Action Buttons
+            Center(
               child: Column(
                 children: [
+                  // Edit Recipe Button
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 209, 125, 51),
@@ -131,25 +143,24 @@ class RecipeDetailPageState extends State<RecipeDetailPage> {
                       Navigator.pushNamed(
                         context,
                         editRecipePageRoute,
-                        arguments:
-                            recipe, // Pass the recipe object to the EditRecipePage
+                        arguments: recipe, // Pass the recipe object to edit
                       );
                     },
                     icon: const Icon(
                       Icons.edit,
-                      color: Color.fromARGB(255, 246, 235, 216),
+                      color: Colors.white,
                     ),
                     label: const Text(
-                      'Edit Recipe',
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 246, 235, 216),
-                      ),
+                      '  Edit Recipe  ',
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
                   const SizedBox(height: 16), // Space between the buttons
+                  
+                  // Delete Recipe Button
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                      backgroundColor: const Color.fromARGB(255, 140, 72, 27),
                       padding: const EdgeInsets.symmetric(
                           vertical: 16, horizontal: 32),
                       shape: RoundedRectangleBorder(
@@ -167,15 +178,13 @@ class RecipeDetailPageState extends State<RecipeDetailPage> {
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () {
-                                  Navigator.of(context)
-                                      .pop(false); // User cancels deletion
+                                  Navigator.of(context).pop(false); // Cancel
                                 },
                                 child: const Text('Cancel'),
                               ),
                               TextButton(
                                 onPressed: () {
-                                  Navigator.of(context)
-                                      .pop(true); // User confirms deletion
+                                  Navigator.of(context).pop(true); // Confirm
                                 },
                                 child: const Text('Delete'),
                               ),
@@ -185,18 +194,15 @@ class RecipeDetailPageState extends State<RecipeDetailPage> {
                       );
 
                       if (confirmed) {
-                        // Call API to delete recipe and handle success/failure
                         try {
-                          await ApiService.deleteRecipe(
-                              recipeId: recipe.recipeId);
+                          await ApiService.deleteRecipe(recipeId: recipe.recipeId);
                           if (mounted) {
                             Navigator.pop(context);
                           }
                         } catch (e) {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text('Failed to delete recipe: $e')),
+                              SnackBar(content: Text('Failed to delete recipe: $e')),
                             );
                           }
                         }
@@ -208,9 +214,7 @@ class RecipeDetailPageState extends State<RecipeDetailPage> {
                     ),
                     label: const Text(
                       'Delete Recipe',
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
                 ],
@@ -219,6 +223,38 @@ class RecipeDetailPageState extends State<RecipeDetailPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+// Helper Widget for Grid Items
+class _GridItem extends StatelessWidget {
+  final String title;
+  final String value;
+
+  const _GridItem({required this.title, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+        mainAxisAlignment: MainAxisAlignment.center, // Center vertically
+        crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 16,
+          ),
+        ),
+      ],
     );
   }
 }

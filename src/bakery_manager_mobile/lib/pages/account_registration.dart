@@ -22,9 +22,6 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  String _emailType = 'Work';
-  String _phoneType = 'Mobile';
-
   // Password requirement indicators
   bool _has8Characters = false;
   bool _hasNumber = false;
@@ -33,7 +30,6 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   @override
   void initState() {
     super.initState();
-
     passwordController.addListener(_validatePassword);
     usernameController.addListener(_checkRequirement);
   }
@@ -69,7 +65,6 @@ class CreateAccountPageState extends State<CreateAccountPage> {
     }
   }
 
-
   Future<void> _createAccount() async {
     if (_formKey.currentState!.validate()) {
       String firstName = firstNameController.text.trim();
@@ -93,50 +88,16 @@ class CreateAccountPageState extends State<CreateAccountPage> {
         );
 
         if (accountResponse['status'] == 'success') {
-          // Step 2: Add email from account creation response
-          // Map<String, dynamic> emailResponse = await ApiService.addUserEmail(
-          //   sessionID: '',
-          //   emailAddress: email,
-          //   emailType: _emailType, 
-          // );
+          // Step 2: Save credentials and show success message
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('username', username);
+          await prefs.setString('password', password);
 
-          //if (emailResponse['status'] == 'success') {
-            // Step 3: Add email from account creation response
-            
-            /*
-            Map<String, dynamic> phoneResponse = await ApiService.addPhoneNumber(
-              phoneNumber,
-              employeeID,
-              _phoneType,
-            );
-
-
-            if (phoneResponse['status'] == 'success') {
-            */
-
-            // Step 4: All succeeded, save credentials and show success message
-            SharedPreferences prefs = await SharedPreferences.getInstance();
-            await prefs.setString('username', username);
-
-            if (!mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Account created successfully!')),
-            );
-            Navigator.pop(context); // Go back after success
-            /*
-            } else {
-              // Phone addition failed
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Failed to add phone number: ${phoneResponse['reason']}')),
-              );
-            }
-            */
-
-    //       } else {
-    //         ScaffoldMessenger.of(context).showSnackBar(
-    //           SnackBar(content: Text('${emailResponse['reason']}')),
-    //         );
-    //       }
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Account created successfully!')),
+          );
+          Navigator.pop(context); // Go back after success
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Account creation failed: ${accountResponse['reason']}')),
@@ -172,42 +133,25 @@ class CreateAccountPageState extends State<CreateAccountPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
         centerTitle: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(10)),
-        ),
-        title: Stack(
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        shape: const RoundedRectangleBorder(),
+        title: const Stack(
           children: <Widget>[
-            // Stroked text as border.
             Text(
-              'Registration',
+              'Register Account',
               style: TextStyle(
-                fontFamily: 'Pacifico',
-                fontSize: 30,
-                foreground: Paint()
-                  ..style = PaintingStyle.stroke
-                  ..strokeWidth = 6
-                  ..color = const Color.fromARGB(255, 140, 72, 27),
-              ),
-            ),
-            // Solid text as fill.
-            const Text(
-              'Registration',
-              style: TextStyle(
-                fontFamily: 'Pacifico',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 246, 235, 216),
+                color: Colors.white
               ),
             ),
           ],
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back,
-              color: Color.fromARGB(255, 140, 72, 27)),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.pop(context); // Back navigation
+            Navigator.pop(context);
           },
         ),
       ),
@@ -221,18 +165,22 @@ class CreateAccountPageState extends State<CreateAccountPage> {
               children: [
                 const SizedBox(height: 16),
 
-                // FirstName Field
                 TextFormField(
                   controller: firstNameController,
+                  maxLength: 64, 
                   decoration: const InputDecoration(
                     labelText: 'First Name',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
+                    counterText: ''
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'First Name is required';
+                    }
+                    if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+                      return 'First Name can only contain letters';
                     }
                     return null;
                   },
@@ -242,15 +190,20 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                 // LastName Field
                 TextFormField(
                   controller: lastNameController,
+                  maxLength: 64,
                   decoration: const InputDecoration(
                     labelText: 'Last Name',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
+                    counterText: ''
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Last Name is required';
+                    }
+                    if (!RegExp(r'^[a-zA-Z]+$').hasMatch(value)) {
+                      return 'Last Name can only contain letters';
                     }
                     return null;
                   },
@@ -260,15 +213,20 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                 // EmployeeID Field
                 TextFormField(
                   controller: employeeIDController,
+                  maxLength: 50,
                   decoration: const InputDecoration(
                     labelText: 'Employee ID',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
+                    counterText: ''
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Employee ID is required';
+                    }
+                    if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(value)) {
+                      return 'Employee ID can only contain letters and numbers';
                     }
                     return null;
                   },
@@ -278,15 +236,20 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                 // Username Field
                 TextFormField(
                   controller: usernameController,
+                  maxLength: 20, 
                   decoration: const InputDecoration(
                     labelText: 'Username',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
+                    counterText: ''
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Username is required';
+                      return 'Employee ID is required';
+                    }
+                    if (!RegExp(r'^[a-zA-Z0-9]+$').hasMatch(value)) {
+                      return 'Employee ID can only contain letters and numbers';
                     }
                     return null;
                   },
@@ -299,12 +262,14 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                     Expanded(
                       child: TextFormField(
                         controller: passwordController,
+                        maxLength: 256, 
                         obscureText: _obscurePassword,
                         decoration: const InputDecoration(
                           labelText: 'Password',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(10)),
                           ),
+                          counterText: ''
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -392,6 +357,7 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(10)),
                           ),
+                          counterText: ''
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -419,120 +385,51 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                 const SizedBox(height: 16),
 
                 // Email Field
-                const Text(
-                  'Email:',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 140,
-                      child: TextFormField(
-                        controller: emailController,
-                        decoration: const InputDecoration(
-                          hintText: 'Email',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Email is required';
-                          }
-                          if (!value.contains('@')) {
-                            return 'Please enter a valid email address';
-                          }
-                          return null;
-                        },
-                      ),
+                TextFormField(
+                  controller: emailController,
+                  maxLength: 50,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
-                    const SizedBox(width: 8),
-                    SizedBox(
-                      width: 100,
-                      child: DropdownButtonFormField<String>(
-                        isExpanded: true,
-                        value: _emailType,
-                        onChanged: (newValue) {
-                          setState(() {
-                            _emailType = newValue!;
-                          });
-                        },
-                        items: ['Personal', 'Work', 'Other'].map((type) {
-                          return DropdownMenuItem(
-                            value: type,
-                            child: Text(type),
-                          );
-                        }).toList(),
-                        decoration: const InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                    counterText: '',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Email is required';
+                    }
+                    if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(value)) {
+                      return 'Please enter a valid email address';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
 
                 // Phone Number Field
-                const Text(
-                  'Phone Number:',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width - 140,
-                      child: TextFormField(
-                        controller: phoneController,
-                        decoration: const InputDecoration(
-                          hintText: 'Phone Number',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Phone number is required';
-                          }
-                          if (!RegExp(r'^\d{10}$').hasMatch(value)) {
-                            return 'Phone number must be 10 digits';
-                          }
-                          return null;
-                        },
-                      ),
+                TextFormField(
+                  controller: phoneController,
+                  maxLength: 10,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Phone Number',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
                     ),
-                    const SizedBox(width: 8),
-                    SizedBox(
-                      width: 100,
-                      child: DropdownButtonFormField<String>(
-                        isExpanded: true,
-                        value: _phoneType,
-                        onChanged: (newValue) {
-                          setState(() {
-                            _phoneType = newValue!;
-                          });
-                        },
-                        items: ['Mobile', 'Home', 'Work', 'Fax'].map((type) {
-                          return DropdownMenuItem(
-                            value: type,
-                            child: Text(type),
-                          );
-                        }).toList(),
-                        decoration: const InputDecoration(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(10)),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                    counterText: null,
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Phone number is required';
+                    }
+                    if (!RegExp(r'^\d{10}$').hasMatch(value)) {
+                      return 'Phone number must be 10 digits';
+                    }
+                    return null;
+                  },
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
 
                 // Create Account Button
                 ElevatedButton(
@@ -544,7 +441,10 @@ class CreateAccountPageState extends State<CreateAccountPage> {
                     ),
                   ),
                   onPressed: _createAccount, // Call the create account function
-                  child: const Text('Create Account'),
+                  child: const Text(
+                    'Create Account',
+                    style: TextStyle(color: Colors.white), // Set font color to white
+                  ),
                 ),
               ],
             ),

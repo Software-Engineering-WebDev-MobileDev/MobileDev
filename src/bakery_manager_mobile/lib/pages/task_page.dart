@@ -94,9 +94,10 @@ class TaskPageState extends State<TaskPage> {
 
   // Build filter button
   Widget _buildFilterButton(String filter) {
+    bool isSelected = _currentFilter == filter;
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: _currentFilter == filter ? Colors.orange : Colors.grey,
+        backgroundColor: _currentFilter == filter ? const Color.fromARGB(255, 140, 72, 27): Colors.grey,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
@@ -104,7 +105,13 @@ class TaskPageState extends State<TaskPage> {
       onPressed: () {
         _filterTasks(filter);
       },
-      child: Text(filter),
+      child: Text(
+        filter,
+        style: TextStyle(
+          color: isSelected ? Colors.white : Colors.white,
+        ),
+        ),
+      //child: Text(filter),
     );
   }
 
@@ -121,9 +128,10 @@ class TaskPageState extends State<TaskPage> {
             Text(
               'All Tasks',
               style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Colors.white
+              ),
             ),
           ],
         ),
@@ -223,7 +231,12 @@ class TaskPageState extends State<TaskPage> {
                 ),
               ),
               onPressed: () {
-                Navigator.pushNamed(context, addTaskPageRoute);
+                Navigator.pushNamed(context, addTaskPageRoute).then((_) {
+                  // Refetch tasks after returning from the add task page
+                  setState(() {
+                    _futureTasks = _fetchTasks();
+                  });
+                });
               },
               icon: const Icon(Icons.add,
                   color: Color.fromARGB(255, 246, 235, 216)),

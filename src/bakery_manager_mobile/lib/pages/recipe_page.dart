@@ -84,78 +84,64 @@ class AllRecipesPageState extends State<AllRecipesPage> {
     });
   }
 
-  // Build category filter button
-  Widget _buildCategoryFilterButton(String category, List<Recipe> recipes) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor:
-            _currentCategoryFilter == category ? Colors.orange : Colors.grey,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+    // Build category filter button
+    Widget _buildCategoryFilterButton(String category, List<Recipe> recipes) {
+      bool isSelected = _currentCategoryFilter == category;
+      return ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isSelected ? const Color.fromARGB(255, 140, 72, 27): Colors.grey,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
         ),
-      ),
-      onPressed: () {
-        _filterByCategory(category, recipes);
-      },
-      child: Text(category),
-    );
-  }
+        onPressed: () {
+          _filterByCategory(category, recipes);
+        },
+        child: Text(
+          category,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.white,
+          ),
+        ),
+      );
+    }
 
   // Page Content Build Function
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        //matched the theme of tha app bar to that of the home screen
-        title: Stack(
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        shape: const RoundedRectangleBorder(),
+        title: const Stack(
           children: <Widget>[
-            // Stroked text as border.
             Text(
               'All Recipes',
               style: TextStyle(
-                fontFamily: 'Pacifico',
-                fontSize: 30,
-                foreground: Paint()
-                  ..style = PaintingStyle.stroke
-                  ..strokeWidth = 6
-                  ..color = const Color.fromARGB(255, 140, 72, 27),
-              ),
-            ),
-            // Solid text as fill.
-            const Text(
-              'All Recipes',
-              style: TextStyle(
-                fontFamily: 'Pacifico',
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 246, 235, 216),
+                color: Colors.white
               ),
             ),
           ],
         ),
-        //center the title
-        centerTitle: true,
-        //changed the background color
-        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
-        //changed the color for both icons in the app bar
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back,
-              color: Color.fromARGB(255, 140, 72, 27)),
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.pop(context); // Back navigation
+            Navigator.pop(context);
           },
         ),
         actions: [
           IconButton(
-            icon:
-                const Icon(Icons.home, color: Color.fromARGB(255, 140, 72, 27)),
+            icon: const Icon(Icons.home, color: Colors.white),
             onPressed: () {
-              Navigator.popUntil(
-                  context, ModalRoute.withName('/')); // Home navigation
+              Navigator.popUntil(context, ModalRoute.withName('/'));
             },
           ),
         ],
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -251,7 +237,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
               label: const Text(
                 'Add recipe',
                 style: TextStyle(
-                  color: Color.fromARGB(255, 246, 235, 216),
+                  color: Colors.white
                 ),
               ),
             ),
@@ -273,25 +259,25 @@ class _RecipeItem extends StatelessWidget {
         // Navigate to the target page when tapped
         Navigator.pushNamed(context, recipeDetailsPageRoute, arguments: recipe);
       },
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          color: const Color.fromARGB(255, 209, 126, 51),
-          elevation: 4, // 3D effect
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              recipe.recipeName,
-              style: const TextStyle(
-                color: Color.fromARGB(255, 246, 235, 216),
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        color: const Color.fromARGB(255, 246, 235, 216),
+        elevation: 4, // 3D effect
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            recipe.recipeName,
+            style: const TextStyle(
+              color: Color.fromARGB(255, 140, 72, 27),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
+      ),
     );
   }
 }
