@@ -355,7 +355,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                       },
                       icon: const Icon(Icons.link, color: Colors.white), // Link icon
                       label: const Text(
-                        'Link to Recipe', // Display "Link to Recipe" on the button
+                        '  Link to Recipe  ', // Display "Link to Recipe" on the button
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
@@ -379,7 +379,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                           _updateTaskStatus('In Progress');
                         },
                         icon: const Icon(Icons.work, color: Colors.white), // Icon for "In Progress"
-                        label: const Text('   Mark In Progress    ', style: TextStyle(color: Colors.white)),
+                        label: const Text('Mark In Progress', style: TextStyle(color: Colors.white)),
                       ),
 
                     if (task.status == 'In Progress') ...[
@@ -395,7 +395,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                           _updateTaskStatus('Completed');
                         },
                         icon: const Icon(Icons.check, color: Colors.white), // Checkmark for "Completed"
-                        label: const Text('   Mark Completed    ', style: TextStyle(color: Colors.white)),
+                        label: const Text('Mark Completed', style: TextStyle(color: Colors.white)),
                       ),
                       const SizedBox(height: 16),
 
@@ -415,7 +415,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                           color: Colors.black,
                         ),
                         label: const Text(
-                          'Undo Status Change',
+                          '    Undo Status    ',
                           style: TextStyle(
                             color: Colors.black,
                           ),
@@ -440,7 +440,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                           color: Colors.black,
                         ),
                         label: const Text(
-                          'Undo Status Change',
+                          '    Undo Status   ',
                           style: TextStyle(
                             color: Colors.black,
                           ),
@@ -448,86 +448,91 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                       ),
                     const SizedBox(height: 52),
 
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.pushNamed(
-                          context,
-                          editTaskPageRoute,
-                          arguments: task,
-                        );
-                      },
-                      icon: const Icon(
-                        Icons.edit,
-                        color: Colors.white, 
-                      ),
-                      label: const Text(
-                        '  Edit Task  ',
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF800000),
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      onPressed: () async {
-                        final confirmed = await showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: const Text('Delete Task'),
-                              content: const Text('Are you sure you want to delete this task?'),
-                              actions: <Widget>[
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop(false); // User cancels deletion
-                                  },
-                                  child: const Text('Cancel'),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop(true); // User confirms deletion
-                                  },
-                                  child: const Text('Delete'),
-                                ),
-                              ],
+                    // Edit and Delete Buttons side by side
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Evenly spaced buttons
+                      children: [
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+                            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.pushNamed(
+                              context,
+                              editTaskPageRoute,
+                              arguments: task,
                             );
                           },
-                        );
-
-                        if (confirmed) {
-                          try {
-                            await ApiService.deleteTask(task.taskID);
-                            Navigator.pop(context); // Navigate back after deletion
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Failed to delete task: $e')),
+                          icon: const Icon(
+                            Icons.edit,
+                            color: Colors.white, 
+                          ),
+                          label: const Text(
+                            '     Edit Task  ',
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF800000),
+                            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: () async {
+                            final confirmed = await showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Delete Task'),
+                                  content: const Text('Are you sure you want to delete this task?'),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop(false); // User cancels deletion
+                                      },
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop(true); // User confirms deletion
+                                      },
+                                      child: const Text('Delete'),
+                                    ),
+                                  ],
+                                );
+                              },
                             );
-                          }
-                        }
-                      },
-                      icon: const Icon(
-                        Icons.delete,
-                        color: Colors.white,
-                      ),
-                      label: const Text(
-                        'Delete Task',
-                        style: TextStyle(color: Colors.white),
-                      ),
+
+                            if (confirmed) {
+                              try {
+                                await ApiService.deleteTask(task.taskID);
+                                Navigator.pop(context); // Navigate back after deletion
+                              } catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('Failed to delete task: $e')),
+                                );
+                              }
+                            }
+                          },
+                          icon: const Icon(
+                            Icons.delete,
+                            color: Colors.white,
+                          ),
+                          label: const Text(
+                            'Delete Task',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
