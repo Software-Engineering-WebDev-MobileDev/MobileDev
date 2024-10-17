@@ -3,6 +3,7 @@ import '../models/task.dart';
 import '../models/account.dart';
 import '../services/api_service.dart';
 import '../assets/constants.dart';
+import '../models/recipe.dart';
 import 'package:intl/intl.dart'; // For date formatting
 import 'dart:async'; // Import to use Future and Timer
 
@@ -16,6 +17,8 @@ class TaskDetailPage extends StatefulWidget {
 class _TaskDetailPageState extends State<TaskDetailPage> {
   late Task task;
   String? employeeName; // Variable to store employee's name
+  String? recipeName; // Variable to store the recipe name
+  Recipe? selectedRecipe; // Variable to store selected recipe
 
   @override
   void didChangeDependencies() {
@@ -23,6 +26,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     // Retrieve the Task object passed from the previous screen
     task = ModalRoute.of(context)!.settings.arguments as Task;
     _fetchAndSetEmployeeName(); // Fetch the employee's name
+    _fetchAndSetRecipeName(); // Fetch and set the recipe name
   }
 
   Future<void> _fetchAndSetEmployeeName() async {
@@ -37,8 +41,47 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         role: 'Unknown',
       ),
     );
-    setState(() {
-      employeeName = '${matchedEmployee.firstName} ${matchedEmployee.lastName}'; // Set employee name
+    if (mounted) {
+      setState(() {
+        employeeName = '${matchedEmployee.firstName} ${matchedEmployee.lastName}'; // Set employee name
+      });
+    }
+  }
+
+  Future<void> _fetchAndSetRecipeName() async {
+    List<Recipe> recipes = await _fetchRecipes();
+    Recipe? matchedRecipe = recipes.firstWhere(
+      (recipe) => recipe.recipeId == task.recipeID,
+      orElse: () => Recipe(
+        recipeId: 'Unknown',
+        recipeName: 'Unknown Recipe',
+        instructions: '',
+        description: '',
+        category: '',
+        servings: 0,
+        cookTime: 0,
+        prepTime: 0,
+      ),
+    );
+    if (mounted) {
+      setState(() {
+        recipeName = matchedRecipe.recipeName;
+        selectedRecipe = matchedRecipe;
+      });
+    }
+  }
+
+  // Fetch recipes function
+  Future<List<Recipe>> _fetchRecipes() {
+    return ApiService.getRecipes().then((response) {
+      if (response['status'] == 'success') {
+        List<Recipe> recipes = response['recipes'];
+        return recipes;
+      } else {
+        throw Exception('Failed to fetch recipes: ${response['message'] ?? 'Unknown error'}');
+      }
+    }).catchError((error) {
+      return <Recipe>[]; 
     });
   }
 
@@ -289,7 +332,36 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                   ),
                 ),
 
-              const SizedBox(height: 48), // Increased space before Edit Task button
+              const SizedBox(height: 24),
+
+              // Link to Recipe Button
+              if (recipeName != null)
+                Center(
+                  child: SizedBox(
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          recipeDetailsPageRoute, // The route for the recipe details page
+                          arguments: selectedRecipe,  // Pass the recipe object as an argument
+                        );
+                      },
+                      icon: const Icon(Icons.link, color: Colors.white), // Link icon
+                      label: const Text(
+                        'Link to Recipe', // Display "Link to Recipe" on the button
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 52),
 
               Center(
                 child: Column(
@@ -307,7 +379,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                           _updateTaskStatus('In Progress');
                         },
                         icon: const Icon(Icons.work, color: Colors.white), // Icon for "In Progress"
-                        label: const Text('   Mark In Progress   ', style: TextStyle(color: Colors.white)),
+                        label: const Text('   Mark In Progress    ', style: TextStyle(color: Colors.white)),
                       ),
 
                     if (task.status == 'In Progress') ...[
@@ -323,13 +395,13 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                           _updateTaskStatus('Completed');
                         },
                         icon: const Icon(Icons.check, color: Colors.white), // Checkmark for "Completed"
-                        label: const Text('   Mark Completed   ', style: TextStyle(color: Colors.white)),
+                        label: const Text('   Mark Completed    ', style: TextStyle(color: Colors.white)),
                       ),
-                      const SizedBox(height: 16), // Space between the buttons
+                      const SizedBox(height: 16),
 
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
+                          backgroundColor: const Color.fromARGB(255, 246, 235, 216),
                           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -340,12 +412,12 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         },
                         icon: const Icon(
                           Icons.undo,
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                         label: const Text(
                           'Undo Status Change',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: Colors.black,
                           ),
                         ),
                       ),
@@ -354,7 +426,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                     if (task.status == 'Completed')
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
+                          backgroundColor: const Color.fromARGB(255, 246, 235, 216),
                           padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -365,16 +437,16 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         },
                         icon: const Icon(
                           Icons.undo,
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                         label: const Text(
                           'Undo Status Change',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: Colors.black,
                           ),
                         ),
                       ),
-                    const SizedBox(height: 64),
+                    const SizedBox(height: 52),
 
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(

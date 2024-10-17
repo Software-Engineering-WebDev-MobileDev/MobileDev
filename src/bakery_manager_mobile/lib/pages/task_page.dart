@@ -268,7 +268,7 @@ class _TaskItem extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
-        color: const Color.fromARGB(255, 246, 235, 216), // Light background color
+        color: const Color.fromARGB(255, 246, 235, 216),
         elevation: 4, // 3D effect
         margin: const EdgeInsets.symmetric(vertical: 8),
         child: Padding(
