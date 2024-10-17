@@ -75,20 +75,25 @@ class _EditTaskPageState extends State<EditTaskPage> {
     }
   }
 
-  // Fetch accounts function
   Future<void> _fetchAccounts() async {
     try {
       final response = await ApiService.getUserList();
       if (response['status'] == 'success') {
         setState(() {
           _allAccounts = response['content'];
-          selectedAccount = _allAccounts.firstWhere(
+          if (_allAccounts.isNotEmpty) {
+            // Find the matched account, otherwise select the first one
+            selectedAccount = _allAccounts.firstWhere(
               (account) => account.employeeId == task!.employeeID,
-              orElse: () => _allAccounts.first);
+              orElse: () => _allAccounts.first,
+            );
+          }
         });
       }
     } catch (error) {
-      return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch employees: $error')),
+      );
     }
   }
 
@@ -208,7 +213,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
     );
   }
 
-  // Build form UI
+  // Updated _buildForm with onChanged logic for the employee dropdown
   Widget _buildForm(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
@@ -223,7 +228,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
                 label: 'Select Recipe',
                 value: selectedRecipe,
                 items: _allRecipes,
-                itemBuilder: (recipe) => Text(recipe.recipeName),
+                itemBuilder: (recipe) => recipe.recipeName,
                 onChanged: (value) => setState(() => selectedRecipe = value),
                 validator: (value) => value == null ? 'Please select a recipe' : null,
               ),
@@ -232,22 +237,27 @@ class _EditTaskPageState extends State<EditTaskPage> {
                 label: 'Select Employee',
                 value: selectedAccount,
                 items: _allAccounts,
-                itemBuilder: (account) => Text('${account.firstName} ${account.lastName} (${account.username})'),
-                onChanged: (value) => setState(() => selectedAccount = value),
+                itemBuilder: (account) => '${account.firstName} ${account.lastName} (${account.username})',
+                onChanged: (value) => setState(() => selectedAccount = value), // Ensure it updates state
                 validator: (value) => value == null ? 'Please select an employee' : null,
               ),
               const SizedBox(height: 16),
-              _buildTextField(
-                label: 'Amount to Bake',
+              TextFormField(
                 controller: amountToBakeController,
+                maxLength: 8, // Limit to 8 characters
+                decoration: const InputDecoration(
+                  labelText: 'Amount to Bake',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                  ),
+                ),
                 keyboardType: TextInputType.number,
+                buildCounter: (BuildContext context, {required int currentLength, required bool isFocused, required int? maxLength}) {
+                  return null; // Don't show the counter
+                },
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter amount to bake';
-                  }
-                  int? amount = int.tryParse(value);
-                  if (amount == null) {
-                    return 'Please enter a valid integer amount';
+                    return 'Amount to bake is required';
                   }
                   return null;
                 },
@@ -286,7 +296,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
                 ),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    _updateTask();
+                    _updateTask();  // This will now include the updated employee data
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Please fill out all fields correctly')),
@@ -305,7 +315,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
     required String label,
     required T? value,
     required List<T> items,
-    required Widget Function(T) itemBuilder,
+    required String Function(T) itemBuilder,  // Return a String instead of a Widget
     required void Function(T?) onChanged,
     String? Function(T?)? validator,
   }) {
@@ -314,7 +324,13 @@ class _EditTaskPageState extends State<EditTaskPage> {
       items: items.map((T item) {
         return DropdownMenuItem<T>(
           value: item,
-          child: itemBuilder(item),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.7, // Constrain width to prevent overflow
+            child: Text(
+              itemBuilder(item),  // Use the itemBuilder to get the text directly
+              overflow: TextOverflow.ellipsis,  // Handle long text by truncating it
+            ),
+          ),
         );
       }).toList(),
       onChanged: onChanged,

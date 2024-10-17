@@ -16,9 +16,9 @@ class TaskDetailPage extends StatefulWidget {
 
 class _TaskDetailPageState extends State<TaskDetailPage> {
   late Task task;
-  String? employeeName; // Variable to store employee's name
-  String? recipeName; // Variable to store the recipe name
-  Recipe? selectedRecipe; // Variable to store selected recipe
+  String? employeeName;
+  String? recipeName;
+  Recipe? selectedRecipe; 
 
   @override
   void didChangeDependencies() {
@@ -208,110 +208,117 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 16),
-
               // Task Name
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: RichText(
-                  text: TextSpan(
-                    style: const TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
-                    children: [
-                      const TextSpan(text: 'Task Name: '),
-                      TextSpan(
-                        text: task.name ?? 'N/A',
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
-                      ),
-                    ],
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Task Name:',
+                      style: TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      task.name ?? 'N/A',
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
+                    ),
+                  ],
                 ),
               ),
 
-              // Amount to Bake (moved below Task Name)
+              // Amount to Bake
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: RichText(
-                  text: TextSpan(
-                    style: const TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
-                    children: [
-                      const TextSpan(text: 'Amount to Bake: '),
-                      TextSpan(
-                        text: '${task.amountToBake}',
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
-                      ),
-                    ],
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Amount to Bake:',
+                      style: TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      '${task.amountToBake}',
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
+                    ),
+                  ],
                 ),
               ),
 
               // Task Status
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: RichText(
-                  text: TextSpan(
-                    style: const TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
-                    children: [
-                      const TextSpan(text: 'Status: '),
-                      TextSpan(
-                        text: task.status,
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: _getStatusColor(task.status),
-                          fontWeight: FontWeight.bold, // Making status bold
-                        ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Status:',
+                      style: TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      task.status,
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: _getStatusColor(task.status),
+                        fontWeight: FontWeight.bold, // Making status bold
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
 
               // Assigned Employee
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: RichText(
-                  text: TextSpan(
-                    style: const TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
-                    children: [
-                      const TextSpan(text: 'Assigned Employee: '),
-                      TextSpan(
-                        text: employeeName ?? task.employeeID, // Show employee name or employee ID if name is not available
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
-                      ),
-                    ],
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Assigned Employee:',
+                      style: TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      employeeName != null
+                          ? '$employeeName (${task.employeeID})'  // Show FirstName LastName (EmployeeID)
+                          : task.employeeID,  // Fallback to EmployeeID if name is unavailable
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
+                    ),
+                  ],
                 ),
               ),
 
               // Due Date
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: RichText(
-                  text: TextSpan(
-                    style: const TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
-                    children: [
-                      const TextSpan(text: 'Due Date: '),
-                      TextSpan(
-                        text: _formatDate(task.dueDate.toLocal()),
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
-                      ),
-                    ],
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Due Date:',
+                      style: TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      _formatDate(task.dueDate.toLocal()),
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
+                    ),
+                  ],
                 ),
               ),
 
               // Assigned Date
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: RichText(
-                  text: TextSpan(
-                    style: const TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
-                    children: [
-                      const TextSpan(text: 'Assigned on: '),
-                      TextSpan(
-                        text: _formatDate(task.assignmentDate.toLocal()),
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
-                      ),
-                    ],
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Assigned on:',
+                      style: TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      _formatDate(task.assignmentDate.toLocal()),
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
+                    ),
+                  ],
                 ),
               ),
 

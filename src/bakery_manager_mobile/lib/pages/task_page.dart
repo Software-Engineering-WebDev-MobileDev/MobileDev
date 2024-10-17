@@ -302,7 +302,7 @@ class _TaskItem extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'ID: ${task.employeeID}', // Display Employee ID
+                        task.employeeID, // Display Employee ID
                         style: const TextStyle(
                           color: Color.fromARGB(255, 140, 72, 27),
                         ),
