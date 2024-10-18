@@ -419,6 +419,79 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> fetchIngredientHistory({
+    required String inventoryId,
+    int pageSize = 30,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/inventory_change');
+    final sessionId = await SessionManager().getSessionToken();
+
+    if (sessionId == null) {
+      return {
+        'status': 'error',
+        'reason': 'Missing session ID',
+      };
+    }
+
+    final headers = <String, String>{
+      'session_id': sessionId,
+      'page_size': pageSize.toString(),
+    };
+
+    List<dynamic> allRecords = [];
+    int page = 1;
+
+    try {
+      while (true) {
+        // Update headers with the current page
+        headers['page'] = page.toString();
+
+        final response = await http.get(url, headers: headers);
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+
+          if (data['status'] == 'success') {
+            final filteredContent = (data['content'] as List<dynamic>).where((item) {
+              return item['InventoryID'] == inventoryId;
+            }).toList();
+
+            allRecords.addAll(filteredContent);
+
+            // Check if we reached the last page
+            if (page >= data['page_count']) {
+              break; // No more pages to fetch
+            }
+
+            page++; // Go to the next page
+          } else {
+            return {
+              'status': 'error',
+              'reason': data['reason'] ?? 'Failed to fetch ingredient history',
+            };
+          }
+        } else {
+          final responseBody = jsonDecode(response.body);
+          return {
+            'status': 'error',
+            'reason': responseBody['reason'] ?? 'Failed to fetch ingredient history',
+          };
+        }
+      }
+
+      return {
+        'status': 'success',
+        'page_count': page,
+        'content': allRecords,
+      };
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+  
   // Create Account Function
   static Future<Map<String, dynamic>> createAccount(
       String firstName,

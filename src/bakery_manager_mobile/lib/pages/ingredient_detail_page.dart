@@ -13,6 +13,11 @@ class IngredientDetailPage extends StatelessWidget {
     final Ingredient ingredient =
         ModalRoute.of(context)!.settings.arguments as Ingredient;
 
+    // Check if quantity is below the reorder amount
+    bool isLowStock = ingredient.quantity < ingredient.reorderAmount;
+    // Check if quantity is within caution range (20% of reorder amount)
+    bool isCautionStock = ingredient.quantity <= (1.2 * ingredient.reorderAmount);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ingredient Details',
@@ -59,7 +64,51 @@ class IngredientDetailPage extends StatelessWidget {
                 style: const TextStyle(fontSize: 16),
                 textAlign: TextAlign.center, // Center text
               ),
-              const SizedBox(height: 32), // Add space before the buttons
+              const SizedBox(height: 16),
+
+              // Display low stock warning if quantity is less than reorder amount
+              if (isLowStock)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.warning, color: Colors.red),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Warning: Stock is low! Order more ${ingredient.name}.',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              // Display caution message if quantity is close to reorder amount
+              if (isCautionStock && !isLowStock)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.warning, color: Colors.amber),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Caution: Stock is getting low! \nOrder more ${ingredient.name} soon.',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amber,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              const SizedBox(height: 16), // Add space before the buttons
 
               Center(
                 child: Column(
