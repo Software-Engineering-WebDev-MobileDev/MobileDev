@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart'; 
+import 'package:bakery_manager_mobile/assets/constants.dart';
+import 'package:bakery_manager_mobile/services/api_service.dart';
+import 'package:flutter/material.dart';
 import '../models/ingredient.dart';
 
 class EditStockPage extends StatefulWidget {
@@ -17,8 +19,8 @@ class _EditStockPageState extends State<EditStockPage> {
   @override
   void initState() {
     super.initState();
-    _stockAmount = widget.ingredient.quantity.toInt();
-    _stockController.text = '$_stockAmount';
+    _stockAmount = 0;
+    _stockController.text = '0';
   }
 
   void _increaseStock() {
@@ -29,29 +31,45 @@ class _EditStockPageState extends State<EditStockPage> {
   }
 
   void _decreaseStock() {
-    if (_stockAmount > 0) {
-      setState(() {
-        _stockAmount--;
-        _stockController.text = '$_stockAmount';
-      });
-    }
+    setState(() {
+      _stockAmount--;
+      _stockController.text = '$_stockAmount';
+    });
   }
 
   void _onTextChanged(String value) {
     final int? newValue = int.tryParse(value);
-    if (newValue != null && newValue >= 0) {
+    if (newValue != null) {
       setState(() {
         _stockAmount = newValue;
       });
     }
   }
 
-  void _saveChanges() {
-    // TODO: Add logic to connect to the database and update the stock amount
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Stock updated successfully')),
-    );
-    Navigator.of(context).pop();
+  void _saveChanges() async{
+    try {
+      final result = await ApiService.inventoryChange(
+        changeAmount: _stockAmount.toDouble(),
+        inventoryId: widget.ingredient.ingredientID,
+        description: 'Manual Stock Update',
+      );
+
+      if (!mounted) return;
+      if (result['status'] == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Stock updated successfully')),
+        );
+        Navigator.of(context).popUntil(ModalRoute.withName(ingredientPageRoute));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${result['reason']}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
   }
 
   @override
@@ -74,7 +92,7 @@ class _EditStockPageState extends State<EditStockPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              'Current Stock for ${widget.ingredient.name}',
+              'Stock Adjustment For ${widget.ingredient.name}',
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),

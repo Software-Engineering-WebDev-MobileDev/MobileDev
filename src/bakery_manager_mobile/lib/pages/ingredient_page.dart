@@ -25,14 +25,14 @@ class IngredientPageState extends State<IngredientPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final NavigatorState navigator = Navigator.of(context);
       final MyNavigatorObserver? observer =
-        _observer = navigator.widget.observers.firstWhere(
+          _observer = navigator.widget.observers.firstWhere(
         (observer) => observer is MyNavigatorObserver,
       ) as MyNavigatorObserver?;
       if (observer != null) {
         observer.onReturned = () async {
           // Refetch account details when returning from another page
           if (mounted) {
-            setState(() {
+            setState((){
               _futureIngredients = _fetchIngredients();
             });
           } // Trigger rebuild
@@ -40,7 +40,6 @@ class IngredientPageState extends State<IngredientPage> {
       }
     });
   }
-
 
   @override
   void dispose() {
@@ -55,12 +54,14 @@ class IngredientPageState extends State<IngredientPage> {
     final result = await ApiService.getInventory();
 
     if (result['status'] == 'success') {
+      _filteredIngredients = await result['inventory'];
       return result['inventory'];
     } else {
-      throw Exception(result['reason']);
+      debugPrint("Failed");
+      return [];
     }
     // List<Ingredient> ingredientList = [(Ingredient(ingredientID: "38462", name: "Test", quantity: 0, quantityUnit: "g", shelfLife: 0, shelfLifeUnit: "shelfLifeUnit", reorderAmount: 0, reorderUnit: "reorderUnit"))];
- 
+
     // return Future.value(ingredientList);
   }
 
@@ -89,10 +90,9 @@ class IngredientPageState extends State<IngredientPage> {
             Text(
               'All Ingredients',
               style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: Colors.white
-              ),
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
             ),
           ],
         ),

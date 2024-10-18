@@ -373,6 +373,52 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> inventoryChange({
+    required double changeAmount,
+    required String inventoryId,
+    String? description,
+    String? expirationDate,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/inventory_change');
+    final sessionId = await SessionManager().getSessionToken();
+    final headers = <String, String>{
+      'session_id': sessionId!,
+      'change_amount': changeAmount.toString(),
+      'inventory_id': inventoryId,
+    };
+
+    // Add optional fields if they are provided
+    if (description != null) {
+      headers['description'] = description;
+    }
+
+    if (expirationDate != null) {
+      headers['expiration_date'] = expirationDate;
+    }
+
+    try {
+      final response = await http.post(url, headers: headers);
+
+      if (response.statusCode == 201) {
+        return {
+          'status': 'success',
+          'hist_id': jsonDecode(response.body)['hist_id']
+        };
+      } else {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'error',
+          'reason': responseBody['reason'] ?? 'Failed to record inventory change',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
   // Create Account Function
   static Future<Map<String, dynamic>> createAccount(
       String firstName,
