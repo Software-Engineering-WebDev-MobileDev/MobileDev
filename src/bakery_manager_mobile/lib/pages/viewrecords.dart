@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // For formatting dates
 import '../models/ingredient.dart';
+import '../services/api_service.dart'; // Assume this is where the API call is defined
 
 class ViewRecordsPage extends StatelessWidget {
   final Ingredient ingredient;
@@ -11,8 +13,12 @@ class ViewRecordsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Records for ${ingredient.name}',
-            style: const TextStyle(color: Colors.white)),
-        backgroundColor: Colors.orange,
+            style: const TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: Colors.white),
+        ),
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51), // Match the color
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
@@ -32,7 +38,7 @@ class ViewRecordsPage extends StatelessWidget {
             const SizedBox(height: 16),
             Expanded(
               child: FutureBuilder<List<Map<String, dynamic>>>(
-                future: _fetchRecords(), // Placeholder for fetching records from the database
+                future: _fetchRecords(ingredient.ingredientID),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -46,21 +52,38 @@ class ViewRecordsPage extends StatelessWidget {
                       itemCount: records.length,
                       itemBuilder: (context, index) {
                         final record = records[index];
+                        final int changeAmount = record['ChangeAmount'];
+                        final String? description = record['Description'];
+                        final String? expirationDate = record['ExpirationDate'];
+                        final String dateUsed = record['Date'];
+
+                        // Parse and format dates to local time
+                        final formattedDateUsed = _formatDateToLocal(dateUsed);
+                        final formattedExpirationDate = expirationDate != null
+                            ? _formatDateToLocal(expirationDate)
+                            : null;
+
                         return Card(
                           elevation: 4,
+                          color: changeAmount < 0
+                              ? Colors.red[100]
+                              : Colors.green[100], // Set card color
                           margin: const EdgeInsets.symmetric(vertical: 8),
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Amount Used: ${record['amountUsed']}'),
-                                Text('Recipe Used: ${record['recipeUsed']}'),
-                                Text('Date/Time Used: ${record['dateTimeUsed']}'),
-                                Text('Amount Started With: ${record['amountStartedWith']}'),
-                                Text('Amount Left: ${record['amountLeft']}'),
-                                Text('Date/Time Added: ${record['dateTimeAdded']}'),
-                                Text('Expiration Date: ${record['expirationDate']}'),
+                                Text('Amount Used: ${_formatAmount(changeAmount)}',
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold)),
+                                if (description != null &&
+                                    description.isNotEmpty)
+                                  Text('Description: $description'),
+                                Text('Date/Time Used: $formattedDateUsed'),
+                                if (formattedExpirationDate != null)
+                                  Text(
+                                      'Expiration Date: $formattedExpirationDate'),
                               ],
                             ),
                           ),
@@ -77,32 +100,38 @@ class ViewRecordsPage extends StatelessWidget {
     );
   }
 
-  Future<List<Map<String, dynamic>>> _fetchRecords() async {
-    // Placeholder for fetching records from the database
-    // TODO: Implement database connection and query to get ingredient records
+  Future<List<Map<String, dynamic>>> _fetchRecords(String ingredientId) async {
+    // Make an API call to fetch the records for the given ingredient
+    final response = await ApiService.fetchIngredientHistory(
+      inventoryId: ingredientId,
+    );
 
-    await Future.delayed(const Duration(seconds: 2)); // Simulate network delay
+    if (response['status'] == 'success') {
+      return List<Map<String, dynamic>>.from(response['content']);
+    } else {
+      throw Exception(response['reason'] ?? 'Failed to fetch records');
+    }
+  }
 
-    // Placeholder data for records
-    return [
-      {
-        'amountUsed': 5,
-        'recipeUsed': 'Recipe 1',
-        'dateTimeUsed': '2024-01-01 12:00 PM',
-        'amountStartedWith': 5,
-        'amountLeft': 5,
-        'dateTimeAdded': '2024-01-01 09:00 AM',
-        'expirationDate': '2024-01-10'
-      },
-      {
-        'amountUsed': 5,
-        'recipeUsed': 'Recipe 2',
-        'dateTimeUsed': '2024-01-02 02:00 PM',
-        'amountStartedWith': 5,
-        'amountLeft': 5,
-        'dateTimeAdded': '2024-01-01 09:00 AM',
-        'expirationDate': '2024-01-10'
-      },
-    ];
+  // Helper function to format a date string to local time
+  String _formatDateToLocal(String dateString) {
+    final DateTime parsedDate = DateTime.parse(dateString).toLocal();
+    return DateFormat('yyyy-MM-dd hh:mm a')
+        .format(parsedDate); // Formatting date to local time
+  }
+
+  // Helper function to format the amount to either grams or kilograms
+  String _formatAmount(int amount) {
+    String unit = 'g';
+    double value = amount.abs().toDouble(); // Use absolute value for formatting
+
+    if (value >= 1000) {
+      // Convert to kilograms if the amount is 1000 grams or more
+      value /= 1000;
+      unit = 'kg'; // Change unit to kg
+    }
+
+    // Return formatted string, including the sign
+    return '${amount < 0 ? '-' : ''}${value.toStringAsFixed(2)} $unit';
   }
 }

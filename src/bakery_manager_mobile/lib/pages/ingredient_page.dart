@@ -1,6 +1,7 @@
 import 'dart:async'; // Import to use Future and Timer
 import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:bakery_manager_mobile/services/api_service.dart';
+import 'package:bakery_manager_mobile/services/navigator_observer.dart';
 import 'package:flutter/material.dart';
 import '../models/ingredient.dart';
 import 'package:bakery_manager_mobile/pages/add_ingredients.dart';
@@ -15,26 +16,56 @@ class IngredientPage extends StatefulWidget {
 class IngredientPageState extends State<IngredientPage> {
   late Future<List<Ingredient>> _futureIngredients;
   List<Ingredient> _filteredIngredients = [];
+  MyNavigatorObserver? _observer;
 
   @override
   void initState() {
     super.initState();
-    _futureIngredients =
-        _fetchIngredients(); // Fetch ingredients from API initially
+    _futureIngredients = _fetchIngredients();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final NavigatorState navigator = Navigator.of(context);
+      final MyNavigatorObserver? observer =
+          _observer = navigator.widget.observers.firstWhere(
+        (observer) => observer is MyNavigatorObserver,
+      ) as MyNavigatorObserver?;
+      if (observer != null) {
+        observer.onReturned = () async {
+          // Refetch account details when returning from another page
+          if (mounted) {
+            setState(() {
+              _futureIngredients = _fetchIngredients();
+            });
+          } // Trigger rebuild
+        };
+      }
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _futureIngredients = _fetchIngredients();
+  }
+
+  @override
+  void dispose() {
+    if (_observer != null) {
+      _observer!.onReturned = null; // Remove the callback to avoid memory leaks
+    }
+    super.dispose();
   }
 
   Future<List<Ingredient>> _fetchIngredients() async {
-    // // Call getInventory function
-    // final result = await ApiService.getInventory();
+    // Call getInventory function
+    final result = await ApiService.getInventory();
 
-    // // if (result['status'] == 'success') {
-    // //   return result['inventory'];
-    // // } else {
-    // //   throw Exception(result['reason']);
-    // // //
-    List<Ingredient> ingredientList = [(Ingredient(ingredientID: "38462", name: "Test", quantity: 0, quantityUnit: "g", shelfLife: 0, shelfLifeUnit: "shelfLifeUnit", reorderAmount: 0, reorderUnit: "reorderUnit"))];
- 
-    return Future.value(ingredientList);
+    if (result['status'] == 'success') {
+      _filteredIngredients = await result['inventory'];
+      return result['inventory'];
+    } else {
+      debugPrint("Failed");
+      return [];
+    }
   }
 
   void _filterIngredients(String query, List<Ingredient> ingredients) {
@@ -55,19 +86,14 @@ class IngredientPageState extends State<IngredientPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51), // Matching the recipe page color
         shape: const RoundedRectangleBorder(),
-        title: const Stack(
-          children: <Widget>[
-            Text(
-              'All Ingredients',
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: Colors.white
-              ),
-            ),
-          ],
+        title: const Text(
+          'All Ingredients',
+          style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: Colors.white),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -138,7 +164,7 @@ class IngredientPageState extends State<IngredientPage> {
             const SizedBox(height: 16),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+                backgroundColor: const Color.fromARGB(255, 209, 125, 51), // Match button color
                 padding:
                     const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
@@ -154,8 +180,11 @@ class IngredientPageState extends State<IngredientPage> {
                   ),
                 );
               },
-              icon: const Icon(Icons.add),
-              label: const Text('Add ingredient'),
+              icon: const Icon(Icons.add, color: Color.fromARGB(255, 246, 235, 216),),
+              label: const Text(
+                'Add ingredient',
+                style: TextStyle(color: Colors.white), // Match text color
+              ),
             ),
           ],
         ),
@@ -172,48 +201,42 @@ class _IngredientItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        //Navigate to ingredient details page.
+        // Navigate to ingredient details page.
         Navigator.pushNamed(context, ingredientDetailsPageRoute,
             arguments: ingredient);
       },
-      child: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 2,
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
         ),
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          color: const Color(0xFFFDF1E0),
-          elevation: 4,
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
+        color: const Color.fromARGB(255, 246, 235, 216), // Match card color
+        elevation: 4, // 3D effect
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
                   ingredient.name,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(255, 140, 72, 27), // Match text color
                   ),
+                  overflow: TextOverflow.ellipsis, // Handle long text
                 ),
-                Text(
-                  '${ingredient.quantity} ${ingredient.quantityUnit}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                  ),
+              ),
+              const SizedBox(width: 8), // Add spacing between text and quantity
+              Text(
+                '${ingredient.quantity}${ingredient.quantityUnit}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Color.fromARGB(255, 140, 72, 27), // Match text color
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
