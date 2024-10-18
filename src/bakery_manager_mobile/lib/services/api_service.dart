@@ -491,7 +491,91 @@ class ApiService {
       };
     }
   }
-  
+
+  static Future<Map<String, dynamic>> deleteInventoryHistory({
+    required String histId,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/inventory_change');
+    final sessionId = await SessionManager().getSessionToken();
+
+    if (sessionId == null) {
+      return {
+        'status': 'error',
+        'reason': 'Missing session ID',
+      };
+    }
+
+    final headers = <String, String>{
+      'session_id': sessionId,
+      'hist_id': histId,
+    };
+
+    try {
+      final response = await http.delete(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          'status': 'success',
+          'content': data,
+        };
+      } else {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'error',
+          'reason': responseBody['reason'] ?? 'Failed to delete inventory history',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> deleteInventoryItem({
+    required String inventoryId,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/inventory_item');
+    final sessionId = await SessionManager().getSessionToken();
+
+    if (sessionId == null) {
+      return {
+        'status': 'error',
+        'reason': 'Missing session ID',
+      };
+    }
+
+    final headers = <String, String>{
+      'session_id': sessionId,
+      'inventory_id': inventoryId,
+    };
+
+    try {
+      final response = await http.delete(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          'status': 'success',
+          'content': data,
+        };
+      } else {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'error',
+          'reason': responseBody['reason'] ?? 'Failed to delete inventory item',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
   // Create Account Function
   static Future<Map<String, dynamic>> createAccount(
       String firstName,

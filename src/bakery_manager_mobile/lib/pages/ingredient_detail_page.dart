@@ -1,3 +1,4 @@
+import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:flutter/material.dart';
 import '../models/ingredient.dart';
 import 'package:bakery_manager_mobile/pages/edit_ingredients.dart';
@@ -16,7 +17,8 @@ class IngredientDetailPage extends StatelessWidget {
     // Check if quantity is below the reorder amount
     bool isLowStock = ingredient.quantity < ingredient.reorderAmount;
     // Check if quantity is within caution range (20% of reorder amount)
-    bool isCautionStock = ingredient.quantity <= (1.2 * ingredient.reorderAmount);
+    bool isCautionStock =
+        ingredient.quantity <= (1.2 * ingredient.reorderAmount);
 
     return Scaffold(
       appBar: AppBar(
@@ -197,7 +199,7 @@ class IngredientDetailPage extends StatelessWidget {
                         ),
                       ),
                       onPressed: () {
-                        // TODO: Implement Delete Ingredient functionality
+                        // Show dialog to confirm deletion
                         showDialog(
                           context: context,
                           builder: (BuildContext context) {
@@ -214,13 +216,63 @@ class IngredientDetailPage extends StatelessWidget {
                                 ),
                                 TextButton(
                                   child: const Text('Delete'),
-                                  onPressed: () {
-                                    // TODO: Implement delete functionality here
-                                    Navigator.of(context).pop();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text('Ingredient deleted')),
-                                    );
+                                  onPressed: () async {
+                                    // Fetch the history records for this ingredient
+                                    final historyResponse =
+                                        await ApiService.fetchIngredientHistory(
+                                            inventoryId:
+                                                ingredient.ingredientID);
+
+                                    if (historyResponse['status'] ==
+                                        'success') {
+                                      // Iterate through the history records and delete each one
+                                      for (var record
+                                          in historyResponse['content']) {
+                                        final deleteResponse = await ApiService
+                                            .deleteInventoryHistory(
+                                          histId: record[
+                                              'HistID'], // Use the appropriate field for history ID
+                                        );
+
+                                        if (deleteResponse['status'] !=
+                                            'success') {
+                                          // Handle the error as needed (you may want to log or show an error message)
+                                        }
+                                      }
+
+                                      // Now delete the ingredient itself
+                                      final deleteIngredientResponse =
+                                          await ApiService.deleteInventoryItem(
+                                        inventoryId: ingredient.ingredientID,
+                                      );
+
+                                      if (deleteIngredientResponse['status'] ==
+                                          'success') {
+                                        Navigator.of(context)
+                                            .pop(); // Close the dialog
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  'Ingredient and its history deleted')),
+                                        );
+                                        Navigator.pop(context);
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                              content: Text(
+                                                  'Failed to delete ingredient: ${deleteIngredientResponse['reason']}')),
+                                        );
+                                      }
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                            content: Text(
+                                                'Failed to fetch history: ${historyResponse['reason']}')),
+                                      );
+                                    }
                                   },
                                 ),
                               ],
