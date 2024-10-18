@@ -160,7 +160,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                   // Delete Recipe Button
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 140, 72, 27),
+                      backgroundColor: const Color(0xFF800000),
                       padding: const EdgeInsets.symmetric(
                           vertical: 16, horizontal: 32),
                       shape: RoundedRectangleBorder(
