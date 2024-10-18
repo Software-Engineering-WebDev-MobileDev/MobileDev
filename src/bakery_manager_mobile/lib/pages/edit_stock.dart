@@ -48,6 +48,9 @@ class _EditStockPageState extends State<EditStockPage> {
 
   void _saveChanges() async{
     try {
+      if (_stockAmount == 0) {
+        throw Exception("Stock changes cannot be zero");
+      }
       final result = await ApiService.inventoryChange(
         changeAmount: _stockAmount.toDouble(),
         inventoryId: widget.ingredient.ingredientID,
@@ -62,7 +65,7 @@ class _EditStockPageState extends State<EditStockPage> {
         Navigator.of(context).popUntil(ModalRoute.withName(ingredientPageRoute));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${result['reason']}')),
+          SnackBar(content: Text('${result['reason']}')),
         );
       }
     } catch (e) {

@@ -32,7 +32,7 @@ class IngredientPageState extends State<IngredientPage> {
         observer.onReturned = () async {
           // Refetch account details when returning from another page
           if (mounted) {
-            setState((){
+            setState(() {
               _futureIngredients = _fetchIngredients();
             });
           } // Trigger rebuild
@@ -60,9 +60,6 @@ class IngredientPageState extends State<IngredientPage> {
       debugPrint("Failed");
       return [];
     }
-    // List<Ingredient> ingredientList = [(Ingredient(ingredientID: "38462", name: "Test", quantity: 0, quantityUnit: "g", shelfLife: 0, shelfLifeUnit: "shelfLifeUnit", reorderAmount: 0, reorderUnit: "reorderUnit"))];
-
-    // return Future.value(ingredientList);
   }
 
   void _filterIngredients(String query, List<Ingredient> ingredients) {
@@ -83,18 +80,14 @@ class IngredientPageState extends State<IngredientPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51), // Matching the recipe page color
         shape: const RoundedRectangleBorder(),
-        title: const Stack(
-          children: <Widget>[
-            Text(
-              'All Ingredients',
-              style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
-            ),
-          ],
+        title: const Text(
+          'All Ingredients',
+          style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: Colors.white),
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -165,7 +158,7 @@ class IngredientPageState extends State<IngredientPage> {
             const SizedBox(height: 16),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+                backgroundColor: const Color.fromARGB(255, 209, 125, 51), // Match button color
                 padding:
                     const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
@@ -182,7 +175,10 @@ class IngredientPageState extends State<IngredientPage> {
                 );
               },
               icon: const Icon(Icons.add),
-              label: const Text('Add ingredient'),
+              label: const Text(
+                'Add ingredient',
+                style: TextStyle(color: Colors.white), // Match text color
+              ),
             ),
           ],
         ),
@@ -199,48 +195,42 @@ class _IngredientItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        //Navigate to ingredient details page.
+        // Navigate to ingredient details page.
         Navigator.pushNamed(context, ingredientDetailsPageRoute,
             arguments: ingredient);
       },
-      child: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 2,
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
         ),
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          color: const Color(0xFFFDF1E0),
-          elevation: 4,
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
+        color: const Color.fromARGB(255, 246, 235, 216), // Match card color
+        elevation: 4, // 3D effect
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
                   ingredient.name,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(255, 140, 72, 27), // Match text color
                   ),
+                  overflow: TextOverflow.ellipsis, // Handle long text
                 ),
-                Text(
-                  '${ingredient.quantity} g',
-                  style: const TextStyle(
-                    fontSize: 16,
-                  ),
+              ),
+              const SizedBox(width: 8), // Add spacing between text and quantity
+              Text(
+                '${ingredient.quantity} g',
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Color.fromARGB(255, 140, 72, 27), // Match text color
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

@@ -1,5 +1,4 @@
 import 'package:bakery_manager_mobile/services/api_service.dart';
-import 'package:bakery_manager_mobile/services/session_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:bakery_manager_mobile/assets/constants.dart';
 

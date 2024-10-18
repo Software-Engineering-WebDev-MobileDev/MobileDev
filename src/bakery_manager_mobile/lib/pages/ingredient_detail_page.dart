@@ -248,8 +248,7 @@ class IngredientDetailPage extends StatelessWidget {
 
                                       if (deleteIngredientResponse['status'] ==
                                           'success') {
-                                        Navigator.of(context)
-                                            .pop(); // Close the dialog
+                                        Navigator.of(context).pop(); // Close the dialog
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
                                           const SnackBar(

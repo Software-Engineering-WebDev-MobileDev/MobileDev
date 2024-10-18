@@ -576,6 +576,67 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> updateInventoryItem({
+    required String inventoryId,
+    required String name,
+    required String? shelfLife,
+    required String? shelfLifeUnit,
+    required int reorderAmount,
+    required String reorderUnit,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/inventory_item');
+    final sessionId = await SessionManager().getSessionToken();
+
+    // Check if the session ID is available
+    if (sessionId == null) {
+      return {
+        'status': 'error',
+        'reason': 'Missing session ID',
+      };
+    }
+
+    // Construct headers
+    final headers = <String, String>{
+      'session_id': sessionId,
+      'inventory_id': inventoryId,
+      'name': name,
+      'reorder_amount': reorderAmount.toString(),
+      'reorder_unit': reorderUnit,
+    };
+
+    // Add shelf life headers if provided
+    if (shelfLife != null) {
+      headers['shelf_life'] = shelfLife;
+    }
+    if (shelfLifeUnit != null) {
+      headers['shelf_life_unit'] = shelfLifeUnit;
+    }
+
+    try {
+      // Send PUT request
+      final response = await http.put(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          'status': 'success',
+          'inventory_id': data['inventory_id'],
+        };
+      } else {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'error',
+          'reason': responseBody['reason'] ?? 'Failed to update inventory item',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
   // Create Account Function
   static Future<Map<String, dynamic>> createAccount(
       String firstName,

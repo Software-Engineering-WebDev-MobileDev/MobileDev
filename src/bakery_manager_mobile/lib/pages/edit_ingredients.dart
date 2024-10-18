@@ -1,3 +1,5 @@
+import 'package:bakery_manager_mobile/assets/constants.dart';
+import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:flutter/material.dart';
 import '../models/ingredient.dart';
 
@@ -13,8 +15,6 @@ class EditIngredientPage extends StatefulWidget {
 class _EditIngredientPageState extends State<EditIngredientPage> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _nameController;
-  late TextEditingController _quantityController;
-  late TextEditingController _quantityUnitController;
   late TextEditingController _shelfLifeController;
   late TextEditingController _shelfLifeUnitController;
   late TextEditingController _reorderAmountController;
@@ -24,20 +24,44 @@ class _EditIngredientPageState extends State<EditIngredientPage> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.ingredient.name);
-    _quantityController = TextEditingController(text: widget.ingredient.quantity.toString());
     _shelfLifeController = TextEditingController(text: widget.ingredient.shelfLife.toString());
     _shelfLifeUnitController = TextEditingController(text: widget.ingredient.shelfLifeUnit);
     _reorderAmountController = TextEditingController(text: widget.ingredient.reorderAmount.toString());
     _reorderUnitController = TextEditingController(text: widget.ingredient.reorderUnit);
   }
 
-  void _saveChanges() {
+  void _saveChanges() async {
     if (_formKey.currentState!.validate()) {
-      // TODO: Add logic to connect to the database and update the ingredient
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Ingredient updated successfully')),
+      // Gather the data from the controllers
+      final name = _nameController.text;
+      final shelfLife = _shelfLifeController.text.isNotEmpty ? _shelfLifeController.text : null;
+      final shelfLifeUnit = _shelfLifeUnitController.text.isNotEmpty ? _shelfLifeUnitController.text : null;
+      final reorderAmount = int.tryParse(_reorderAmountController.text) ?? 0;
+      final reorderUnit = _reorderUnitController.text;
+
+      // Call the update API
+      final response = await ApiService.updateInventoryItem(
+        inventoryId: widget.ingredient.ingredientID,
+        name: name,
+        shelfLife: shelfLife,
+        shelfLifeUnit: shelfLifeUnit,
+        reorderAmount: reorderAmount,
+        reorderUnit: reorderUnit,
       );
-      Navigator.of(context).pop();
+
+      // Handle the response
+      if(!mounted) return;
+      
+      if (response['status'] == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Ingredient updated successfully')),
+        );
+        Navigator.of(context).popUntil(ModalRoute.withName(ingredientPageRoute)); // Close the page
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: ${response['reason']}')),
+        );
+      }
     }
   }
 
@@ -66,29 +90,6 @@ class _EditIngredientPageState extends State<EditIngredientPage> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter the ingredient name';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _quantityController,
-                decoration: const InputDecoration(labelText: 'Quantity'),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter the quantity';
-                  } else if (double.tryParse(value) == null) {
-                    return 'Please enter a valid number';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _quantityUnitController,
-                decoration: const InputDecoration(labelText: 'Quantity Unit'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter the quantity unit';
                   }
                   return null;
                 },
@@ -123,7 +124,7 @@ class _EditIngredientPageState extends State<EditIngredientPage> {
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter the reorder amount';
-                  } else if (double.tryParse(value) == null) {
+                  } else if (int.tryParse(value) == null) {
                     return 'Please enter a valid number';
                   }
                   return null;
