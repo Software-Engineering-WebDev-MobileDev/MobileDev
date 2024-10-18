@@ -1,18 +1,16 @@
 class Ingredient {
   final String ingredientID;
   final String name;
-  final double quantity;
-  final String quantityUnit;
-  final double shelfLife;
+  final int quantity;
+  final int shelfLife;
   final String shelfLifeUnit;
-  final double reorderAmount;
+  final int reorderAmount;
   final String reorderUnit;
 
   Ingredient(
       {required this.ingredientID,
       required this.name,
       required this.quantity,
-      required this.quantityUnit,
       required this.shelfLife,
       required this.shelfLifeUnit,
       required this.reorderAmount,
@@ -22,11 +20,10 @@ class Ingredient {
     return Ingredient(
         ingredientID: json['InventoryID'] ?? '',
         name: json['Name'] ?? '',
-        quantity: json['Quantity'] ?? 0.0,
-        quantityUnit: json['QuantityUnit'] ?? '',
-        shelfLife: json['ShelfLife']?.toDouble() ?? 0.0,
+        quantity: json['Amount'] ?? 0,
+        shelfLife: json['ShelfLife'] ?? 0,
         shelfLifeUnit: json['ShelfLifeUnit'] ?? '',
-        reorderAmount: json['ReorderAmount'].toDouble() ?? 0.0,
+        reorderAmount: json['ReorderAmount'] ?? 0,
         reorderUnit: json['ReorderUnit'] ?? '');
   }
 }

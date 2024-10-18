@@ -49,7 +49,7 @@ class IngredientDetailPage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                '• Quantity: ${ingredient.quantity} ${ingredient.quantityUnit}',
+                '• Quantity: ${ingredient.quantity} g',
                 style: const TextStyle(fontSize: 16),
                 textAlign: TextAlign.center, // Center text
               ),

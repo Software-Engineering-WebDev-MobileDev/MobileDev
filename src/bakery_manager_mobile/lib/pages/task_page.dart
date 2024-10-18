@@ -45,11 +45,6 @@ class TaskPageState extends State<TaskPage> {
     });
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _futureTasks = _fetchTasks();
-  }
 
   @override
   void dispose() {

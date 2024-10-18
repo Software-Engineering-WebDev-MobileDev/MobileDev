@@ -1,6 +1,7 @@
 import 'dart:async'; // Import to use Future and Timer
 import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:bakery_manager_mobile/services/api_service.dart';
+import 'package:bakery_manager_mobile/services/navigator_observer.dart';
 import 'package:flutter/material.dart';
 import '../models/ingredient.dart';
 import 'package:bakery_manager_mobile/pages/add_ingredients.dart';
@@ -15,26 +16,52 @@ class IngredientPage extends StatefulWidget {
 class IngredientPageState extends State<IngredientPage> {
   late Future<List<Ingredient>> _futureIngredients;
   List<Ingredient> _filteredIngredients = [];
+  MyNavigatorObserver? _observer;
 
   @override
   void initState() {
     super.initState();
-    _futureIngredients =
-        _fetchIngredients(); // Fetch ingredients from API initially
+    _futureIngredients = _fetchIngredients();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final NavigatorState navigator = Navigator.of(context);
+      final MyNavigatorObserver? observer =
+        _observer = navigator.widget.observers.firstWhere(
+        (observer) => observer is MyNavigatorObserver,
+      ) as MyNavigatorObserver?;
+      if (observer != null) {
+        observer.onReturned = () async {
+          // Refetch account details when returning from another page
+          if (mounted) {
+            setState(() {
+              _futureIngredients = _fetchIngredients();
+            });
+          } // Trigger rebuild
+        };
+      }
+    });
+  }
+
+
+  @override
+  void dispose() {
+    if (_observer != null) {
+      _observer!.onReturned = null; // Remove the callback to avoid memory leaks
+    }
+    super.dispose();
   }
 
   Future<List<Ingredient>> _fetchIngredients() async {
-    // // Call getInventory function
-    // final result = await ApiService.getInventory();
+    // Call getInventory function
+    final result = await ApiService.getInventory();
 
-    // // if (result['status'] == 'success') {
-    // //   return result['inventory'];
-    // // } else {
-    // //   throw Exception(result['reason']);
-    // // //
-    List<Ingredient> ingredientList = [(Ingredient(ingredientID: "38462", name: "Test", quantity: 0, quantityUnit: "g", shelfLife: 0, shelfLifeUnit: "shelfLifeUnit", reorderAmount: 0, reorderUnit: "reorderUnit"))];
+    if (result['status'] == 'success') {
+      return result['inventory'];
+    } else {
+      throw Exception(result['reason']);
+    }
+    // List<Ingredient> ingredientList = [(Ingredient(ingredientID: "38462", name: "Test", quantity: 0, quantityUnit: "g", shelfLife: 0, shelfLifeUnit: "shelfLifeUnit", reorderAmount: 0, reorderUnit: "reorderUnit"))];
  
-    return Future.value(ingredientList);
+    // return Future.value(ingredientList);
   }
 
   void _filterIngredients(String query, List<Ingredient> ingredients) {
@@ -207,7 +234,7 @@ class _IngredientItem extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '${ingredient.quantity} ${ingredient.quantityUnit}',
+                  '${ingredient.quantity} g',
                   style: const TextStyle(
                     fontSize: 16,
                   ),

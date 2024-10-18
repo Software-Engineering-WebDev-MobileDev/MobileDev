@@ -25,7 +25,6 @@ class _EditIngredientPageState extends State<EditIngredientPage> {
     super.initState();
     _nameController = TextEditingController(text: widget.ingredient.name);
     _quantityController = TextEditingController(text: widget.ingredient.quantity.toString());
-    _quantityUnitController = TextEditingController(text: widget.ingredient.quantityUnit);
     _shelfLifeController = TextEditingController(text: widget.ingredient.shelfLife.toString());
     _shelfLifeUnitController = TextEditingController(text: widget.ingredient.shelfLifeUnit);
     _reorderAmountController = TextEditingController(text: widget.ingredient.reorderAmount.toString());
