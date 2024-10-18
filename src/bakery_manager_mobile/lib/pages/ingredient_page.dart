@@ -42,6 +42,12 @@ class IngredientPageState extends State<IngredientPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _futureIngredients = _fetchIngredients();
+  }
+
+  @override
   void dispose() {
     if (_observer != null) {
       _observer!.onReturned = null; // Remove the callback to avoid memory leaks
@@ -174,7 +180,7 @@ class IngredientPageState extends State<IngredientPage> {
                   ),
                 );
               },
-              icon: const Icon(Icons.add),
+              icon: const Icon(Icons.add, color: Color.fromARGB(255, 246, 235, 216),),
               label: const Text(
                 'Add ingredient',
                 style: TextStyle(color: Colors.white), // Match text color
@@ -224,7 +230,7 @@ class _IngredientItem extends StatelessWidget {
               ),
               const SizedBox(width: 8), // Add spacing between text and quantity
               Text(
-                '${ingredient.quantity} g',
+                '${ingredient.quantity}${ingredient.quantityUnit}',
                 style: const TextStyle(
                   fontSize: 16,
                   color: Color.fromARGB(255, 140, 72, 27), // Match text color

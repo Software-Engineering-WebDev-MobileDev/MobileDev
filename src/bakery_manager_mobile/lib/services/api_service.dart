@@ -579,9 +579,9 @@ class ApiService {
   static Future<Map<String, dynamic>> updateInventoryItem({
     required String inventoryId,
     required String name,
-    required String? shelfLife,
+    required int? shelfLife,
     required String? shelfLifeUnit,
-    required int reorderAmount,
+    required double reorderAmount,
     required String reorderUnit,
   }) async {
     final url = Uri.parse('$baseApiUrl/inventory_item');
@@ -606,7 +606,7 @@ class ApiService {
 
     // Add shelf life headers if provided
     if (shelfLife != null) {
-      headers['shelf_life'] = shelfLife;
+      headers['shelf_life'] = shelfLife.toString();
     }
     if (shelfLifeUnit != null) {
       headers['shelf_life_unit'] = shelfLifeUnit;

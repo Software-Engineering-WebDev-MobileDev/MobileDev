@@ -13,8 +13,12 @@ class ViewRecordsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Records for ${ingredient.name}',
-            style: const TextStyle(color: Colors.white)),
-        backgroundColor: Colors.orange,
+            style: const TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: Colors.white),
+        ),
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51), // Match the color
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
@@ -70,7 +74,7 @@ class ViewRecordsPage extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('Amount Used: $changeAmount',
+                                Text('Amount Used: ${_formatAmount(changeAmount)}',
                                     style: const TextStyle(
                                         fontWeight: FontWeight.bold)),
                                 if (description != null &&
@@ -114,5 +118,20 @@ class ViewRecordsPage extends StatelessWidget {
     final DateTime parsedDate = DateTime.parse(dateString).toLocal();
     return DateFormat('yyyy-MM-dd hh:mm a')
         .format(parsedDate); // Formatting date to local time
+  }
+
+  // Helper function to format the amount to either grams or kilograms
+  String _formatAmount(int amount) {
+    String unit = 'g';
+    double value = amount.abs().toDouble(); // Use absolute value for formatting
+
+    if (value >= 1000) {
+      // Convert to kilograms if the amount is 1000 grams or more
+      value /= 1000;
+      unit = 'kg'; // Change unit to kg
+    }
+
+    // Return formatted string, including the sign
+    return '${amount < 0 ? '-' : ''}${value.toStringAsFixed(2)} $unit';
   }
 }

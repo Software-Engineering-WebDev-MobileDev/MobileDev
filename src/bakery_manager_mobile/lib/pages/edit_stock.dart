@@ -15,6 +15,7 @@ class EditStockPage extends StatefulWidget {
 class _EditStockPageState extends State<EditStockPage> {
   late int _stockAmount;
   final TextEditingController _stockController = TextEditingController();
+  String _unit = 'grams'; // Default unit
 
   @override
   void initState() {
@@ -46,13 +47,17 @@ class _EditStockPageState extends State<EditStockPage> {
     }
   }
 
-  void _saveChanges() async{
+  void _saveChanges() async {
     try {
       if (_stockAmount == 0) {
         throw Exception("Stock changes cannot be zero");
       }
+
+      // Convert to grams if the selected unit is kilograms
+      double changeAmount = _unit == 'kilograms' ? _stockAmount * 1000.0 : _stockAmount.toDouble();
+
       final result = await ApiService.inventoryChange(
-        changeAmount: _stockAmount.toDouble(),
+        changeAmount: changeAmount,
         inventoryId: widget.ingredient.ingredientID,
         description: 'Manual Stock Update',
       );
@@ -79,8 +84,12 @@ class _EditStockPageState extends State<EditStockPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Stock', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.orange,
+        title: const Text('Edit Stock', style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: Colors.white),
+        ),
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51), // Updated color to match
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
@@ -109,7 +118,21 @@ class _EditStockPageState extends State<EditStockPage> {
               keyboardType: TextInputType.number,
               onChanged: _onTextChanged,
             ),
-            // Removed the number under the text box
+            // Dropdown for unit selection
+            DropdownButton<String>(
+              value: _unit,
+              items: <String>['grams', 'kilograms'].map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _unit = newValue!;
+                });
+              },
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -126,14 +149,14 @@ class _EditStockPageState extends State<EditStockPage> {
             const SizedBox(height: 32),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+                backgroundColor: const Color.fromARGB(255, 209, 125, 51), // Updated color to match
                 padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
               onPressed: _saveChanges,
-              child: const Text('Save Changes', style: TextStyle(fontSize: 18)),
+              child: const Text('Save Changes', style: TextStyle(fontSize: 18, color: Colors.white)),
             ),
           ],
         ),
