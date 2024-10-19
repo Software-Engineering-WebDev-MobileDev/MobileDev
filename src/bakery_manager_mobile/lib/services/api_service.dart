@@ -285,7 +285,7 @@ class ApiService {
 
   static Future<Map<String, dynamic>> getInventory(
       {int page = 1, int pageSize = 20}) async {
-    final url = Uri.parse('$baseApiUrl/inventory');
+    final url = Uri.parse('$baseApiUrl/inventory_amount');
     String sessionId = await SessionManager().getSessionToken() ?? "";
     try {
       final response = await http.get(
@@ -319,6 +319,317 @@ class ApiService {
       }
     } catch (e) {
       // Network error
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> addInventoryItem({
+    required String name,
+    required double reorderAmount,
+    required String reorderUnit,
+    int? shelfLife,
+    String? shelfLifeUnit,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/inventory_item');
+    final sessionId = await SessionManager().getSessionToken();
+    final headers = <String, String>{
+      'session_id': sessionId!,
+      'name': name,
+      'reorder_amount': reorderAmount.toString(),
+      'reorder_unit': reorderUnit,
+    };
+
+    if (shelfLife != null) {
+      headers['shelf_life'] = shelfLife.toString();
+    }
+
+    if (shelfLifeUnit != null) {
+      headers['shelf_life_unit'] = shelfLifeUnit;
+    }
+
+    try {
+      final response = await http.post(url, headers: headers);
+
+      if (response.statusCode == 201) {
+        return {
+          'status': 'success',
+          'inventory_id': jsonDecode(response.body)['inventory_id']
+        };
+      } else {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'error',
+          'reason': responseBody['reason'] ?? 'Failed to add inventory item',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> inventoryChange({
+    required double changeAmount,
+    required String inventoryId,
+    String? description,
+    String? expirationDate,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/inventory_change');
+    final sessionId = await SessionManager().getSessionToken();
+    final headers = <String, String>{
+      'session_id': sessionId!,
+      'change_amount': changeAmount.toString(),
+      'inventory_id': inventoryId,
+    };
+
+    // Add optional fields if they are provided
+    if (description != null) {
+      headers['description'] = description;
+    }
+
+    if (expirationDate != null) {
+      headers['expiration_date'] = expirationDate;
+    }
+
+    try {
+      final response = await http.post(url, headers: headers);
+
+      if (response.statusCode == 201) {
+        return {
+          'status': 'success',
+          'hist_id': jsonDecode(response.body)['hist_id']
+        };
+      } else {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'error',
+          'reason': responseBody['reason'] ?? 'Failed to record inventory change',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> fetchIngredientHistory({
+    required String inventoryId,
+    int pageSize = 30,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/inventory_change');
+    final sessionId = await SessionManager().getSessionToken();
+
+    if (sessionId == null) {
+      return {
+        'status': 'error',
+        'reason': 'Missing session ID',
+      };
+    }
+
+    final headers = <String, String>{
+      'session_id': sessionId,
+      'page_size': pageSize.toString(),
+    };
+
+    List<dynamic> allRecords = [];
+    int page = 1;
+
+    try {
+      while (true) {
+        // Update headers with the current page
+        headers['page'] = page.toString();
+
+        final response = await http.get(url, headers: headers);
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+
+          if (data['status'] == 'success') {
+            final filteredContent = (data['content'] as List<dynamic>).where((item) {
+              return item['InventoryID'] == inventoryId;
+            }).toList();
+
+            allRecords.addAll(filteredContent);
+
+            // Check if we reached the last page
+            if (page >= data['page_count']) {
+              break; // No more pages to fetch
+            }
+
+            page++; // Go to the next page
+          } else {
+            return {
+              'status': 'error',
+              'reason': data['reason'] ?? 'Failed to fetch ingredient history',
+            };
+          }
+        } else {
+          final responseBody = jsonDecode(response.body);
+          return {
+            'status': 'error',
+            'reason': responseBody['reason'] ?? 'Failed to fetch ingredient history',
+          };
+        }
+      }
+
+      return {
+        'status': 'success',
+        'page_count': page,
+        'content': allRecords,
+      };
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> deleteInventoryHistory({
+    required String histId,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/inventory_change');
+    final sessionId = await SessionManager().getSessionToken();
+
+    if (sessionId == null) {
+      return {
+        'status': 'error',
+        'reason': 'Missing session ID',
+      };
+    }
+
+    final headers = <String, String>{
+      'session_id': sessionId,
+      'hist_id': histId,
+    };
+
+    try {
+      final response = await http.delete(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          'status': 'success',
+          'content': data,
+        };
+      } else {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'error',
+          'reason': responseBody['reason'] ?? 'Failed to delete inventory history',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> deleteInventoryItem({
+    required String inventoryId,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/inventory_item');
+    final sessionId = await SessionManager().getSessionToken();
+
+    if (sessionId == null) {
+      return {
+        'status': 'error',
+        'reason': 'Missing session ID',
+      };
+    }
+
+    final headers = <String, String>{
+      'session_id': sessionId,
+      'inventory_id': inventoryId,
+    };
+
+    try {
+      final response = await http.delete(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          'status': 'success',
+          'content': data,
+        };
+      } else {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'error',
+          'reason': responseBody['reason'] ?? 'Failed to delete inventory item',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> updateInventoryItem({
+    required String inventoryId,
+    required String name,
+    required int? shelfLife,
+    required String? shelfLifeUnit,
+    required double reorderAmount,
+    required String reorderUnit,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/inventory_item');
+    final sessionId = await SessionManager().getSessionToken();
+
+    // Check if the session ID is available
+    if (sessionId == null) {
+      return {
+        'status': 'error',
+        'reason': 'Missing session ID',
+      };
+    }
+
+    // Construct headers
+    final headers = <String, String>{
+      'session_id': sessionId,
+      'inventory_id': inventoryId,
+      'name': name,
+      'reorder_amount': reorderAmount.toString(),
+      'reorder_unit': reorderUnit,
+    };
+
+    // Add shelf life headers if provided
+    if (shelfLife != null) {
+      headers['shelf_life'] = shelfLife.toString();
+    }
+    if (shelfLifeUnit != null) {
+      headers['shelf_life_unit'] = shelfLifeUnit;
+    }
+
+    try {
+      // Send PUT request
+      final response = await http.put(url, headers: headers);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return {
+          'status': 'success',
+          'inventory_id': data['inventory_id'],
+        };
+      } else {
+        final responseBody = jsonDecode(response.body);
+        return {
+          'status': 'error',
+          'reason': responseBody['reason'] ?? 'Failed to update inventory item',
+        };
+      }
+    } catch (e) {
       return {
         'status': 'error',
         'reason': 'Network error: $e',
@@ -488,7 +799,7 @@ class ApiService {
           'status': 'error',
           'reason': responseBody['reason'] ?? 'Forbidden access',
         };
-      }else if (response.statusCode == 500) {
+      } else if (response.statusCode == 500) {
         final response = await http.delete(url, headers: headers);
         if (response.statusCode == 200) {
           return {'status': 'success'};
@@ -499,7 +810,7 @@ class ApiService {
             'reason': responseBody['reason'] ?? 'Forbidden access',
           };
         } else {
-            return {
+          return {
             'status': 'error',
             'reason': 'Failed to delete task: ${response.statusCode}',
           };
