@@ -32,10 +32,23 @@ class _EditStockPageState extends State<EditStockPage> {
   }
 
   void _decreaseStock() {
-    setState(() {
-      _stockAmount--;
-      _stockController.text = '$_stockAmount';
-    });
+    // Convert the stock amount to grams for comparison
+    int stockInGrams = _unit == 'kilograms' ? _stockAmount * 1000 : _stockAmount;
+
+    double quantityInGrams = widget.ingredient.quantityUnit == 'kg' ? widget.ingredient.quantity * 1000 : widget.ingredient.quantity;
+
+    // Check if the decrease is allowed
+    if (stockInGrams > -quantityInGrams) {
+      setState(() {
+        _stockAmount--;
+        _stockController.text = '$_stockAmount';
+      });
+    } else {
+      // Optionally, show a message if trying to decrease beyond the limit
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Cannot decrease stock beyond current inventory')),
+      );
+    }
   }
 
   void _onTextChanged(String value) {
