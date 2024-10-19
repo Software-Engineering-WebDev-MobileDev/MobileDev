@@ -1,4 +1,5 @@
 import 'package:bakery_manager_mobile/assets/constants.dart';
+import 'package:bakery_manager_mobile/models/ingredient.dart';
 import 'package:bakery_manager_mobile/models/recipe.dart';
 import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
   final TextEditingController servingsController = TextEditingController();
   final List<RecipeIngredient> ingredients = [];
 
+  List<Ingredient> inventoryItems = [];
   final List<String> categories = recipeCatagories;
   String? selectedCategory;
 
@@ -31,6 +33,20 @@ class _EditRecipePageState extends State<EditRecipePage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _loadRecipeDetails();
+    _loadInventory();
+  }
+
+  Future<void> _loadInventory() async {
+    final response = await ApiService.getInventory();
+    if (response['status'] == 'success') {
+      setState(() {
+        inventoryItems = response['inventory'];
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Failed to load inventory: ${response['reason']}'),
+      ));
+    }
   }
 
   void _loadRecipeDetails() {
@@ -56,15 +72,9 @@ class _EditRecipePageState extends State<EditRecipePage> {
 
       // Load ingredients from the recipe - replace with actual backend data later
       ingredients.clear();
-      // for (var ing in recipe.ingredients) {
-      //   ingredients.add(RecipeIngredient(
-      //     recipeIngredientId: ing['id'],
-      //     componentId: ing['componentId'],
-      //     ingredientDescription: ing['ingredientDescription'],
-      //     quantity: int.tryParse(ing['quantity'].toString()) ?? 0.0,
-      //     measurement: ing['unit'],
-      //   ));
-      // }
+      for (var ing in recipe.ingredients!) {
+        ingredients.add(ing);
+      }
     }
   }
 
@@ -274,16 +284,38 @@ class _EditRecipePageState extends State<EditRecipePage> {
                 ...ingredients.asMap().entries.map((entry) {
                   int idx = entry.key;
                   var ingredient = entry.value;
+
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
                     child: Row(
                       children: [
                         Expanded(
-                          child: TextFormField(
-                            onChanged: (value) => ingredient.inventoryID = value,
-                            decoration: InputDecoration(
-                              labelText: 'Ingredient ${idx + 1}',
-                              border: const OutlineInputBorder(
+                          child: DropdownButtonFormField<String>(
+                            isExpanded: true,
+                            value: ingredient.inventoryID.isNotEmpty
+                                ? ingredient.inventoryID
+                                : null,
+                            items: inventoryItems.map((inventoryItem) {
+                              return DropdownMenuItem(
+                                value: inventoryItem.ingredientID,
+                                child: Text(
+                                  inventoryItem.name,
+                                  overflow: TextOverflow.ellipsis, // Prevent overflow
+                                  maxLines: 1),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                ingredient.inventoryID = value!;
+                                ingredient.inventoryName = inventoryItems
+                                    .firstWhere(
+                                        (item) => item.ingredientID == value)
+                                    .name;
+                              });
+                            },
+                            decoration: const InputDecoration(
+                              labelText: 'Select Ingredient',
+                              border: OutlineInputBorder(
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(10)),
                               ),
@@ -299,8 +331,13 @@ class _EditRecipePageState extends State<EditRecipePage> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: TextFormField(
-                            onChanged: (value) => ingredient.quantity =
-                                double.tryParse(value) ?? 0.0,
+                            initialValue: ingredient.quantity > 0
+                                ? ingredient.quantity.toString()
+                                : '',
+                            onChanged: (value) {
+                              ingredient.quantity =
+                                  double.tryParse(value) ?? 0.0;
+                            },
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
                               labelText: 'Quantity',
@@ -319,9 +356,30 @@ class _EditRecipePageState extends State<EditRecipePage> {
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: TextFormField(
-                            onChanged: (value) =>
-                                ingredient.unitOfMeasure = value,
+                          child: DropdownButtonFormField<String>(
+                            isExpanded: true,
+                            value: ingredient.unitOfMeasure.isNotEmpty
+                                ? ingredient.unitOfMeasure
+                                : null,
+                            items: const [
+                              DropdownMenuItem(
+                                  value: 'g', child: Text(
+                                    'Grams',
+                                    overflow: TextOverflow.ellipsis, // Prevent overflow
+                                  maxLines: 1)),
+                              DropdownMenuItem(
+                                  value: 'kg', child: Text(
+                                    'Kilograms',
+                                    overflow: TextOverflow.ellipsis, // Prevent overflow
+                                    maxLines: 1)),
+                              // Add more units as needed
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                ingredient.unitOfMeasure =
+                                    value!; // Update the unit of measure
+                              });
+                            },
                             decoration: const InputDecoration(
                               labelText: 'Measurement',
                               border: OutlineInputBorder(
@@ -337,7 +395,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
                             },
                           ),
                         ),
-                        if (idx != 0)
+                        if (ingredients.length > 1)
                           IconButton(
                             icon: const Icon(Icons.remove_circle,
                                 color: Colors.red),
@@ -346,7 +404,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
                       ],
                     ),
                   );
-                }).toList(),
+                }),
                 ElevatedButton.icon(
                   onPressed: _addIngredientField,
                   icon: const Icon(Icons.add),

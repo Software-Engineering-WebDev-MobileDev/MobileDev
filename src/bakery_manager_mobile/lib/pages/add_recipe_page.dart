@@ -286,13 +286,16 @@ class _AddRecipePageState extends State<AddRecipePage> {
                       children: [
                         Expanded(
                           child: DropdownButtonFormField<String>(
+                            isExpanded: true,
                             value: ingredient.inventoryID.isEmpty
                                 ? null
                                 : ingredient.inventoryID,
                             items: inventoryItems.map((inventoryItem) {
                               return DropdownMenuItem(
                                 value: inventoryItem.ingredientID,
-                                child: Text(inventoryItem.name),
+                                child: Text(
+                                  inventoryItem.name,
+                                ),
                               );
                             }).toList(),
                             onChanged: (value) {
@@ -311,6 +314,10 @@ class _AddRecipePageState extends State<AddRecipePage> {
                                     BorderRadius.all(Radius.circular(10)),
                               ),
                             ),
+                            style: const TextStyle(
+                                overflow: TextOverflow.ellipsis,
+                                fontSize: 16,
+                                color: Colors.black),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Ingredient is required';
@@ -343,6 +350,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: DropdownButtonFormField<String>(
+                            isExpanded: true,
                             value: ingredient.unitOfMeasure.isEmpty
                                 ? null
                                 : ingredient.unitOfMeasure,
@@ -362,6 +370,10 @@ class _AddRecipePageState extends State<AddRecipePage> {
                                     value!; // Update the unit of measure
                               });
                             },
+                            style: const TextStyle(
+                                overflow: TextOverflow.ellipsis,
+                                fontSize: 16,
+                                color: Colors.black),
                             decoration: const InputDecoration(
                               labelText: 'Measurement',
                               border: OutlineInputBorder(

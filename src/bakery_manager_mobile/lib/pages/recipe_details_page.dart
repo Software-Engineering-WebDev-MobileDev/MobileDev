@@ -15,11 +15,13 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
   late Future<List<RecipeIngredient>> _futureIngredients;
 
   Future<List<RecipeIngredient>> _fetchIngredients(String recipeId) async {
+    final Recipe recipe = ModalRoute.of(context)!.settings.arguments as Recipe;
     final response = await ApiService.getRecipeIngredients(recipeId);
     if (response['status'] == 'success') {
       // Map the ingredients to RecipeIngredient instances
-      return List<RecipeIngredient>.from(
+      recipe.ingredients = List<RecipeIngredient>.from(
           response['ingredients'].map((ingredientJson) => RecipeIngredient.fromJson(ingredientJson)));
+      return recipe.ingredients!;
     } else {
       throw Exception('Failed to load ingredients: ${response['reason']}');
     }

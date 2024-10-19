@@ -1,4 +1,6 @@
 // Recipe model for the recipe table in the database
+import 'package:bakery_manager_mobile/models/recipe_ingredients.dart';
+
 class Recipe {
   final String recipeId;
   final String recipeName;
@@ -8,6 +10,7 @@ class Recipe {
   final int servings;
   final int prepTime;
   final int cookTime;
+  List<RecipeIngredient>? ingredients;
 
   Recipe(
       {required this.recipeId,
@@ -17,7 +20,8 @@ class Recipe {
       required this.category,
       required this.servings,
       required this.cookTime,
-      required this.prepTime});
+      required this.prepTime,
+      this.ingredients,});
 
   factory Recipe.fromJson(Map<String, dynamic> json) {
     return Recipe(
