@@ -1,4 +1,5 @@
 import 'package:bakery_manager_mobile/assets/constants.dart';
+import 'package:bakery_manager_mobile/models/ingredient.dart';
 import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:flutter/material.dart';
 import '../models/recipe_ingredients.dart';
@@ -21,30 +22,48 @@ class _AddRecipePageState extends State<AddRecipePage> {
 
   final List<RecipeIngredient> ingredients = [
     RecipeIngredient(
-      recipeIngredientId: '',
-      componentId: '',
-      ingredientDescription: '',
+      ingredientID: '',
+      inventoryName: '',
       quantity: 0.0,
-      measurement: '',
+      unitOfMeasure: '',
+      inventoryID: '',
     ),
   ];
+
+  List<Ingredient> inventoryItems = [];
   final List<String> categories = recipeCatagories;
   String? selectedCategory;
 
   @override
   void initState() {
     super.initState();
+    _loadInventory();
+  }
+
+  Future<void> _loadInventory() async {
+    final response = await ApiService.getInventory();
+    if (response['status'] == 'success') {
+      setState(() {
+        inventoryItems = response['inventory'];
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Failed to load inventory: ${response['reason']}'),
+      ));
+    }
   }
 
   void _addIngredientField() {
     setState(() {
-      ingredients.add(RecipeIngredient(
-        recipeIngredientId: '',
-        componentId: '',
-        ingredientDescription: '',
-        quantity: 0.0,
-        measurement: '',
-      ));
+      ingredients.add(
+        RecipeIngredient(
+          ingredientID: '',
+          inventoryName: '',
+          quantity: 0.0,
+          unitOfMeasure: '',
+          inventoryID: '',
+        ),
+      );
     });
   }
 
@@ -252,8 +271,6 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   },
                 ),
                 const SizedBox(height: 16),
-
-                // Ingredients Section
                 const Text(
                   'Ingredients:',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -262,17 +279,34 @@ class _AddRecipePageState extends State<AddRecipePage> {
                 ...ingredients.asMap().entries.map((entry) {
                   int idx = entry.key;
                   var ingredient = entry.value;
+
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
                     child: Row(
                       children: [
                         Expanded(
-                          child: TextFormField(
-                            onChanged: (value) =>
-                                ingredient.ingredientDescription = value,
-                            decoration: InputDecoration(
-                              labelText: 'Ingredient ${idx + 1}',
-                              border: const OutlineInputBorder(
+                          child: DropdownButtonFormField<String>(
+                            value: ingredient.inventoryID.isEmpty
+                                ? null
+                                : ingredient.inventoryID,
+                            items: inventoryItems.map((inventoryItem) {
+                              return DropdownMenuItem(
+                                value: inventoryItem.ingredientID,
+                                child: Text(inventoryItem.name),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                ingredient.inventoryID = value!;
+                                ingredient.inventoryName = inventoryItems
+                                    .firstWhere(
+                                        (item) => item.ingredientID == value)
+                                    .name;
+                              });
+                            },
+                            decoration: const InputDecoration(
+                              labelText: 'Select Ingredient',
+                              border: OutlineInputBorder(
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(10)),
                               ),
@@ -308,9 +342,26 @@ class _AddRecipePageState extends State<AddRecipePage> {
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: TextFormField(
-                            onChanged: (value) =>
-                                ingredient.measurement = value,
+                          child: DropdownButtonFormField<String>(
+                            value: ingredient.unitOfMeasure.isEmpty
+                                ? null
+                                : ingredient.unitOfMeasure,
+                            items: const [
+                              DropdownMenuItem(
+                                value: 'g',
+                                child: Text('Grams'), // Display text
+                              ),
+                              DropdownMenuItem(
+                                value: 'kg',
+                                child: Text('Kilograms'), // Display text
+                              ),
+                            ],
+                            onChanged: (value) {
+                              setState(() {
+                                ingredient.unitOfMeasure =
+                                    value!; // Update the unit of measure
+                              });
+                            },
                             decoration: const InputDecoration(
                               labelText: 'Measurement',
                               border: OutlineInputBorder(
@@ -342,7 +393,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   label: const Text('Add Ingredient'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
-                    foregroundColor: Colors.white, // White font color
+                    foregroundColor: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -366,7 +417,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                       String servings = servingsController.text;
 
                       // Save recipe
-                      Map<String, dynamic> response = await ApiService.addRecipe(
+                      Map<String, dynamic> response =
+                          await ApiService.addRecipe(
                         recipeName: recipeName,
                         ingredients: instructions,
                         prepTime: int.tryParse(prepTime) ?? 0,
@@ -381,15 +433,13 @@ class _AddRecipePageState extends State<AddRecipePage> {
                         for (var ingredient in ingredients) {
                           Map<String, dynamic> ingredientResponse =
                               await ApiService.addRecipeIngredient(
-                            recipeID: recipeId,
-                            ingredientDescription:
-                                ingredient.ingredientDescription,
-                            quantity: ingredient.quantity,
-                            unit: ingredient.measurement,
-                          );
+                                  recipeId: recipeId,
+                                  quantity: ingredient.quantity,
+                                  unitOfMeasure: ingredient.unitOfMeasure,
+                                  inventoryId: ingredient.inventoryID);
                           if (ingredientResponse['status'] != 'success') {
                             errors.add(
-                                'Failed to add ingredient ${ingredient.ingredientDescription}: ${ingredientResponse['reason']}');
+                                'Failed to add ingredient ${ingredient.inventoryName}: ${ingredientResponse['reason']}');
                           }
                         }
                         if (context.mounted) {

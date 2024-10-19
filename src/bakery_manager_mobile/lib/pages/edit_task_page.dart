@@ -1,18 +1,10 @@
 import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // For date and time formatting
+import 'package:intl/intl.dart';
 import '../models/recipe.dart';
-import '../models/task.dart'; // Import Task model
-import '../models/account.dart'; // Import Account model
-import '../services/api_service.dart'; // Import API service
-
-import 'package:bakery_manager_mobile/assets/constants.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // For date and time formatting
-import '../models/recipe.dart';
-import '../models/task.dart'; // Import Task model
-import '../models/account.dart'; // Import Account model
-import '../services/api_service.dart'; // Import API service
+import '../models/task.dart';
+import '../models/account.dart';
+import '../services/api_service.dart';
 
 class EditTaskPage extends StatefulWidget {
   const EditTaskPage({super.key});
@@ -158,7 +150,7 @@ class _EditTaskPageState extends State<EditTaskPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Task updated successfully')),
         );
-        Navigator.pop(context);
+        Navigator.popUntil(context, ModalRoute.withName(taskPageRoute));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to update task: ${response['reason']}')),

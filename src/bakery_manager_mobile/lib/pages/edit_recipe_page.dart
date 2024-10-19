@@ -71,11 +71,11 @@ class _EditRecipePageState extends State<EditRecipePage> {
   void _addIngredientField() {
     setState(() {
       ingredients.add(RecipeIngredient(
-        recipeIngredientId: '',
-        componentId: '',
-        ingredientDescription: '',
+        ingredientID: '',
+        inventoryName: '',
         quantity: 0.0,
-        measurement: '',
+        unitOfMeasure: '',
+        inventoryID: '',
       ));
     });
   }
@@ -280,8 +280,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
                       children: [
                         Expanded(
                           child: TextFormField(
-                            onChanged: (value) =>
-                                ingredient.ingredientDescription = value,
+                            onChanged: (value) => ingredient.inventoryID = value,
                             decoration: InputDecoration(
                               labelText: 'Ingredient ${idx + 1}',
                               border: const OutlineInputBorder(
@@ -322,7 +321,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
                         Expanded(
                           child: TextFormField(
                             onChanged: (value) =>
-                                ingredient.measurement = value,
+                                ingredient.unitOfMeasure = value,
                             decoration: const InputDecoration(
                               labelText: 'Measurement',
                               border: OutlineInputBorder(
@@ -395,8 +394,11 @@ class _EditRecipePageState extends State<EditRecipePage> {
                       String servings = servingsController.text;
 
                       // Update Recipe
-                      Map<String, dynamic> response = await ApiService.updateRecipe(
-                        recipeId: (ModalRoute.of(context)!.settings.arguments as Recipe).recipeId,
+                      Map<String, dynamic> response =
+                          await ApiService.updateRecipe(
+                        recipeId: (ModalRoute.of(context)!.settings.arguments
+                                as Recipe)
+                            .recipeId,
                         recipeName: recipeName,
                         instructions: instructions,
                         prepTime: int.tryParse(prepTime) ?? 0,
@@ -408,12 +410,14 @@ class _EditRecipePageState extends State<EditRecipePage> {
 
                       if (response['status'] == 'success') {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Recipe updated successfully!')),
+                          const SnackBar(
+                              content: Text('Recipe updated successfully!')),
                         );
                         Navigator.pop(context);
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text('Failed to update recipe: ${response['reason']}'),
+                          content: Text(
+                              'Failed to update recipe: ${response['reason']}'),
                         ));
                       }
                     }
