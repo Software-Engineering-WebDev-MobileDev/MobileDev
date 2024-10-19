@@ -219,9 +219,10 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> getRecipeIngredients(String recipeID) async {
+  static Future<Map<String, dynamic>> getRecipeIngredients(
+      String recipeID) async {
     final url = Uri.parse('$baseApiUrl/recipe/$recipeID/ingredients');
-    final sessionId = await SessionManager().getSessionToken(); 
+    final sessionId = await SessionManager().getSessionToken();
     final headers = {
       'Content-Type': 'application/json',
       'session_id': sessionId!, // Include session ID in headers
@@ -261,6 +262,84 @@ class ApiService {
     }
   }
 
+  static Future<Map<String, dynamic>> deleteIngredient(
+      String ingredientId) async {
+    final url = Uri.parse('$baseApiUrl/ingredient');
+    String sessionId = await SessionManager().getSessionToken() ?? "";
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'session_id': sessionId,
+          'ingredient_id': ingredientId,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return {
+          'status': 'success',
+        };
+      } else if (response.statusCode == 404) {
+        return {
+          'status': 'error',
+          'reason': 'Ingredient not found in the database',
+        };
+      } else {
+        return {
+          'status': 'error',
+          'reason': 'Failed to delete ingredient: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> updateIngredient(
+      String ingredientId,
+      String inventoryId,
+      double quantity,
+      String unitOfMeasurement,
+      String name) async {
+    final url = Uri.parse('$baseApiUrl/ingredient');
+    String sessionId = await SessionManager().getSessionToken() ?? "";
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'session_id': sessionId,
+          'ingredient_id': ingredientId,
+          'inventory_id': inventoryId,
+          'quantity': quantity.toString(),
+          'unit_of_measurement': unitOfMeasurement,
+          'name': name,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return {
+          'status': 'success',
+        };
+      } else {
+        Map<String, dynamic> body = json.decode(response.body);
+        return {
+          'status': 'error',
+          'reason': body['reason'] ??
+              'Failed to update ingredient: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
 
   static Future<Map<String, dynamic>> getInventory(
       {int page = 1, int pageSize = 20}) async {
