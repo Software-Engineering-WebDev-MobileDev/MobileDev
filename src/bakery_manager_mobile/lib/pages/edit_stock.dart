@@ -61,37 +61,48 @@ class _EditStockPageState extends State<EditStockPage> {
   }
 
   void _saveChanges() async {
-    try {
-      if (_stockAmount == 0) {
-        throw Exception("Stock changes cannot be zero");
-      }
+  try {
+    // Convert the stock amount to grams for submission
+    double changeAmount = _unit == 'kilograms' ? _stockAmount * 1000.0 : _stockAmount.toDouble();
+    double quantityInGrams = widget.ingredient.quantityUnit == 'kg' ? widget.ingredient.quantity * 1000 : widget.ingredient.quantity;
+    
+    // Check if the changeAmount is valid
+    if (changeAmount == 0) {
+      throw Exception("Stock changes cannot be zero");
+    }
 
-      // Convert to grams if the selected unit is kilograms
-      double changeAmount = _unit == 'kilograms' ? _stockAmount * 1000.0 : _stockAmount.toDouble();
-
-      final result = await ApiService.inventoryChange(
-        changeAmount: changeAmount,
-        inventoryId: widget.ingredient.ingredientID,
-        description: 'Manual Stock Update',
-      );
-
-      if (!mounted) return;
-      if (result['status'] == 'success') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Stock updated successfully')),
-        );
-        Navigator.of(context).popUntil(ModalRoute.withName(ingredientPageRoute));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${result['reason']}')),
-        );
-      }
-    } catch (e) {
+    // Check if the changeAmount would cause stock to go negative
+    if ((quantityInGrams + changeAmount) < 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(content: Text("Cannot adjust stock below zero. Current stock is $quantityInGrams grams.")),
+      );
+      return;
+    }
+
+    final result = await ApiService.inventoryChange(
+      changeAmount: changeAmount,
+      inventoryId: widget.ingredient.ingredientID,
+      description: 'Manual Stock Update',
+    );
+
+    if (!mounted) return;
+    if (result['status'] == 'success') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Stock updated successfully')),
+      );
+      Navigator.of(context).popUntil(ModalRoute.withName(ingredientPageRoute));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${result['reason']}')),
       );
     }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: $e')),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
