@@ -534,7 +534,7 @@ class _EditRecipePageState extends State<EditRecipePage> {
                                 content: Text(
                                     'Recipe and ingredients updated successfully!')),
                           );
-                          Navigator.pop(context);
+                          Navigator.popUntil(context, ModalRoute.withName(recipePageRoute));
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(

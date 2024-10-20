@@ -15,13 +15,15 @@ class ApiService {
   // Get Recipes Function
   static Future<Map<String, dynamic>> getRecipes() async {
     final url = Uri.parse('$baseApiUrl/recipes');
+    final sessionToken = await SessionManager().getSessionToken();
+    final headers = {'session_id': sessionToken!};
     try {
-      final response = await http.get(url);
+      final response = await http.get(url, headers: headers);
 
       // Successful response
       if (response.statusCode == 200) {
         Map<String, dynamic> body = json.decode(response.body);
-        List<dynamic> recipeList = body['recipes'];
+        List<dynamic> recipeList = body['recipe'];
         return {
           'status': 'success',
           'recipes':
@@ -54,7 +56,10 @@ class ApiService {
       int prepTime = 0,
       int cookTime = 0}) async {
     final url = Uri.parse('$baseApiUrl/add_recipe');
-    final headers = {'Content-Type': 'application/json'};
+    final sessionToken = await SessionManager().getSessionToken();
+    final headers = {'Content-Type': 'application/json',
+                     'session_id': sessionToken!
+                    };
     final body = jsonEncode({
       "RecipeName": recipeName,
       "Instructions": ingredients,
@@ -101,7 +106,9 @@ class ApiService {
     required String description,
   }) async {
     final url = Uri.parse('$baseApiUrl/update_recipe/$recipeId');
-    final headers = {'Content-Type': 'application/json'};
+    final sessionToken = await SessionManager().getSessionToken();
+    final headers = {'Content-Type': 'application/json',
+                     'session_id': sessionToken!};
     final now = DateTime.now();
     final formattedDate =
         now.toIso8601String().split('T').join(' ').split('.').first;
@@ -144,7 +151,11 @@ class ApiService {
     required String recipeId,
   }) async {
     final url = Uri.parse('$baseApiUrl/delete_recipe/$recipeId');
-    final headers = {'Content-Type': 'application/json'};
+    final sessionToken = await SessionManager().getSessionToken();
+    final headers = {
+      'Content-Type': 'application/json',
+      'session_id': sessionToken!
+    };
 
     try {
       final response = await http.delete(url, headers: headers);
