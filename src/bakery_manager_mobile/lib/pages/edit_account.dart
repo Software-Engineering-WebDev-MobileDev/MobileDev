@@ -466,7 +466,7 @@ Column _buildPhonesField() {
         title: const Stack(
           children: <Widget>[
             Text(
-              'Edit Account',
+              'Edit Contact Info',
               style: TextStyle(
                   fontSize: 30,
                   fontWeight: FontWeight.bold,
