@@ -37,7 +37,9 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    final Recipe recipe = ModalRoute.of(context)!.settings.arguments as Recipe;
+    final Recipe recipe =
+        ModalRoute.of(context)!.settings.arguments as Recipe;
+    _futureIngredients = _fetchIngredients(recipe.recipeId);
 
     return Scaffold(
       appBar: AppBar(
@@ -73,19 +75,42 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
           children: [
             const SizedBox(height: 16),
 
-            // 2x2 Grid for Recipe Info
-            GridView(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 3,
-              ),
+            // 2x2 Grid for Recipe Info using Rows and Columns
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _GridItem(title: 'Prep Time:', value: '${recipe.prepTime} minutes'),
-                _GridItem(title: 'Category:', value: recipe.category.isNotEmpty ? recipe.category : 'No category'),
-                _GridItem(title: 'Cook Time:', value: '${recipe.cookTime} minutes'),
-                _GridItem(title: 'Servings:', value: recipe.servings.toString()),
+                Expanded(
+                  child: _GridItem(
+                    title: 'Prep Time:',
+                    value: '${recipe.prepTime} minutes',
+                  ),
+                ),
+                Expanded(
+                  child: _GridItem(
+                    title: 'Category:',
+                    value: recipe.category.isNotEmpty
+                        ? recipe.category
+                        : 'No category',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: _GridItem(
+                    title: 'Cook Time:',
+                    value: '${recipe.cookTime} minutes',
+                  ),
+                ),
+                Expanded(
+                  child: _GridItem(
+                    title: 'Servings:',
+                    value: recipe.servings.toString(),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -144,8 +169,10 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                   // Edit Recipe Button
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 209, 125, 51),
-                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                      backgroundColor:
+                          const Color.fromARGB(255, 209, 125, 51),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 16, horizontal: 32),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -187,7 +214,8 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () {
-                                  Navigator.of(context).pop(false); // Cancel
+                                  Navigator.of(context)
+                                      .pop(false); // Cancel
                                 },
                                 child: const Text('Cancel'),
                               ),
@@ -204,14 +232,17 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
 
                       if (confirmed) {
                         try {
-                          await ApiService.deleteRecipe(recipeId: recipe.recipeId);
+                          await ApiService.deleteRecipe(
+                              recipeId: recipe.recipeId);
                           if (mounted) {
                             Navigator.pop(context);
                           }
                         } catch (e) {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Failed to delete recipe: $e')),
+                              SnackBar(
+                                  content:
+                                      Text('Failed to delete recipe: $e')),
                             );
                           }
                         }
