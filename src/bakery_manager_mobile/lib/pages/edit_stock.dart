@@ -15,7 +15,7 @@ class EditStockPage extends StatefulWidget {
 class _EditStockPageState extends State<EditStockPage> {
   late int _stockAmount;
   final TextEditingController _stockController = TextEditingController();
-  String _unit = 'Grams'; // Default unit
+  String _unit = 'grams'; // Default unit
 
   @override
   void initState() {
@@ -33,9 +33,12 @@ class _EditStockPageState extends State<EditStockPage> {
 
   void _decreaseStock() {
     // Convert the stock amount to grams for comparison
-    int stockInGrams = _unit == 'Kilograms' ? _stockAmount * 1000 : _stockAmount;
+    int stockInGrams =
+        _unit == 'kilograms' ? _stockAmount * 1000 : _stockAmount;
 
-    double quantityInGrams = widget.ingredient.quantityUnit == 'kg' ? widget.ingredient.quantity * 1000 : widget.ingredient.quantity;
+    double quantityInGrams = widget.ingredient.quantityUnit == 'kg'
+        ? widget.ingredient.quantity * 1000
+        : widget.ingredient.quantity;
 
     // Check if the decrease is allowed
     if (stockInGrams > -quantityInGrams) {
@@ -46,7 +49,8 @@ class _EditStockPageState extends State<EditStockPage> {
     } else {
       // Optionally, show a message if trying to decrease beyond the limit
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cannot decrease stock beyond current inventory')),
+        const SnackBar(
+            content: Text('Cannot decrease stock beyond current inventory')),
       );
     }
   }
@@ -61,59 +65,71 @@ class _EditStockPageState extends State<EditStockPage> {
   }
 
   void _saveChanges() async {
-  try {
-    // Convert the stock amount to grams for submission
-    double changeAmount = _unit == 'kilograms' ? _stockAmount * 1000.0 : _stockAmount.toDouble();
-    double quantityInGrams = widget.ingredient.quantityUnit == 'kg' ? widget.ingredient.quantity * 1000 : widget.ingredient.quantity;
-    
-    // Check if the changeAmount is valid
-    if (changeAmount == 0) {
-      throw Exception("Stock changes cannot be zero");
-    }
+    try {
+      // Convert the stock amount to grams for submission
+      double changeAmount = _unit == 'kilograms'
+          ? _stockAmount * 1000.0
+          : _stockAmount.toDouble();
+      double quantityInGrams = widget.ingredient.quantityUnit == 'kg'
+          ? widget.ingredient.quantity * 1000
+          : widget.ingredient.quantity;
 
-    // Check if the changeAmount would cause stock to go negative
-    if ((quantityInGrams + changeAmount) < 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Cannot adjust stock below zero. Current stock is $quantityInGrams grams.")),
-      );
-      return;
-    }
+      // Check if the changeAmount is valid
+      if (changeAmount == 0) {
+        throw Exception("Stock changes cannot be zero");
+      }
 
-    final result = await ApiService.inventoryChange(
-      changeAmount: changeAmount,
-      inventoryId: widget.ingredient.ingredientID,
-      description: 'Manual Stock Update',
-    );
+      // Check if the changeAmount would cause stock to go negative
+      if ((quantityInGrams + changeAmount) < 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+                  "Cannot adjust stock below zero. Current stock is $quantityInGrams grams.")),
+        );
+        return;
+      }
 
-    if (!mounted) return;
-    if (result['status'] == 'success') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Stock updated successfully')),
+      final result = await ApiService.inventoryChange(
+        changeAmount: changeAmount,
+        inventoryId: widget.ingredient.ingredientID,
+        description: 'Manual Stock Update',
       );
-      Navigator.of(context).popUntil(ModalRoute.withName(ingredientPageRoute));
-    } else {
+
+      if (!mounted) return;
+      if (result['status'] == 'success') {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Stock updated successfully')),
+        );
+        Navigator.of(context)
+            .popUntil(ModalRoute.withName(ingredientPageRoute));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('${result['reason']}')),
+        );
+      }
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${result['reason']}')),
+        SnackBar(content: Text('Error: $e')),
       );
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error: $e')),
-    );
   }
-}
 
+  String _capitalizeFirstLetter(String input) {
+    if (input.isEmpty) return input;
+    return input[0].toUpperCase() + input.substring(1);
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit Stock', style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-              color: Colors.white),
+        title: const Text(
+          'Edit Stock',
+          style: TextStyle(
+              fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: const Color.fromARGB(255, 209, 125, 51), // Updated color to match
+        backgroundColor:
+            const Color.fromARGB(255, 209, 125, 51), // Updated color to match
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
@@ -145,10 +161,11 @@ class _EditStockPageState extends State<EditStockPage> {
             // Dropdown for unit selection
             DropdownButton<String>(
               value: _unit,
-              items: <String>['grams', 'kilograms'].map<DropdownMenuItem<String>>((String value) {
+              items: <String>['grams', 'kilograms']
+                  .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
-                  child: Text(value),
+                  child: Text(_capitalizeFirstLetter(value)),
                 );
               }).toList(),
               onChanged: (String? newValue) {
@@ -173,14 +190,17 @@ class _EditStockPageState extends State<EditStockPage> {
             const SizedBox(height: 32),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 209, 125, 51), // Updated color to match
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                backgroundColor: const Color.fromARGB(
+                    255, 209, 125, 51), // Updated color to match
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
               onPressed: _saveChanges,
-              child: const Text('Save Changes', style: TextStyle(fontSize: 18, color: Colors.white)),
+              child: const Text('Save Changes',
+                  style: TextStyle(fontSize: 18, color: Colors.white)),
             ),
           ],
         ),
