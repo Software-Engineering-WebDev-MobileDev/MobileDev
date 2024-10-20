@@ -188,7 +188,7 @@ class ApiService {
     double? scaleFactor,
     String? modifierId,
   }) async {
-    final url = Uri.parse('$baseApiUrl/add_recipe_ingredient');
+    final url = Uri.parse('$baseApiUrl/add_recipe_ingredient_full');
     final sessionId = await SessionManager().getSessionToken();
 
     final headers = <String, String>{
