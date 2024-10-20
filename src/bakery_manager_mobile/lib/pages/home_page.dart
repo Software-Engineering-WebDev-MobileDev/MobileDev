@@ -79,13 +79,16 @@ class _MyHomePageState extends State<MyHomePage> {
               Container(
                 height: 80,
                 alignment: Alignment.center,
-                child: const Text(
-                  'A Simple Bakery',
-                  style: TextStyle(
-                    fontFamily: 'Pacifico',
-                    fontSize: 40,
-                    fontWeight: FontWeight.bold,
-                    color: Color.fromARGB(255, 140, 72, 27),
+                child: const FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'The Rolling Scones',
+                    style: TextStyle(
+                      fontFamily: 'Pacifico',
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromARGB(255, 140, 72, 27),
+                    ),
                   ),
                 ),
               ),
@@ -178,3 +181,4 @@ class OptionsBar extends StatelessWidget {
     );
   }
 }
+
