@@ -4,8 +4,8 @@ import '../models/account.dart';
 import '../services/api_service.dart';
 import '../assets/constants.dart';
 import '../models/recipe.dart';
-import 'package:intl/intl.dart'; // For date formatting
-import 'dart:async'; // Import to use Future and Timer
+import 'package:intl/intl.dart';
+import 'dart:async';
 
 class TaskDetailPage extends StatefulWidget {
   const TaskDetailPage({super.key});
@@ -18,7 +18,7 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
   late Task task;
   String? employeeName;
   String? recipeName;
-  Recipe? selectedRecipe; 
+  Recipe? selectedRecipe;
 
   @override
   void didChangeDependencies() {
@@ -43,7 +43,8 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
     );
     if (mounted) {
       setState(() {
-        employeeName = '${matchedEmployee.firstName} ${matchedEmployee.lastName}'; // Set employee name
+        employeeName =
+            '${matchedEmployee.firstName} ${matchedEmployee.lastName}'; // Set employee name
       });
     }
   }
@@ -78,10 +79,11 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         List<Recipe> recipes = response['recipes'];
         return recipes;
       } else {
-        throw Exception('Failed to fetch recipes: ${response['message'] ?? 'Unknown error'}');
+        throw Exception(
+            'Failed to fetch recipes: ${response['message'] ?? 'Unknown error'}');
       }
     }).catchError((error) {
-      return <Recipe>[]; 
+      return <Recipe>[];
     });
   }
 
@@ -92,7 +94,8 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
         List<Account> users = response['content'];
         return users;
       } else {
-        throw Exception('Failed to fetch users: ${response['reason'] ?? 'Unknown error'}');
+        throw Exception(
+            'Failed to fetch users: ${response['reason'] ?? 'Unknown error'}');
       }
     }).catchError((error) {
       return <Account>[]; // Return an empty list on error
@@ -101,7 +104,8 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
   // Function to update task status and provide an undo button
   Future<void> _updateTaskStatus(String newStatus) async {
-    final result = await ApiService.completeTask(taskID: task.taskID, taskStatus: newStatus);
+    final result =
+        await ApiService.completeTask(taskID: task.taskID, taskStatus: newStatus);
 
     if (result['status'] == 'success') {
       setState(() {
@@ -216,11 +220,15 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                   children: [
                     const Text(
                       'Task Name:',
-                      style: TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold),
                     ),
                     Text(
                       task.name ?? 'N/A',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.normal),
                     ),
                   ],
                 ),
@@ -234,11 +242,15 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                   children: [
                     const Text(
                       'Amount to Bake:',
-                      style: TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold),
                     ),
                     Text(
                       '${task.amountToBake}',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.normal),
                     ),
                   ],
                 ),
@@ -252,7 +264,10 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                   children: [
                     const Text(
                       'Status:',
-                      style: TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold),
                     ),
                     Text(
                       task.status,
@@ -274,13 +289,17 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                   children: [
                     const Text(
                       'Assigned Employee:',
-                      style: TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold),
                     ),
                     Text(
                       employeeName != null
-                          ? '$employeeName (${task.employeeID})'  // Show FirstName LastName (EmployeeID)
-                          : task.employeeID,  // Fallback to EmployeeID if name is unavailable
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
+                          ? '$employeeName (${task.employeeID})'
+                          : task.employeeID, // Fallback to EmployeeID if name is unavailable
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.normal),
                     ),
                   ],
                 ),
@@ -294,11 +313,15 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                   children: [
                     const Text(
                       'Due Date:',
-                      style: TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold),
                     ),
                     Text(
                       _formatDate(task.dueDate.toLocal()),
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.normal),
                     ),
                   ],
                 ),
@@ -312,11 +335,15 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                   children: [
                     const Text(
                       'Assigned on:',
-                      style: TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold),
                     ),
                     Text(
                       _formatDate(task.assignmentDate.toLocal()),
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.normal),
                     ),
                   ],
                 ),
@@ -327,12 +354,16 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: RichText(
                     text: TextSpan(
-                      style: const TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 24,
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold),
                       children: [
                         const TextSpan(text: 'Completed on: '),
                         TextSpan(
                           text: _formatDate(task.completionDate?.toLocal()),
-                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.normal),
+                          style: const TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.normal),
                         ),
                       ],
                     ),
@@ -347,8 +378,10 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                   child: SizedBox(
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
-                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                        backgroundColor:
+                            const Color.fromARGB(255, 209, 125, 51),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 16, horizontal: 32),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -357,18 +390,20 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         Navigator.pushNamed(
                           context,
                           recipeDetailsPageRoute, // The route for the recipe details page
-                          arguments: selectedRecipe,  // Pass the recipe object as an argument
+                          arguments:
+                              selectedRecipe, // Pass the recipe object as an argument
                         );
                       },
-                      icon: const Icon(Icons.link, color: Colors.white), // Link icon
+                      icon: const Icon(Icons.link,
+                          color: Colors.white), // Link icon
                       label: const Text(
-                        '  Link to Recipe  ', // Display "Link to Recipe" on the button
+                        '  Link to Recipe  ',
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 52),
+              const SizedBox(height: 52),
 
               Center(
                 child: Column(
@@ -377,7 +412,8 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
-                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 32),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -385,15 +421,18 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         onPressed: () {
                           _updateTaskStatus('In Progress');
                         },
-                        icon: const Icon(Icons.work, color: Colors.white), // Icon for "In Progress"
-                        label: const Text('Mark In Progress', style: TextStyle(color: Colors.white)),
+                        icon: const Icon(Icons.work,
+                            color: Colors.white), // Icon for "In Progress"
+                        label: const Text('Mark In Progress',
+                            style: TextStyle(color: Colors.white)),
                       ),
 
                     if (task.status == 'In Progress') ...[
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
-                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 32),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -401,15 +440,18 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                         onPressed: () {
                           _updateTaskStatus('Completed');
                         },
-                        icon: const Icon(Icons.check, color: Colors.white), // Checkmark for "Completed"
-                        label: const Text('Mark Completed', style: TextStyle(color: Colors.white)),
+                        icon: const Icon(Icons.check,
+                            color: Colors.white), // Checkmark for "Completed"
+                        label: const Text('Mark Completed',
+                            style: TextStyle(color: Colors.white)),
                       ),
                       const SizedBox(height: 16),
-
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 246, 235, 216),
-                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                          backgroundColor:
+                              const Color.fromARGB(255, 246, 235, 216),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 32),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -433,8 +475,10 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
                     if (task.status == 'Completed')
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 246, 235, 216),
-                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                          backgroundColor:
+                              const Color.fromARGB(255, 246, 235, 216),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 16, horizontal: 32),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -457,86 +501,98 @@ class _TaskDetailPageState extends State<TaskDetailPage> {
 
                     // Edit and Delete Buttons side by side
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Evenly spaced buttons
                       children: [
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 209, 125, 51),
-                            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  const Color.fromARGB(255, 209, 125, 51),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
-                          ),
-                          onPressed: () {
-                            Navigator.pushNamed(
-                              context,
-                              editTaskPageRoute,
-                              arguments: task,
-                            );
-                          },
-                          icon: const Icon(
-                            Icons.edit,
-                            color: Colors.white, 
-                          ),
-                          label: const Text(
-                            '     Edit Task  ',
-                            style: TextStyle(
+                            onPressed: () {
+                              Navigator.pushNamed(
+                                context,
+                                editTaskPageRoute,
+                                arguments: task,
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.edit,
                               color: Colors.white,
+                            ),
+                            label: const Text(
+                              'Edit Task',
+                              style: TextStyle(
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
-                        
-                        ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF800000),
-                            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF800000),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
-                          ),
-                          onPressed: () async {
-                            final confirmed = await showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text('Delete Task'),
-                                  content: const Text('Are you sure you want to delete this task?'),
-                                  actions: <Widget>[
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop(false); // User cancels deletion
-                                      },
-                                      child: const Text('Cancel'),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop(true); // User confirms deletion
-                                      },
-                                      child: const Text('Delete'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
+                            onPressed: () async {
+                              final confirmed = await showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Delete Task'),
+                                    content: const Text(
+                                        'Are you sure you want to delete this task?'),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop(
+                                              false); // User cancels deletion
+                                        },
+                                        child: const Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop(
+                                              true); // User confirms deletion
+                                        },
+                                        child: const Text('Delete'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
 
-                            if (confirmed) {
-                              try {
-                                await ApiService.deleteTask(task.taskID);
-                                Navigator.pop(context); // Navigate back after deletion
-                              } catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Failed to delete task: $e')),
-                                );
+                              if (confirmed) {
+                                try {
+                                  await ApiService.deleteTask(task.taskID);
+                                  Navigator.pop(
+                                      context); // Navigate back after deletion
+                                } catch (e) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            'Failed to delete task: $e')),
+                                  );
+                                }
                               }
-                            }
-                          },
-                          icon: const Icon(
-                            Icons.delete,
-                            color: Colors.white,
-                          ),
-                          label: const Text(
-                            'Delete Task',
-                            style: TextStyle(color: Colors.white),
+                            },
+                            icon: const Icon(
+                              Icons.delete,
+                              color: Colors.white,
+                            ),
+                            label: const Text(
+                              'Delete Task',
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                         ),
                       ],

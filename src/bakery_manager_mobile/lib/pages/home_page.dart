@@ -53,47 +53,30 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
-        shape: const RoundedRectangleBorder(),
-        title: const Stack(
-          children: <Widget>[
-            Text(
-              'Home',
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: Colors.white
-              ),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(90.0),
+        child: AppBar(
+          centerTitle: true,
+          automaticallyImplyLeading: false,
+          backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+          shape: const RoundedRectangleBorder(),
+          title: const Text(
+            'The Rolling Scones',
+            style: TextStyle(
+              fontFamily: 'Pacifico',
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
-          ],
+          ),
         ),
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
           child: Column(
             children: [
-              Container(
-                height: 80,
-                alignment: Alignment.center,
-                child: const FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    'The Rolling Scones',
-                    style: TextStyle(
-                      fontFamily: 'Pacifico',
-                      fontSize: 40,
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromARGB(255, 140, 72, 27),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
+              const SizedBox(height: 15),
               // Dynamically displaying the first and last name
               Text(
                 'Hi $_firstName $_lastName!',
@@ -181,4 +164,3 @@ class OptionsBar extends StatelessWidget {
     );
   }
 }
-

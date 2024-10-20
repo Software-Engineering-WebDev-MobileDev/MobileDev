@@ -29,7 +29,7 @@ class TaskPageState extends State<TaskPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final NavigatorState navigator = Navigator.of(context);
       final MyNavigatorObserver? observer =
-        _observer = navigator.widget.observers.firstWhere(
+          _observer = navigator.widget.observers.firstWhere(
         (observer) => observer is MyNavigatorObserver,
       ) as MyNavigatorObserver?;
       if (observer != null) {
@@ -44,7 +44,6 @@ class TaskPageState extends State<TaskPage> {
       }
     });
   }
-
 
   @override
   void dispose() {
@@ -92,7 +91,9 @@ class TaskPageState extends State<TaskPage> {
     bool isSelected = _currentFilter == filter;
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: _currentFilter == filter ? const Color.fromARGB(255, 140, 72, 27): Colors.grey,
+        backgroundColor: isSelected
+            ? const Color.fromARGB(255, 140, 72, 27)
+            : Colors.grey,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
@@ -102,11 +103,10 @@ class TaskPageState extends State<TaskPage> {
       },
       child: Text(
         filter,
-        style: TextStyle(
-          color: isSelected ? Colors.white : Colors.white,
+        style: const TextStyle(
+          color: Colors.white,
         ),
-        ),
-      //child: Text(filter),
+      ),
     );
   }
 
@@ -123,10 +123,9 @@ class TaskPageState extends State<TaskPage> {
             Text(
               'All Tasks',
               style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: Colors.white
-              ),
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
             ),
           ],
         ),
@@ -179,7 +178,7 @@ class TaskPageState extends State<TaskPage> {
                   icon: const Icon(Icons.clear),
                   onPressed: () {
                     _searchController.clear();
-                    _filterTasks(''); // Clear search field
+                    _filterTasks(_currentFilter); // Clear search field
                   },
                 ),
                 border: const OutlineInputBorder(
@@ -312,19 +311,26 @@ class _TaskItem extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Status: ${task.status}', // Display Task Status
-                    style: TextStyle(
-                      color: _getStatusColor(task.status), // Status color
-                      fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Text(
+                      'Status: ${task.status}', // Display Task Status
+                      style: TextStyle(
+                        color: _getStatusColor(task.status), // Status color
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis, // Truncate text if overflow
                     ),
                   ),
-                  Text(
-                    // Format the due date with AM/PM
-                    'Due: ${DateFormat('MM/dd hh:mm a').format(task.dueDate)}', // e.g., 08/12 02:45 PM
-                    style: const TextStyle(
-                      color: Color.fromARGB(255, 140, 72, 27),
-                      fontStyle: FontStyle.italic,
+                  Expanded(
+                    child: Text(
+                      // Format the due date with AM/PM
+                      'Due: ${DateFormat('MM/dd hh:mm a').format(task.dueDate)}', // e.g., 08/12 02:45 PM
+                      style: const TextStyle(
+                        color: Color.fromARGB(255, 140, 72, 27),
+                        fontStyle: FontStyle.italic,
+                      ),
+                      textAlign: TextAlign.right,
+                      overflow: TextOverflow.ellipsis, // Truncate text if overflow
                     ),
                   ),
                 ],

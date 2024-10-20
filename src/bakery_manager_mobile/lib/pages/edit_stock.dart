@@ -15,7 +15,7 @@ class EditStockPage extends StatefulWidget {
 class _EditStockPageState extends State<EditStockPage> {
   late int _stockAmount;
   final TextEditingController _stockController = TextEditingController();
-  String _unit = 'grams'; // Default unit
+  String _unit = 'Grams'; // Default unit
 
   @override
   void initState() {
@@ -33,7 +33,7 @@ class _EditStockPageState extends State<EditStockPage> {
 
   void _decreaseStock() {
     // Convert the stock amount to grams for comparison
-    int stockInGrams = _unit == 'kilograms' ? _stockAmount * 1000 : _stockAmount;
+    int stockInGrams = _unit == 'Kilograms' ? _stockAmount * 1000 : _stockAmount;
 
     double quantityInGrams = widget.ingredient.quantityUnit == 'kg' ? widget.ingredient.quantity * 1000 : widget.ingredient.quantity;
 
