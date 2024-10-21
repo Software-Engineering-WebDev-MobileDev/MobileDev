@@ -1,5 +1,5 @@
+import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bakery_manager_mobile/assets/constants.dart';
 
 /*
@@ -25,26 +25,50 @@ class _MyHomePageState extends State<MyHomePage> {
     _loadUserData();
   }
 
-  Future<void> _loadUserData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _firstName = prefs.getString('first_name') ?? 'John';
-      _lastName = prefs.getString('last_name') ?? 'Doe';
-    });
+  String _capitalizeFirstLetter(String input) {
+    if (input.isEmpty) return input;
+    return input[0].toUpperCase() + input.substring(1);
   }
 
-  void _logout() {
-    Navigator.pushReplacementNamed(context, loginPageRoute);
+  Future<void> _loadUserData() async {
+    // Call the API to get user info
+    Map<String, dynamic> userInfo = await ApiService.getUserInfo();
+
+    // Check if the response was successful
+    if (userInfo['status'] == 'success') {
+      setState(() {
+        // Assuming userInfo['content'] contains a map with first and last name
+        _firstName = _capitalizeFirstLetter(userInfo['content']['FirstName'] ?? '');
+        _lastName = _capitalizeFirstLetter(userInfo['content']['LastName'] ?? '');
+      });
+    } else {
+      // Handle the error case, show only "Hi!"
+      setState(() {
+        _firstName = '';
+        _lastName = '';
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
-        leading: IconButton(
-          icon: const Icon(Icons.logout), 
-          onPressed: _logout,
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        shape: const RoundedRectangleBorder(),
+        title: const Stack(
+          children: <Widget>[
+            Text(
+              'Home',
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Colors.white
+              ),
+            ),
+          ],
         ),
       ),
       body: SafeArea(
@@ -56,12 +80,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 height: 80,
                 alignment: Alignment.center,
                 child: const Text(
-                  'The Rolling Scones',
+                  'A Simple Bakery',
                   style: TextStyle(
                     fontFamily: 'Pacifico',
-                    fontSize: 28,
+                    fontSize: 40,
                     fontWeight: FontWeight.bold,
-                    color: Colors.orange,
+                    color: Color.fromARGB(255, 140, 72, 27),
                   ),
                 ),
               ),
@@ -71,19 +95,12 @@ class _MyHomePageState extends State<MyHomePage> {
               Text(
                 'Hi $_firstName $_lastName!',
                 style: const TextStyle(
-                  fontSize: 22,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Colors.orange,
+                  color: Color.fromARGB(255, 209, 125, 51),
                 ),
               ),
-              const Text(
-                'Owner',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.black54,
-                ),
-              ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 80),
               const Expanded(
                 child: OptionsBar(),
               ),
@@ -132,7 +149,7 @@ class OptionsBar extends StatelessWidget {
   Widget _buildMenuButton(String title, IconData icon, VoidCallback onPressed) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color.fromARGB(255, 227, 171, 4),
+        backgroundColor: const Color.fromARGB(255, 209, 126, 51),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
@@ -144,16 +161,16 @@ class OptionsBar extends StatelessWidget {
         children: [
           Icon(
             icon,
-            size: 24,
-            color: Colors.white,
+            size: 36,
+            color: Colors.white
           ),
           const SizedBox(height: 5),
           Text(
             title,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              fontSize: 12,
-              color: Colors.white,
+              fontSize: 18,
+              color: Colors.white
             ),
           ),
         ],

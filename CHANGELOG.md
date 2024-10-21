@@ -7,7 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- nothing
+### Added
+
+- Added Dynamic Routing for task items.
+- Added Dynamic Routing for inventory items. 
+- Added Launch Details to README.
+- Added Session Management.
+- Added 15 minute idle timout and 8 hour absolute timeout on sessions.
+- Added Automatic login if session is currently valid.
+- Added API calls for update and delete recipes
+- Added API calls for get inventory ingredients
+
+
+### Changed
+
+- Changed task page to build tasks using futures to mock API.
+- Changed ingredients page to pull from the backend
+- Changed some UI elements to match new design
+- Changed layout of add recipe to match new required fields
+
+### Removed
+
+- Removed password from shared_preferences on remember me function.
+- Removed sales page route and file
 
 ## [0.1.0] - 2024-09-19
 

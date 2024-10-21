@@ -1,25 +1,25 @@
 class RecipeIngredient {
-  String recipeIngredientId;
-  String componentId;
-  String ingredientDescription;
+  String ingredientID;
+  String inventoryID;
+  String inventoryName;
   double quantity;
-  String measurement;
+  String unitOfMeasure;
 
   RecipeIngredient({
-    required this.recipeIngredientId,
-    required this.componentId,
-    required this.ingredientDescription,
+    required this.ingredientID,
+    required this.inventoryName,
     required this.quantity,
-    required this.measurement,
+    required this.unitOfMeasure,
+    required this.inventoryID
   });
 
   factory RecipeIngredient.fromJson(Map<String, dynamic> json) {
     return RecipeIngredient(
-      recipeIngredientId: json['RecipeIngredientID'] ?? '',
-      componentId: json['ComponentID'] ?? '',
-      ingredientDescription: json['IngredientDescription'] ?? '',
-      quantity: json['Quantity']?.toDouble() ?? 0.0,
-      measurement: json['Measurement'] ?? '',
+      ingredientID: json['ingredientId'],
+      inventoryName: json['inventoryName'],
+      quantity: json['quantity'].toDouble(),
+      unitOfMeasure: json['unit'],
+      inventoryID: json['inventoryId']
     );
   }
 }

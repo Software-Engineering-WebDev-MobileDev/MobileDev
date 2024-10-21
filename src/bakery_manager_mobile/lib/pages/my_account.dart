@@ -1,76 +1,101 @@
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:bakery_manager_mobile/assets/constants.dart';
+import 'package:bakery_manager_mobile/services/api_service.dart';
+import 'package:bakery_manager_mobile/services/session_manager.dart';
+import 'package:flutter/material.dart';
+import '../services/navigator_observer.dart';
 
 class MyAccountPage extends StatefulWidget {
   const MyAccountPage({super.key});
 
   @override
-  MyAccountPageState createState() => MyAccountPageState();
+  State<MyAccountPage> createState() => MyAccountPageState();
 }
 
 class MyAccountPageState extends State<MyAccountPage> {
-  final _formKey = GlobalKey<FormState>();
-  bool _isEditing = false;
+  late Future<Map<String, dynamic>> _futureAccountDetails;
+  MyNavigatorObserver? _observer;
 
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  // Fetch account details from the API
+  Future<Map<String, dynamic>> _fetchAccountDetails() async {
+    final response = await ApiService.getUserInfo();
 
-  bool _obscurePassword = true;
+    if (response['status'] == 'success') {
+      return response['content'];
+    } else {
+      debugPrint('Error: ${response['reason']}');
+      return {};
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    _loadAccountDetails();
-  }
-
-  Future<void> _loadAccountDetails() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (!mounted) return;
-    setState(() {
-      _firstNameController.text = prefs.getString('first_name') ?? '';
-      _lastNameController.text = prefs.getString('last_name') ?? '';
-      _usernameController.text = prefs.getString('username') ?? '';
-      _passwordController.text = prefs.getString('password') ?? '';
+    _futureAccountDetails = _fetchAccountDetails();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final NavigatorState navigator = Navigator.of(context);
+      final MyNavigatorObserver? observer =
+        _observer = navigator.widget.observers.firstWhere(
+        (observer) => observer is MyNavigatorObserver,
+      ) as MyNavigatorObserver?;
+      if (observer != null) {
+        observer.onReturned = () async {
+          // Refetch account details when returning from another page
+          if (mounted) {
+            setState(() {
+              _futureAccountDetails = _fetchAccountDetails();
+            });
+          } // Trigger rebuild
+        };
+      }
     });
   }
 
-  Future<void> _saveAccountDetails() async {
-    if (_formKey.currentState!.validate()) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('first_name', _firstNameController.text);
-      await prefs.setString('last_name', _lastNameController.text);
-      await prefs.setString('username', _usernameController.text);
-      await prefs.setString('password', _passwordController.text);
+  Future<void> _handleLogout(BuildContext context) async {
+    bool? shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Logout'),
+          content: const Text('Are you sure you want to log out?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false); // Return false (cancel)
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(true); // Return true (confirm)
+              },
+              child: const Text('Logout'),
+            ),
+          ],
+        );
+      },
+    );
 
-      if (!mounted) return;
-      setState(() {
-        _isEditing = false;
-      });
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Account details updated successfully')),
-      );
+    if (shouldLogout == true) {
+      bool success = await ApiService.logout();
+      if (success) {
+        // Clear session token from SessionManager
+        await SessionManager().clearSession();
+        // Navigate to the login page
+        Navigator.pushReplacementNamed(context, '/login');
+      } else {
+        // Show an error message if logout fails
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Logout failed. Please try again.')),
+        );
+      }
     }
-  }
-
-  Future<void> _logout() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-
-    if (!mounted) return;
-    Navigator.pushReplacementNamed(context, loginPageRoute);
   }
 
   @override
   void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _usernameController.dispose();
-    _passwordController.dispose();
+    if (_observer != null) {
+      _observer!.onReturned = null; // Remove the callback to avoid memory leaks
+    }
     super.dispose();
   }
 
@@ -78,11 +103,20 @@ class MyAccountPageState extends State<MyAccountPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Account Details',
-          style: TextStyle(color: Colors.white),
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        title: const Stack(
+          children: <Widget>[
+            Text(
+              'Account Details',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
-        backgroundColor: Colors.orange,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
@@ -93,170 +127,191 @@ class MyAccountPageState extends State<MyAccountPage> {
           IconButton(
             icon: const Icon(Icons.home, color: Colors.white),
             onPressed: () {
-              Navigator.popUntil(context, ModalRoute.withName('/')); // Home navigation
+              Navigator.popUntil(context, ModalRoute.withName('/'));
             },
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(25),
-        child: Center(
-          child: SingleChildScrollView(
-            child: _buildAccountDetails(),
-          ),
-        ),
-      ),
-    );
-  }
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _futureAccountDetails,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
 
-  Widget _buildAccountDetails() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text(
-          'Welcome, John Doe!',
-          style: TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            color: Color.fromARGB(255, 209, 126, 51),
-          ),
-        ),
-        const SizedBox(height: 40),
-        SizedBox(
-          width: 300,
-          child: Card(
-            elevation: 4,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    _buildTextField(
-                      controller: _firstNameController,
-                      label: 'First Name',
-                      icon: Icons.person,
-                      enabled: _isEditing,
-                    ),
-                    const Divider(),
-                    _buildTextField(
-                      controller: _lastNameController,
-                      label: 'Last Name',
-                      icon: Icons.person_outline,
-                      enabled: _isEditing,
-                    ),
-                    const Divider(),
-                    _buildTextField(
-                      controller: _usernameController,
-                      label: 'Username',
-                      icon: Icons.account_circle,
-                      enabled: _isEditing,
-                    ),
-                    const Divider(),
-                    _buildPasswordField(
-                      controller: _passwordController,
-                      label: 'Password',
-                      icon: Icons.lock,
-                      enabled: _isEditing,
-                      obscureText: _obscurePassword,
-                      onToggleVisibility: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
-                  ],
+          final account = snapshot.data ?? {};
+
+          return Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 16),
+
+                      const Text(
+                        'First Name:',
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        account['FirstName'] ?? '',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      const Text(
+                        'Last Name:',
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        account['LastName'] ?? '',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      const Text(
+                        'Employee ID:',
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        account['EmployeeID'] ?? '',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      const Text(
+                        'Username:',
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        account['Username'] ?? '',
+                        style: const TextStyle(fontSize: 18),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Emails Section
+                      const Text(
+                        'Emails:',
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: (account['Emails'] as List<dynamic>? ?? []).map((email) {
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  email['EmailAddress'] ?? '',
+                                  style: const TextStyle(fontSize: 18),
+                                ),
+                              ),
+                              Text(
+                                _capitalizeFirstLetter(email['EmailTypeID'] ?? 'other'),
+                                style: const TextStyle(fontSize: 18),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      // Phone Numbers Section
+                      const Text(
+                        'Phone Numbers:',
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: (account['PhoneNumbers'] as List<dynamic>? ?? []).map((phone) {
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  phone['PhoneNumber'] ?? '',
+                                  style: const TextStyle(fontSize: 18),
+                                ),
+                              ),
+                              Text(
+                                _capitalizeFirstLetter(phone['PhoneTypeID'] ?? 'mobile'),
+                                style: const TextStyle(fontSize: 18),
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+
+                      const SizedBox(height: 64),
+
+                      // Action Buttons
+                      Center(
+                        child: Column(
+                          children: [
+                            ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 16, horizontal: 32),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              onPressed: () {
+                                Navigator.pushNamed(context, editAccountPageRoute);
+                              },
+                              icon: const Icon(Icons.edit, color: Colors.white),
+                              label: const Text(
+                                'Edit Contact Info',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton.icon(
+                              onPressed: () => _handleLogout(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF800000),
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 16, horizontal: 32),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              icon: const Icon(Icons.logout, color: Colors.white),
+                              label: const Text(
+                                '        Log Out        ',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 30),
-        SizedBox(
-          width: 150,
-          child: _isEditing
-              ? ElevatedButton(
-                  onPressed: _saveAccountDetails,
-                  child: const Text('Save'),
-                )
-              : ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _isEditing = true;
-                    });
-                  },
-                  child: const Text('Edit'),
-                ),
-        ),
-        const SizedBox(height: 10),
-        if (!_isEditing)
-          SizedBox(
-            width: 150,
-            child: ElevatedButton(
-              onPressed: _logout,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-              ),
-              child: const Text('Logout'),
-            ),
-          ),
-      ],
+            ],
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    bool enabled = false,
-  }) {
-    return TextFormField(
-      controller: controller,
-      enabled: enabled,
-      decoration: InputDecoration(
-        labelText: label,
-        icon: Icon(icon),
-      ),
-      validator: (value) {
-        if (enabled && (value == null || value.isEmpty)) {
-          return 'Please enter your $label';
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildPasswordField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    required bool enabled,
-    required bool obscureText,
-    required VoidCallback onToggleVisibility,
-  }) {
-    return TextFormField(
-      controller: controller,
-      enabled: enabled,
-      obscureText: obscureText,
-      decoration: InputDecoration(
-        labelText: label,
-        icon: Icon(icon),
-        suffixIcon: IconButton(
-          icon: Icon(
-            obscureText ? Icons.visibility_off : Icons.visibility,
-          ),
-          onPressed: enabled ? onToggleVisibility : null,
-        ),
-      ),
-      validator: (value) {
-        if (enabled && (value == null || value.isEmpty)) {
-          return 'Please enter your $label';
-        }
-        if (enabled && value!.length < 6) {
-          return 'Password must be at least 6 characters long';
-        }
-        return null;
-      },
-    );
+  String _capitalizeFirstLetter(String input) {
+    if (input.isEmpty) return input;
+    return input[0].toUpperCase() + input.substring(1);
   }
 }

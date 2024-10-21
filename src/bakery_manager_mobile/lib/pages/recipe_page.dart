@@ -13,26 +13,44 @@ class AllRecipesPage extends StatefulWidget {
 
 class AllRecipesPageState extends State<AllRecipesPage> {
   late Future<List<Recipe>> _futureRecipes;
+  List<Recipe> _allRecipes = [];
   List<Recipe> _filteredRecipes = [];
+  String _currentCategoryFilter = 'All'; // Track current category filter
+  MyNavigatorObserver? _observer;
 
   // Page Initialization Function
   @override
   void initState() {
     super.initState();
-    _fetchRecipes(); // Lists all recipes
-
-    // Adds the observer to the navigator
+    _fetchRecipes();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final NavigatorState navigator = Navigator.of(context);
       final MyNavigatorObserver? observer =
-          navigator.widget.observers.firstWhere(
+        _observer = navigator.widget.observers.firstWhere(
         (observer) => observer is MyNavigatorObserver,
       ) as MyNavigatorObserver?;
       if (observer != null) {
-        observer.onReturned = _fetchRecipes;
+        observer.onReturned = () async {
+          // Refetch account details when returning from another page
+          if (mounted) {
+            setState(() {
+              _fetchRecipes();
+            });
+          } // Trigger rebuild
+        };
       }
     });
   }
+
+
+  @override
+  void dispose() {
+    if (_observer != null) {
+      _observer!.onReturned = null; // Remove the callback to avoid memory leaks
+    }
+    super.dispose();
+  }
+
 
   // Fetch recipes function
   void _fetchRecipes() {
@@ -41,6 +59,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
         List<Recipe> recipes = response['recipes'];
         setState(() {
           _filteredRecipes = recipes;
+          _allRecipes = recipes;
         });
         return recipes;
       } else {
@@ -52,11 +71,12 @@ class AllRecipesPageState extends State<AllRecipesPage> {
     });
   }
 
-  // Filter recipes function
+  // Filter recipes function by search query
   void _filterRecipes(String query) {
     setState(() {
       if (query.isEmpty) {
-        _fetchRecipes();
+        _filterByCategory(
+            _currentCategoryFilter, _allRecipes); // Restore category filter
       } else {
         _filteredRecipes = _filteredRecipes
             .where((recipe) =>
@@ -66,33 +86,108 @@ class AllRecipesPageState extends State<AllRecipesPage> {
     });
   }
 
+  // Filter by category function
+  void _filterByCategory(String category, List<Recipe> recipes) {
+    setState(() {
+      _currentCategoryFilter = category;
+      if (category == 'All') {
+        _filteredRecipes = recipes;
+      } else {
+        _filteredRecipes =
+            recipes.where((recipe) => recipe.category == category).toList();
+      }
+    });
+  }
+
+    // Build category filter button
+    Widget _buildCategoryFilterButton(String category, List<Recipe> recipes) {
+      bool isSelected = _currentCategoryFilter == category;
+      return ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: isSelected ? const Color.fromARGB(255, 140, 72, 27): Colors.grey,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+        onPressed: () {
+          _filterByCategory(category, recipes);
+        },
+        child: Text(
+          category,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.white,
+          ),
+        ),
+      );
+    }
+
   // Page Content Build Function
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('All Recipes', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.orange,
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        shape: const RoundedRectangleBorder(),
+        title: const Stack(
+          children: <Widget>[
+            Text(
+              'All Recipes',
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                color: Colors.white
+              ),
+            ),
+          ],
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.pop(context); // Back navigation
+            Navigator.pop(context);
           },
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.home, color: Colors.white),
             onPressed: () {
-              Navigator.popUntil(
-                  context, ModalRoute.withName('/')); // Home navigation
+              Navigator.popUntil(context, ModalRoute.withName('/'));
             },
           ),
         ],
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            // Horizontal category filter bar
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildCategoryFilterButton('All', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Bread', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Muffins', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Cookies', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Pastry', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Cake', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Pie', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Cupcakes', _allRecipes),
+                  const SizedBox(width: 8),
+                  _buildCategoryFilterButton('Dessert', _allRecipes),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
             // Search Bar
             TextField(
               onChanged: _filterRecipes, // Search feature
@@ -127,8 +222,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
                     return ListView.builder(
                       itemCount: _filteredRecipes.length,
                       itemBuilder: (context, index) {
-                        return _RecipeItem(
-                            recipe: _filteredRecipes[index],);
+                        return _RecipeItem(recipe: _filteredRecipes[index]);
                       },
                     );
                   }
@@ -140,7 +234,7 @@ class AllRecipesPageState extends State<AllRecipesPage> {
             // Add Recipe Button
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
+                backgroundColor: const Color.fromARGB(255, 209, 125, 51),
                 padding:
                     const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
@@ -151,8 +245,16 @@ class AllRecipesPageState extends State<AllRecipesPage> {
                 // Navigate to AddRecipePage
                 Navigator.pushNamed(context, addRecipePageRoute);
               },
-              icon: const Icon(Icons.add),
-              label: const Text('Add recipe'),
+              icon: const Icon(
+                Icons.add,
+                color: Color.fromARGB(255, 246, 235, 216),
+              ),
+              label: const Text(
+                'Add recipe',
+                style: TextStyle(
+                  color: Colors.white
+                ),
+              ),
             ),
           ],
         ),
@@ -165,39 +267,28 @@ class _RecipeItem extends StatelessWidget {
   final Recipe recipe;
   const _RecipeItem({required this.recipe});
 
- @override
+  @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
         // Navigate to the target page when tapped
         Navigator.pushNamed(context, recipeDetailsPageRoute, arguments: recipe);
       },
-      child: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5), // Shadow under items
-              spreadRadius: 2,
-              blurRadius: 8,
-              offset: const Offset(0, 4), // Shadow offset
-            ),
-          ],
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
         ),
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          color: const Color(0xFFFDF1E0),
-          elevation: 4, // 3D effect
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              recipe.recipeName,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+        color: const Color.fromARGB(255, 246, 235, 216),
+        elevation: 4, // 3D effect
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            recipe.recipeName,
+            style: const TextStyle(
+              color: Color.fromARGB(255, 140, 72, 27),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),

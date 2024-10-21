@@ -1,5 +1,10 @@
+import 'dart:async'; // Import to use Future and Timer
+import 'package:bakery_manager_mobile/assets/constants.dart';
+import 'package:bakery_manager_mobile/services/api_service.dart';
+import 'package:bakery_manager_mobile/services/navigator_observer.dart';
 import 'package:flutter/material.dart';
 import '../models/task.dart';
+import 'package:intl/intl.dart';
 
 class TaskPage extends StatefulWidget {
   const TaskPage({super.key});
@@ -9,45 +14,141 @@ class TaskPage extends StatefulWidget {
 }
 
 class TaskPageState extends State<TaskPage> {
-  // TODO: Add tasks from database
-  final List<Task> _tasks = [
-    Task(name: 'Banana Bread', status: 'Pending', dueDate: DateTime.now().add(const Duration(hours: 2))),
-    Task(name: 'Chocolate Cake', status: 'In Progress', dueDate: DateTime.now().add(const Duration(hours: 1))),
-    Task(name: 'Vanilla Cupcakes', status: 'Completed', dueDate: DateTime.now().subtract(const Duration(hours: 1))),
-    Task(name: 'Scones', status: 'Pending', dueDate: DateTime.now().add(const Duration(hours: 3))),
-  ];
-
+  late Future<List<Task>> _futureTasks;
   List<Task> _filteredTasks = [];
+  List<Task> _allTasks = [];
   String _currentFilter = 'All';
+  final TextEditingController _searchController = TextEditingController();
+  MyNavigatorObserver? _observer;
 
+  // Page Initialization Function
   @override
   void initState() {
     super.initState();
-    _filteredTasks = _tasks;
-  }
-
-  void _filterTasks(String filter) {
-    setState(() {
-      _currentFilter = filter;
-      if (filter == 'All') {
-        _filteredTasks = _tasks;
-      } else {
-        _filteredTasks = _tasks.where((task) => task.status == filter).toList();
+    _futureTasks = _fetchTasks();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final NavigatorState navigator = Navigator.of(context);
+      final MyNavigatorObserver? observer =
+          _observer = navigator.widget.observers.firstWhere(
+        (observer) => observer is MyNavigatorObserver,
+      ) as MyNavigatorObserver?;
+      if (observer != null) {
+        observer.onReturned = () async {
+          // Refetch account details when returning from another page
+          if (mounted) {
+            setState(() {
+              _futureTasks = _fetchTasks();
+            });
+          } // Trigger rebuild
+        };
       }
     });
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    if (_observer != null) {
+      _observer!.onReturned = null; // Remove the callback to avoid memory leaks
+    }
+    super.dispose();
+  }
+
+  // Fetch tasks function
+  Future<List<Task>> _fetchTasks() async {
+    final result = await ApiService.getTasks();
+
+    if (result['status'] == 'success') {
+      List<Task> tasks = result['tasks'];
+
+      setState(() {
+        _allTasks = tasks;
+        _filteredTasks = tasks; // Initially show all tasks
+      });
+
+      return tasks;
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to grab recipes')));
+      return [];
+    }
+  }
+
+  void _filterTasks(String status, {String query = ''}) {
+    setState(() {
+      _currentFilter = status;
+      _filteredTasks = _allTasks.where((task) {
+        final matchesStatus = status == 'All' || task.status == status;
+        final matchesQuery =
+            task.name!.toLowerCase().contains(query.toLowerCase());
+        return matchesStatus && matchesQuery; // Filter by both status and query
+      }).toList();
+    });
+  }
+
+  // Build filter button
+  Widget _buildFilterButton(String filter) {
+    bool isSelected = _currentFilter == filter;
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isSelected
+            ? const Color.fromARGB(255, 140, 72, 27)
+            : Colors.grey,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+      onPressed: () {
+        _filterTasks(filter);
+      },
+      child: Text(
+        filter,
+        style: const TextStyle(
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  // Build page content
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Daily Tasks', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.orange,
+        centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+        shape: const RoundedRectangleBorder(),
+        title: const Stack(
+          children: <Widget>[
+            Text(
+              'All Tasks',
+              style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
+            ),
+          ],
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home, color: Colors.white),
+            onPressed: () {
+              Navigator.popUntil(context, ModalRoute.withName('/'));
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            // Status filter bar
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -63,48 +164,86 @@ class TaskPageState extends State<TaskPage> {
               ),
             ),
             const SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _filteredTasks.length,
-                itemBuilder: (context, index) {
-                  return _TaskItem(task: _filteredTasks[index]);
-                },
+
+            // Search Bar
+            TextField(
+              controller: _searchController,
+              onChanged: (query) {
+                _filterTasks(_currentFilter,
+                    query: query); // Filter by current status and query
+              },
+              decoration: InputDecoration(
+                hintText: 'Search tasks',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    _filterTasks(_currentFilter); // Clear search field
+                  },
+                ),
+                border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                ),
               ),
             ),
             const SizedBox(height: 16),
+
+            // Task List
+            Expanded(
+              child: FutureBuilder<List<Task>>(
+                future: _futureTasks,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    //return const Center(child: CircularProgressIndicator());
+                    return const SizedBox(height: 16);
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else if (_filteredTasks.isEmpty) {
+                    return const Text('No tasks found');
+                  } else {
+                    return ListView.builder(
+                      itemCount: _filteredTasks.length,
+                      itemBuilder: (context, index) {
+                        return _TaskItem(task: _filteredTasks[index]);
+                      },
+                    );
+                  }
+                },
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Add Task Button
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                backgroundColor: const Color.fromARGB(255, 209, 125, 51),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
               onPressed: () {
-                // TODO: Implement add task functionality
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Add task functionality not implemented yet')),
-                );
+                Navigator.pushNamed(context, addTaskPageRoute).then((_) {
+                  // Refetch tasks after returning from the add task page
+                  setState(() {
+                    _futureTasks = _fetchTasks();
+                  });
+                });
               },
-              icon: const Icon(Icons.add),
-              label: const Text('Add task'),
+              icon: const Icon(Icons.add,
+                  color: Color.fromARGB(255, 246, 235, 216)),
+              label: const Text(
+                'Add Task',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 246, 235, 216),
+                ),
+              ),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildFilterButton(String filter) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: _currentFilter == filter ? Colors.orange : Colors.grey,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-      ),
-      onPressed: () => _filterTasks(filter),
-      child: Text(filter),
     );
   }
 }
@@ -117,62 +256,86 @@ class _TaskItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        // TODO: Implement navigation to task details page
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${task.name} details page not implemented yet')),
-        );
+        Navigator.pushNamed(context, taskDetailsPageRoute, arguments: task);
       },
-      child: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.5),
-              spreadRadius: 2,
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
         ),
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          color: const Color(0xFFFDF1E0),
-          elevation: 4,
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  task.name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Status: ${task.status}',
-                      style: TextStyle(
-                        color: _getStatusColor(task.status),
+        color: const Color.fromARGB(255, 246, 235, 216),
+        elevation: 4, // 3D effect
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Task name, amount to bake, and assigned employee in one row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${task.name} x${task.amountToBake}', // Task and amount
+                      style: const TextStyle(
+                        color: Color.fromARGB(255, 140, 72, 27),
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text(
-                      'Due: ${_formatDate(task.dueDate)}',
+                  ),
+                  // Employee ID and Assigned Employee text to the right
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Assigned Employee:', // Static text
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 140, 72, 27),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        task.employeeID, // Display Employee ID
+                        style: const TextStyle(
+                          color: Color.fromARGB(255, 140, 72, 27),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+
+              // Status and due date
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Status: ${task.status}', // Display Task Status
+                      style: TextStyle(
+                        color: _getStatusColor(task.status), // Status color
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis, // Truncate text if overflow
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      // Format the due date with AM/PM
+                      'Due: ${DateFormat('MM/dd hh:mm a').format(task.dueDate)}', // e.g., 08/12 02:45 PM
                       style: const TextStyle(
+                        color: Color.fromARGB(255, 140, 72, 27),
                         fontStyle: FontStyle.italic,
                       ),
+                      textAlign: TextAlign.right,
+                      overflow: TextOverflow.ellipsis, // Truncate text if overflow
                     ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -182,17 +345,13 @@ class _TaskItem extends StatelessWidget {
   Color _getStatusColor(String status) {
     switch (status) {
       case 'Pending':
-        return Colors.orange;
+        return const Color(0xFFF44336); // Red for Pending
       case 'In Progress':
-        return Colors.blue;
+        return const Color(0xFF2196F3); // Blue for In Progress
       case 'Completed':
-        return Colors.green;
+        return const Color(0xFF4CAF50); // Green for Completed
       default:
         return Colors.black;
     }
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.hour}:${date.minute.toString().padLeft(2, '0')}';
   }
 }

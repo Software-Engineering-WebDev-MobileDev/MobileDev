@@ -1,17 +1,18 @@
 import 'package:bakery_manager_mobile/assets/constants.dart';
 import 'package:bakery_manager_mobile/models/ingredient.dart';
+import 'package:bakery_manager_mobile/models/recipe.dart';
 import 'package:bakery_manager_mobile/services/api_service.dart';
 import 'package:flutter/material.dart';
 import '../models/recipe_ingredients.dart';
 
-class AddRecipePage extends StatefulWidget {
-  const AddRecipePage({super.key});
+class EditRecipePage extends StatefulWidget {
+  const EditRecipePage({super.key});
 
   @override
-  State<AddRecipePage> createState() => _AddRecipePageState();
+  State<EditRecipePage> createState() => _EditRecipePageState();
 }
 
-class _AddRecipePageState extends State<AddRecipePage> {
+class _EditRecipePageState extends State<EditRecipePage> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController recipeNameController = TextEditingController();
@@ -19,24 +20,20 @@ class _AddRecipePageState extends State<AddRecipePage> {
   final TextEditingController prepTimeController = TextEditingController();
   final TextEditingController cookTimeController = TextEditingController();
   final TextEditingController servingsController = TextEditingController();
-
-  final List<RecipeIngredient> ingredients = [
-    RecipeIngredient(
-      ingredientID: '',
-      inventoryName: '',
-      quantity: 0.0,
-      unitOfMeasure: '',
-      inventoryID: '',
-    ),
-  ];
+  final List<RecipeIngredient> ingredients = [];
+  List<RecipeIngredient> ingredientsToDelete = [];
 
   List<Ingredient> inventoryItems = [];
   final List<String> categories = recipeCatagories;
   String? selectedCategory;
 
+  // Flag to ensure recipe details are only loaded once
+  bool _hasLoadedInitialRecipeData = false;
+
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _loadRecipeDetails();
     _loadInventory();
   }
 
@@ -53,30 +50,59 @@ class _AddRecipePageState extends State<AddRecipePage> {
     }
   }
 
+  void _loadRecipeDetails() {
+    // Retrieve the recipe data from the passed arguments
+    final Recipe recipe = ModalRoute.of(context)!.settings.arguments as Recipe;
+
+    if (!_hasLoadedInitialRecipeData) {
+      setState(() {
+        recipeNameController.text = recipe.recipeName;
+        instructionsController.text = recipe.instructions;
+        prepTimeController.text = recipe.prepTime.toString();
+        cookTimeController.text = recipe.cookTime.toString();
+        servingsController.text = recipe.servings.toString();
+
+        selectedCategory = recipe.category;
+        if (!categories.contains(selectedCategory)) {
+          selectedCategory = "Other";
+        }
+
+        // Mark that the initial recipe data has been loaded
+        _hasLoadedInitialRecipeData = true;
+      });
+
+      // Load ingredients from the recipe - replace with actual backend data later
+      ingredients.clear();
+      for (var ing in recipe.ingredients!) {
+        ingredients.add(ing);
+      }
+    }
+  }
+
   void _addIngredientField() {
     setState(() {
-      ingredients.add(
-        RecipeIngredient(
-          ingredientID: '',
-          inventoryName: '',
-          quantity: 0.0,
-          unitOfMeasure: '',
-          inventoryID: '',
-        ),
-      );
+      ingredients.add(RecipeIngredient(
+        ingredientID: '',
+        inventoryName: '',
+        quantity: 0.0,
+        unitOfMeasure: '',
+        inventoryID: '',
+      ));
     });
   }
 
   void _removeIngredientField(int index) {
-    if (ingredients.length > 1) {
-      setState(() {
-        ingredients.removeAt(index);
-      });
-    }
+    setState(() {
+      if (ingredients[index].ingredientID != "") {
+        ingredientsToDelete.add(ingredients[index]);
+      }
+      ingredients.removeAt(index);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final Recipe recipe = ModalRoute.of(context)!.settings.arguments as Recipe;
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -85,7 +111,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
         title: const Stack(
           children: <Widget>[
             Text(
-              'Add Recipe',
+              'Edit Recipe',
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
@@ -131,6 +157,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Recipe Name is required';
+                    } else if (value.length > 50) {
+                      return 'Recipe Name can\'t exceed 50 characters';
                     }
                     return null;
                   },
@@ -138,7 +166,8 @@ class _AddRecipePageState extends State<AddRecipePage> {
                       {required int currentLength,
                       required bool isFocused,
                       required int? maxLength}) {
-                    return null; // Don't show character count
+                    // Don't show the character count
+                    return null;
                   },
                 ),
                 const SizedBox(height: 16),
@@ -251,26 +280,7 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   },
                 ),
                 const SizedBox(height: 16),
-
-                // Instructions Field
-                TextFormField(
-                  controller: instructionsController,
-                  keyboardType: TextInputType.multiline,
-                  maxLines: 6, // Increased box size
-                  decoration: const InputDecoration(
-                    labelText: 'Instructions',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Instructions are required';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
+                // Ingredients Section
                 const Text(
                   'Ingredients:',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -287,15 +297,16 @@ class _AddRecipePageState extends State<AddRecipePage> {
                         Expanded(
                           child: DropdownButtonFormField<String>(
                             isExpanded: true,
-                            value: ingredient.inventoryID.isEmpty
-                                ? null
-                                : ingredient.inventoryID,
+                            value: ingredient.inventoryID.isNotEmpty
+                                ? ingredient.inventoryID
+                                : null,
                             items: inventoryItems.map((inventoryItem) {
                               return DropdownMenuItem(
                                 value: inventoryItem.ingredientID,
-                                child: Text(
-                                  inventoryItem.name,
-                                ),
+                                child: Text(inventoryItem.name,
+                                    overflow: TextOverflow
+                                        .ellipsis, // Prevent overflow
+                                    maxLines: 1),
                               );
                             }).toList(),
                             onChanged: (value) {
@@ -314,10 +325,6 @@ class _AddRecipePageState extends State<AddRecipePage> {
                                     BorderRadius.all(Radius.circular(10)),
                               ),
                             ),
-                            style: const TextStyle(
-                                overflow: TextOverflow.ellipsis,
-                                fontSize: 16,
-                                color: Colors.black),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Ingredient is required';
@@ -329,8 +336,13 @@ class _AddRecipePageState extends State<AddRecipePage> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: TextFormField(
-                            onChanged: (value) => ingredient.quantity =
-                                double.tryParse(value) ?? 0.0,
+                            initialValue: ingredient.quantity > 0
+                                ? ingredient.quantity.toString()
+                                : '',
+                            onChanged: (value) {
+                              ingredient.quantity =
+                                  double.tryParse(value) ?? 0.0;
+                            },
                             keyboardType: TextInputType.number,
                             decoration: const InputDecoration(
                               labelText: 'Quantity',
@@ -351,18 +363,23 @@ class _AddRecipePageState extends State<AddRecipePage> {
                         Expanded(
                           child: DropdownButtonFormField<String>(
                             isExpanded: true,
-                            value: ingredient.unitOfMeasure.isEmpty
-                                ? null
-                                : ingredient.unitOfMeasure,
+                            value: ingredient.unitOfMeasure.isNotEmpty
+                                ? ingredient.unitOfMeasure
+                                : null,
                             items: const [
                               DropdownMenuItem(
-                                value: 'g',
-                                child: Text('Grams'), // Display text
-                              ),
+                                  value: 'g',
+                                  child: Text('Grams',
+                                      overflow: TextOverflow
+                                          .ellipsis, // Prevent overflow
+                                      maxLines: 1)),
                               DropdownMenuItem(
-                                value: 'kg',
-                                child: Text('Kilograms'), // Display text
-                              ),
+                                  value: 'kg',
+                                  child: Text('Kilograms',
+                                      overflow: TextOverflow
+                                          .ellipsis, // Prevent overflow
+                                      maxLines: 1)),
+                              // Add more units as needed
                             ],
                             onChanged: (value) {
                               setState(() {
@@ -370,10 +387,6 @@ class _AddRecipePageState extends State<AddRecipePage> {
                                     value!; // Update the unit of measure
                               });
                             },
-                            style: const TextStyle(
-                                overflow: TextOverflow.ellipsis,
-                                fontSize: 16,
-                                color: Colors.black),
                             decoration: const InputDecoration(
                               labelText: 'Measurement',
                               border: OutlineInputBorder(
@@ -405,84 +418,144 @@ class _AddRecipePageState extends State<AddRecipePage> {
                   label: const Text('Add Ingredient'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
+                    foregroundColor: Colors.white, // White font color
                   ),
                 ),
                 const SizedBox(height: 16),
-
+                // Instructions Field (moved under Ingredients and increased in size)
+                TextFormField(
+                  controller: instructionsController,
+                  maxLines: 6, // Increased size
+                  decoration: const InputDecoration(
+                    labelText: 'Instructions',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10)),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Instructions are required';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 16),
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color.fromARGB(255, 209, 125, 51),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 16, horizontal: 32),
+                    foregroundColor: Colors.white, // White font color
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
+                      // Get the recipe data
                       String recipeName = recipeNameController.text;
                       String instructions = instructionsController.text;
                       String prepTime = prepTimeController.text;
                       String cookTime = cookTimeController.text;
                       String servings = servingsController.text;
 
-                      // Save recipe
-                      Map<String, dynamic> response =
-                          await ApiService.addRecipe(
+                      // Update Recipe API call
+                      Map<String, dynamic> recipeResponse =
+                          await ApiService.updateRecipe(
+                        recipeId: (ModalRoute.of(context)!.settings.arguments
+                                as Recipe)
+                            .recipeId,
                         recipeName: recipeName,
-                        ingredients: instructions,
+                        instructions: instructions,
                         prepTime: int.tryParse(prepTime) ?? 0,
                         cookTime: int.tryParse(cookTime) ?? 0,
                         servings: int.tryParse(servings) ?? 1,
-                        category: selectedCategory ?? "Bread",
+                        category: selectedCategory ?? 'Other',
+                        description: '',
                       );
 
-                      if (response['status'] == 'success') {
-                        String recipeId = response['recipeID'];
-                        List<String> errors = [];
+                      if (recipeResponse['status'] == 'success') {
+                        // If recipe updated successfully, update ingredients
+                        bool allIngredientsUpdated = true;
+
+                        // Update ingredients with non-empty ingredient IDs
                         for (var ingredient in ingredients) {
-                          Map<String, dynamic> ingredientResponse =
-                              await ApiService.addRecipeIngredient(
-                                  recipeId: recipeId,
-                                  quantity: ingredient.quantity,
-                                  unitOfMeasure: ingredient.unitOfMeasure,
-                                  inventoryId: ingredient.inventoryID);
-                          if (ingredientResponse['status'] != 'success') {
-                            errors.add(
-                                'Failed to add ingredient ${ingredient.inventoryName}: ${ingredientResponse['reason']}');
+                          if (ingredient.ingredientID.isNotEmpty) {
+                            Map<String, dynamic> ingredientResponse =
+                                await ApiService.updateIngredient(
+                                    ingredient.ingredientID,
+                                    ingredient.inventoryID,
+                                    ingredient.quantity,
+                                    ingredient.unitOfMeasure,
+                                    ingredient.inventoryName);
+                            if (ingredientResponse['status'] != 'success') {
+                              allIngredientsUpdated = false;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Failed to update ingredient: ${ingredientResponse['reason']}')),
+                              );
+                            }
+                          } else {
+                            Map<String, dynamic> ingredientResponse =
+                                await ApiService.addRecipeIngredient(
+                                    recipeId: recipe.recipeId,
+                                    quantity: ingredient.quantity,
+                                    unitOfMeasure: ingredient.unitOfMeasure,
+                                    inventoryId: ingredient.inventoryID);
+                            if (ingredientResponse['status'] != 'success') {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                        'Failed to add ingredient: ${ingredientResponse['reason']}')),
+                              );
+                            }
                           }
                         }
-                        if (context.mounted) {
-                          if (errors.isEmpty) {
+
+                        // Delete items in itemsToDelete list
+                        for (var item in ingredientsToDelete) {
+                          Map<String, dynamic> deleteResponse =
+                              await ApiService.deleteIngredient(
+                                  item.ingredientID);
+
+                          if (deleteResponse['status'] != 'success') {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Recipe and all ingredients added successfully'),
-                              ),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Recipe added, but some ingredients failed to add. Check recipe details.'),
-                              ),
+                              SnackBar(
+                                  content: Text(
+                                      'Failed to delete ingredient: ${deleteResponse['reason']}')),
                             );
                           }
-                          Navigator.pop(context);
+                        }
+
+                        // Show success message if all operations succeeded
+                        if (allIngredientsUpdated) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'Recipe and ingredients updated successfully!')),
+                          );
+                          Navigator.popUntil(context, ModalRoute.withName(recipePageRoute));
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content:
+                                    Text('Some ingredients failed to update.')),
+                          );
                         }
                       } else {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
                               content: Text(
-                                  'Failed to add recipe: ${response['reason']}')));
-                        }
+                                  'Failed to update recipe: ${recipeResponse['reason']}')),
+                        );
                       }
                     }
                   },
-                  icon: const Icon(Icons.save), // Save icon added
-                  label: const Text('Save Recipe'),
+                  icon: const Icon(
+                    Icons.update,
+                    color: Colors.white,
+                  ),
+                  label: const Text('Update Recipe'),
                 ),
               ],
             ),
