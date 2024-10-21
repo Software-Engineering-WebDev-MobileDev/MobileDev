@@ -16,25 +16,41 @@ class AllRecipesPageState extends State<AllRecipesPage> {
   List<Recipe> _allRecipes = [];
   List<Recipe> _filteredRecipes = [];
   String _currentCategoryFilter = 'All'; // Track current category filter
+  MyNavigatorObserver? _observer;
 
   // Page Initialization Function
   @override
   void initState() {
     super.initState();
-    _fetchRecipes(); // Fetch recipes initially
-
-    // Adds the observer to the navigator
+    _fetchRecipes();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final NavigatorState navigator = Navigator.of(context);
       final MyNavigatorObserver? observer =
-          navigator.widget.observers.firstWhere(
+        _observer = navigator.widget.observers.firstWhere(
         (observer) => observer is MyNavigatorObserver,
       ) as MyNavigatorObserver?;
       if (observer != null) {
-        observer.onReturned = _fetchRecipes;
+        observer.onReturned = () async {
+          // Refetch account details when returning from another page
+          if (mounted) {
+            setState(() {
+              _fetchRecipes();
+            });
+          } // Trigger rebuild
+        };
       }
     });
   }
+
+
+  @override
+  void dispose() {
+    if (_observer != null) {
+      _observer!.onReturned = null; // Remove the callback to avoid memory leaks
+    }
+    super.dispose();
+  }
+
 
   // Fetch recipes function
   void _fetchRecipes() {

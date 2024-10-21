@@ -1,3 +1,4 @@
+import 'package:bakery_manager_mobile/models/recipe_ingredients.dart';
 import 'package:flutter/material.dart';
 import '../models/recipe.dart';
 import '../services/api_service.dart';
@@ -11,15 +12,27 @@ class RecipeDetailPage extends StatefulWidget {
 }
 
 class _RecipeDetailPageState extends State<RecipeDetailPage> {
-  late Future<List<Map<String, dynamic>>> _futureIngredients;
+  late Future<List<RecipeIngredient>> _futureIngredients;
 
-  Future<List<Map<String, dynamic>>> _fetchIngredients(String recipeId) async {
+  Future<List<RecipeIngredient>> _fetchIngredients(String recipeId) async {
+    final Recipe recipe = ModalRoute.of(context)!.settings.arguments as Recipe;
     final response = await ApiService.getRecipeIngredients(recipeId);
     if (response['status'] == 'success') {
-      return List<Map<String, dynamic>>.from(response['ingredients']);
+      // Map the ingredients to RecipeIngredient instances
+      recipe.ingredients = List<RecipeIngredient>.from(
+          response['ingredients'].map((ingredientJson) => RecipeIngredient.fromJson(ingredientJson)));
+      return recipe.ingredients!;
     } else {
-      throw Exception('Failed to load ingredients');
+      throw Exception('Failed to load ingredients: ${response['reason']}');
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Fetch ingredients when the dependencies change
+    final Recipe recipe = ModalRoute.of(context)!.settings.arguments as Recipe;
+    _futureIngredients = _fetchIngredients(recipe.recipeId);
   }
 
   @override
@@ -32,7 +45,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          recipe.recipeName, // Replace "View Recipe" with recipe name
+          recipe.recipeName,
           style: const TextStyle(
             fontSize: 30,
             fontWeight: FontWeight.bold,
@@ -108,11 +121,11 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            FutureBuilder<List<Map<String, dynamic>>>(
+            FutureBuilder<List<RecipeIngredient>>(
               future: _futureIngredients,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const CircularProgressIndicator();
+                  return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
                   return Text('Error: ${snapshot.error}');
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -124,7 +137,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 8.0),
                         child: Text(
-                          '${ingredient['IngredientDescription'] ?? 'Unknown'}: ${ingredient['Quantity'] ?? 'N/A'} ${ingredient['UnitOfMeasure'] ?? ''}',
+                          '${ingredient.inventoryName}: ${ingredient.quantity} ${ingredient.unitOfMeasure}',
                           style: const TextStyle(fontSize: 20),
                         ),
                       );
@@ -186,8 +199,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                   ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF800000),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 16, horizontal: 32),
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -198,8 +210,7 @@ class _RecipeDetailPageState extends State<RecipeDetailPage> {
                         builder: (BuildContext context) {
                           return AlertDialog(
                             title: const Text('Delete Recipe'),
-                            content: const Text(
-                                'Are you sure you want to delete this recipe?'),
+                            content: const Text('Are you sure you want to delete this recipe?'),
                             actions: <Widget>[
                               TextButton(
                                 onPressed: () {

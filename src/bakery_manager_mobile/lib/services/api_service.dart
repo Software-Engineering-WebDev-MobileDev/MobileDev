@@ -15,13 +15,15 @@ class ApiService {
   // Get Recipes Function
   static Future<Map<String, dynamic>> getRecipes() async {
     final url = Uri.parse('$baseApiUrl/recipes');
+    final sessionToken = await SessionManager().getSessionToken();
+    final headers = {'session_id': sessionToken!};
     try {
-      final response = await http.get(url);
+      final response = await http.get(url, headers: headers);
 
       // Successful response
       if (response.statusCode == 200) {
         Map<String, dynamic> body = json.decode(response.body);
-        List<dynamic> recipeList = body['recipes'];
+        List<dynamic> recipeList = body['recipe'];
         return {
           'status': 'success',
           'recipes':
@@ -54,7 +56,10 @@ class ApiService {
       int prepTime = 0,
       int cookTime = 0}) async {
     final url = Uri.parse('$baseApiUrl/add_recipe');
-    final headers = {'Content-Type': 'application/json'};
+    final sessionToken = await SessionManager().getSessionToken();
+    final headers = {'Content-Type': 'application/json',
+                     'session_id': sessionToken!
+                    };
     final body = jsonEncode({
       "RecipeName": recipeName,
       "Instructions": ingredients,
@@ -101,7 +106,9 @@ class ApiService {
     required String description,
   }) async {
     final url = Uri.parse('$baseApiUrl/update_recipe/$recipeId');
-    final headers = {'Content-Type': 'application/json'};
+    final sessionToken = await SessionManager().getSessionToken();
+    final headers = {'Content-Type': 'application/json',
+                     'session_id': sessionToken!};
     final now = DateTime.now();
     final formattedDate =
         now.toIso8601String().split('T').join(' ').split('.').first;
@@ -144,7 +151,11 @@ class ApiService {
     required String recipeId,
   }) async {
     final url = Uri.parse('$baseApiUrl/delete_recipe/$recipeId');
-    final headers = {'Content-Type': 'application/json'};
+    final sessionToken = await SessionManager().getSessionToken();
+    final headers = {
+      'Content-Type': 'application/json',
+      'session_id': sessionToken!
+    };
 
     try {
       final response = await http.delete(url, headers: headers);
@@ -169,40 +180,49 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> addRecipeIngredient(
-      {String recipeID = "",
-      String ingredientDescription = "",
-      double quantity = 0,
-      String unit = "",
-      int stockQuantity = 0,
-      int reorderFlag = 0}) async {
-    final url = Uri.parse('$baseApiUrl/add_recipe_ingredient');
-    final headers = {'Content-Type': 'application/json'};
-    final body = jsonEncode({
-      "RecipeID": recipeID,
-      "IngredientDescription": ingredientDescription,
-      "Quantity": quantity.toString(),
-      "UnitOfMeasure": unit,
-      "QuantityInStock": stockQuantity.toString(),
-      "ReorderFlag": reorderFlag.toString(),
-    });
+  static Future<Map<String, dynamic>> addRecipeIngredient({
+    required String recipeId,
+    required String inventoryId,
+    required double quantity,
+    required String unitOfMeasure,
+    double? scaleFactor,
+    String? modifierId,
+  }) async {
+    final url = Uri.parse('$baseApiUrl/add_recipe_ingredient_full');
+    final sessionId = await SessionManager().getSessionToken();
+
+    final headers = <String, String>{
+      'session_id': sessionId!,
+      'recipe_id': recipeId,
+      'inventory_id': inventoryId,
+      'quantity': quantity.toString(),
+      'unit_of_measure': unitOfMeasure,
+    };
+
+    if (scaleFactor != null) {
+      headers['scale_factor'] = scaleFactor.toString();
+    }
+
+    if (modifierId != null) {
+      headers['modifier_id'] = modifierId;
+    }
 
     try {
-      final response = await http.post(url, headers: headers, body: body);
+      final response = await http.post(url, headers: headers);
 
-      // Successful response
-      if (response.statusCode == 200) {
-        return {'status': 'success'};
-      }
-      // Failed response
-      else {
+      if (response.statusCode == 201) {
+        return {
+          'status': 'success',
+          'ingredient_id': jsonDecode(response.body)['ingredient_id']
+        };
+      } else {
+        final responseBody = jsonDecode(response.body);
         return {
           'status': 'error',
-          'reason': 'Failed to add recipe ingredient: ${response.statusCode}',
+          'reason': responseBody['reason'] ?? 'Failed to add recipe ingredient',
         };
       }
     } catch (e) {
-      // Network error
       return {
         'status': 'error',
         'reason': 'Network error: $e',
@@ -212,8 +232,12 @@ class ApiService {
 
   static Future<Map<String, dynamic>> getRecipeIngredients(
       String recipeID) async {
-    final url = Uri.parse('$baseApiUrl/recipe/$recipeID');
-    final headers = {'Content-Type': 'application/json'};
+    final url = Uri.parse('$baseApiUrl/recipe/$recipeID/ingredients');
+    final sessionId = await SessionManager().getSessionToken();
+    final headers = {
+      'Content-Type': 'application/json',
+      'session_id': sessionId!, // Include session ID in headers
+    };
 
     try {
       final response = await http.get(url, headers: headers);
@@ -221,28 +245,24 @@ class ApiService {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
-        // Filter ingredients from the full recipe response
-        final ingredients = data['recipe']
-            .map((item) => {
-                  'RecipeIngredientID': item['RecipeIngredientID'],
-                  'IngredientDescription': item['IngredientDescription'],
-                  'Quantity': item['Quantity'],
-                  'UnitOfMeasure': item['UnitOfMeasure'],
-                  'QuantityInStock': item['QuantityInStock'],
-                  'ReorderFlag': item['ReorderFlag'],
-                  'ModifierID': item['ModifierID'],
-                  'ScalingFactorID': item['ScalingFactorID'],
-                })
-            .toList();
-
-        return {
-          'status': 'success',
-          'ingredients': ingredients, // Only return the ingredients
-        };
+        // Ensure we access the correct structure of the response
+        if (data['status'] == 'success') {
+          // Extract the list of ingredients from the response
+          final List ingredients = data['ingredients'];
+          return {
+            'status': 'success',
+            'ingredients': ingredients,
+          };
+        } else {
+          return {
+            'status': 'error',
+            'reason': data['reason'] ?? 'Unknown error',
+          };
+        }
       } else {
         return {
           'status': 'error',
-          'reason': 'Failed to fetch recipe: ${response.statusCode}',
+          'reason': 'Failed to fetch ingredients: ${response.statusCode}',
         };
       }
     } catch (e) {
@@ -253,26 +273,75 @@ class ApiService {
     }
   }
 
-  static Future<Map<String, dynamic>> getRecipeName(String recipeID) async {
-    final url = Uri.parse('$baseApiUrl/recipe/$recipeID');
-    final headers = {'Content-Type': 'application/json'};
+  static Future<Map<String, dynamic>> deleteIngredient(
+      String ingredientId) async {
+    final url = Uri.parse('$baseApiUrl/ingredient');
+    String sessionId = await SessionManager().getSessionToken() ?? "";
 
     try {
-      final response = await http.get(url, headers: headers);
+      final response = await http.delete(
+        url,
+        headers: {
+          'session_id': sessionId,
+          'ingredient_id': ingredientId,
+        },
+      );
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-
-        // Extract the recipe name from the response
-        final String recipeName = data['recipe'][0]['RecipeName'];
         return {
           'status': 'success',
-          'recipeName': recipeName,
+        };
+      } else if (response.statusCode == 404) {
+        return {
+          'status': 'error',
+          'reason': 'Ingredient not found in the database',
         };
       } else {
         return {
           'status': 'error',
-          'reason': 'Failed to fetch recipe name: ${response.statusCode}',
+          'reason': 'Failed to delete ingredient: ${response.statusCode}',
+        };
+      }
+    } catch (e) {
+      return {
+        'status': 'error',
+        'reason': 'Network error: $e',
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> updateIngredient(
+      String ingredientId,
+      String inventoryId,
+      double quantity,
+      String unitOfMeasurement,
+      String name) async {
+    final url = Uri.parse('$baseApiUrl/ingredient');
+    String sessionId = await SessionManager().getSessionToken() ?? "";
+
+    try {
+      final response = await http.put(
+        url,
+        headers: {
+          'session_id': sessionId,
+          'ingredient_id': ingredientId,
+          'inventory_id': inventoryId,
+          'quantity': quantity.toString(),
+          'unit_of_measurement': unitOfMeasurement,
+          'name': name,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return {
+          'status': 'success',
+        };
+      } else {
+        Map<String, dynamic> body = json.decode(response.body);
+        return {
+          'status': 'error',
+          'reason': body['reason'] ??
+              'Failed to update ingredient: ${response.statusCode}',
         };
       }
     } catch (e) {
@@ -408,7 +477,8 @@ class ApiService {
         final responseBody = jsonDecode(response.body);
         return {
           'status': 'error',
-          'reason': responseBody['reason'] ?? 'Failed to record inventory change',
+          'reason':
+              responseBody['reason'] ?? 'Failed to record inventory change',
         };
       }
     } catch (e) {
@@ -452,7 +522,8 @@ class ApiService {
           final data = jsonDecode(response.body);
 
           if (data['status'] == 'success') {
-            final filteredContent = (data['content'] as List<dynamic>).where((item) {
+            final filteredContent =
+                (data['content'] as List<dynamic>).where((item) {
               return item['InventoryID'] == inventoryId;
             }).toList();
 
@@ -474,7 +545,8 @@ class ApiService {
           final responseBody = jsonDecode(response.body);
           return {
             'status': 'error',
-            'reason': responseBody['reason'] ?? 'Failed to fetch ingredient history',
+            'reason':
+                responseBody['reason'] ?? 'Failed to fetch ingredient history',
           };
         }
       }
@@ -523,7 +595,8 @@ class ApiService {
         final responseBody = jsonDecode(response.body);
         return {
           'status': 'error',
-          'reason': responseBody['reason'] ?? 'Failed to delete inventory history',
+          'reason':
+              responseBody['reason'] ?? 'Failed to delete inventory history',
         };
       }
     } catch (e) {
